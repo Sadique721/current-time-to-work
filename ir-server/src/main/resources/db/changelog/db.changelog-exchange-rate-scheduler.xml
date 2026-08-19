@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="exchange-rate-scheduler-001" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="exchange_rate_scheduler_status"/></not>
+        </preConditions>
+        <createTable tableName="exchange_rate_scheduler_status">
+            <column autoIncrement="true" name="id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('PENDING', 'RUNNING', 'SUCCESS', 'FAILED')"><constraints nullable="false"/></column>
+            <column name="start_time" type="datetime"/>
+            <column name="end_time" type="datetime"/>
+            <column name="records_processed" type="INT"/>
+            <column name="error_message" type="TEXT"/>
+            <column name="retry_count" type="INT"/>
+            <column name="api_source_used" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="exchange-rate-scheduler-002-add-precision-col" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="exchange_rates" columnName="target_currency_precision"/></not>
+        </preConditions>
+        <comment>Add target_currency_precision column to exchange_rates</comment>
+        <addColumn tableName="exchange_rates">
+            <column name="target_currency_precision" type="INT" defaultValueNumeric="2">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

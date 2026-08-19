@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- 1. Alter existing ENUMs to add new values -->
+    <changeSet id="roaming-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'partners'
+                AND COLUMN_NAME = 'tadig_code'
+            </sqlCheck>
+        </preConditions>
+        <sql>ALTER TABLE partners ADD COLUMN tadig_code VARCHAR(6) NULL UNIQUE</sql>
+    </changeSet>
+
+    <changeSet id="roaming-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'partners'
+                AND COLUMN_NAME = 'partner_type'
+                AND COLUMN_TYPE LIKE '%ROAMING%'
+            </sqlCheck>
+        </preConditions>
+        <sql>ALTER TABLE partners MODIFY COLUMN partner_type ENUM('VENDOR','CUSTOMER','CARRIER','BOTH','ROAMING','INVALID_TYPE') NOT NULL</sql>
+    </changeSet>
+
+
+    <changeSet id="add-interconnect_type-column" author="GOVIND SIRSATH">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="interconnect_type"/>
+            </not>
+        </preConditions>
+
+        <comment>Add interconnect_type column to partners table</comment>
+
+        <addColumn tableName="partners">
+            <column name="interconnect_type" type="ENUM('IP','SS7','SIP','ROAMING')">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="partners" columnName="interconnect_type"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="roaming-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'partners'
+                AND COLUMN_NAME = 'interconnect_type'
+                AND COLUMN_TYPE LIKE '%ROAMING%'
+            </sqlCheck>
+        </preConditions>
+        <sql>UPDATE partners SET interconnect_type = 'IP' WHERE interconnect_type IS NULL</sql>
+        <sql>ALTER TABLE partners MODIFY COLUMN interconnect_type ENUM('IP','SS7','SIP','ROAMING') NOT NULL</sql>
+    </changeSet>
+
+    <changeSet id="roaming-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pulse_config'
+                AND COLUMN_NAME = 'service_type'
+                AND COLUMN_TYPE LIKE '%DATA%'
+            </sqlCheck>
+        </preConditions>
+        <sql>ALTER TABLE pulse_config MODIFY COLUMN service_type ENUM('VOICE','SMS','USAGE','DATA')</sql>
+    </changeSet>
+
+    <changeSet id="roaming-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'rate_packages'
+                AND COLUMN_NAME = 'service_type'
+                AND COLUMN_TYPE LIKE '%DATA%'
+            </sqlCheck>
+        </preConditions>
+        <sql>ALTER TABLE rate_packages MODIFY COLUMN service_type ENUM('VOICE','SMS','USAGE','DATA')</sql>
+    </changeSet>
+
+    <!-- 2. tap_file_records -->
+    <changeSet id="roaming-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_file_records"/></not>
+        </preConditions>
+        <createTable tableName="tap_file_records">
+            <column autoIncrement="true" name="tap_file_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)"><constraints nullable="false"/></column>
+            <column name="sender_tadig" type="VARCHAR(6)"/>
+            <column name="recipient_tadig" type="VARCHAR(6)"/>
+            <column name="file_sequence_no" type="INT"/>
+            <column name="file_type" type="ENUM('TAP_IN','TAP_OUT','NOTIFICATION','RAP_IN','RAP_OUT')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tap_version" type="VARCHAR(20)"/>
+            <column name="status" type="ENUM('RECEIVED','DECODING','DECODED','RATING','RATED','INVOICED','ERROR','REJECTED')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_records" type="INT"/>
+            <column name="total_charge" type="BIGINT"/>
+            <column name="tap_decimal_places" type="INT"/>
+            <column name="local_currency" type="VARCHAR(3)"/>
+            <column name="partner_id" type="BIGINT"/>
+            <column name="file_path" type="VARCHAR(500)"/>
+            <column name="error_reason" type="TEXT"/>
+            <column name="processed_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-7a" author="Govind Sirsath">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tap_file_records"/>
+            <columnExists tableName="tap_file_records" columnName="status"/>
+        </preConditions>
+
+        <modifyDataType
+                tableName="tap_file_records"
+                columnName="status"
+                newDataType="ENUM('RECEIVED','DECODING','DECODED','RATING','RATED','INVOICED','SFTP_PUSHED','SFTP_FAILED','ERROR','REJECTED')"/>
+
+        <rollback>
+            <modifyDataType
+                    tableName="tap_file_records"
+                    columnName="status"
+                    newDataType="ENUM('RECEIVED','DECODING','DECODED','RATING','RATED','INVOICED','ERROR','REJECTED')"/>
+        </rollback>
+
+    </changeSet>
+
+    <changeSet id="roaming-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_tap_file_partner"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="tap_file_records" baseColumnNames="partner_id"
+                                 referencedTableName="partners" referencedColumnNames="partner_id"
+                                 constraintName="fk_tap_file_partner"/>
+    </changeSet>
+
+    <!-- 3. roaming_iot_rates -->
+    <changeSet id="roaming-8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="roaming_iot_rates"/></not>
+        </preConditions>
+        <createTable tableName="roaming_iot_rates">
+            <column autoIncrement="true" name="iot_rate_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="partner_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="destination_prefix" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="service_type" type="ENUM('VOICE','SMS','DATA')"><constraints nullable="false"/></column>
+            <column name="rate" type="DECIMAL(15,6)"><constraints nullable="false"/></column>
+            <column name="currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
+            <column name="effective_from" type="DATE"><constraints nullable="false"/></column>
+            <column name="effective_to" type="DATE"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-9" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_iot_rate_partner"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="roaming_iot_rates" baseColumnNames="partner_id"
+                                 referencedTableName="partners" referencedColumnNames="partner_id"
+                                 constraintName="fk_iot_rate_partner"/>
+    </changeSet>
+
+    <!-- 4. roaming_cdrs -->
+    <changeSet id="roaming-10" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="roaming_cdrs"/></not>
+        </preConditions>
+        <createTable tableName="roaming_cdrs">
+            <column autoIncrement="true" name="roaming_cdr_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="tap_file_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="tap_direction" type="ENUM('TAP_IN','TAP_OUT')"><constraints nullable="false"/></column>
+            <column name="call_type" type="ENUM('MOC','MTC','GPRS','SMS','SUPPL','CONTENT')"/>
+            <column name="imsi" type="VARCHAR(15)"/>
+            <column name="msisdn" type="VARCHAR(15)"/>
+            <column name="calling_number" type="VARCHAR(20)"/>
+            <column name="called_number" type="VARCHAR(20)"/>
+            <column name="call_start_time" type="DATETIME"/>
+            <column name="call_duration_sec" type="INT"/>
+            <column name="visited_plmn" type="VARCHAR(10)"/>
+            <column name="home_plmn" type="VARCHAR(10)"/>
+            <column name="service_type" type="ENUM('VOICE','SMS','DATA')"/>
+            <column name="tap_charge" type="DECIMAL(15,6)"/>
+            <column name="iot_applied_rate" type="DECIMAL(15,6)"/>
+            <column name="iot_rate_id" type="BIGINT"/>
+            <column name="our_charge" type="DECIMAL(15,6)"/>
+            <column name="currency" type="VARCHAR(3)"/>
+            <column name="rating_status" type="ENUM('RATED','UNRATED','FAILED','PENDING')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating_failure_reason" type="TEXT"/>
+            <column name="is_summarized" type="BIT(1)" defaultValueNumeric="0"/>
+            <column name="rap_file_sequence_no" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-11" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_roaming_cdr_tap_file"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="roaming_cdrs" baseColumnNames="tap_file_id"
+                                 referencedTableName="tap_file_records" referencedColumnNames="tap_file_id"
+                                 constraintName="fk_roaming_cdr_tap_file"/>
+    </changeSet>
+
+    <changeSet id="roaming-12" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <not><foreignKeyConstraintExists foreignKeyName="fk_roaming_cdr_iot_rate"/></not>
+                <columnExists tableName="roaming_cdrs" columnName="iot_rate_id"/>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="roaming_cdrs" baseColumnNames="iot_rate_id"
+                                 referencedTableName="roaming_iot_rates" referencedColumnNames="iot_rate_id"
+                                 constraintName="fk_roaming_cdr_iot_rate"/>
+    </changeSet>
+
+    <!-- 5. roaming_rated_summary -->
+    <changeSet id="roaming-13" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="roaming_rated_summary"/></not>
+        </preConditions>
+        <createTable tableName="roaming_rated_summary">
+            <column autoIncrement="true" name="summary_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="summary_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="tap_file_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="partner_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="tap_direction" type="ENUM('TAP_IN','TAP_OUT')"><constraints nullable="false"/></column>
+            <column name="service_type" type="ENUM('VOICE','SMS','DATA')"/>
+            <column name="destination_prefix" type="VARCHAR(20)"/>
+            <column name="total_calls" type="INT"><constraints nullable="false"/></column>
+            <column name="total_duration_sec" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="total_tap_charge" type="DECIMAL(15,6)"/>
+            <column name="total_our_charge" type="DECIMAL(15,6)"/>
+            <column name="currency" type="VARCHAR(3)"/>
+            <column name="is_invoiced" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-14" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_roaming_summary_tap_file"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="roaming_rated_summary" baseColumnNames="tap_file_id"
+                                 referencedTableName="tap_file_records" referencedColumnNames="tap_file_id"
+                                 constraintName="fk_roaming_summary_tap_file"/>
+    </changeSet>
+
+    <changeSet id="roaming-15" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_roaming_summary_partner"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="roaming_rated_summary" baseColumnNames="partner_id"
+                                 referencedTableName="partners" referencedColumnNames="partner_id"
+                                 constraintName="fk_roaming_summary_partner"/>
+    </changeSet>
+
+    <!-- 6. rap_records -->
+    <changeSet id="roaming-16" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="rap_records"/></not>
+        </preConditions>
+        <createTable tableName="rap_records">
+            <column autoIncrement="true" name="rap_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="tap_file_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="rap_file_name" type="VARCHAR(255)"><constraints nullable="false"/></column>
+            <column name="rap_sequence_no" type="INT"/>
+            <column name="rap_direction" type="ENUM('RAP_IN','RAP_OUT')"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('OPEN','ACKNOWLEDGED','RESOLVED','REJECTED')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="disputed_amount" type="DECIMAL(15,6)"/>
+            <column name="reason_code" type="VARCHAR(20)"/>
+            <column name="resolution_notes" type="TEXT"/>
+            <column name="resolved_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-17" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_rap_tap_file"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="rap_records" baseColumnNames="tap_file_id"
+                                 referencedTableName="tap_file_records" referencedColumnNames="tap_file_id"
+                                 constraintName="fk_rap_tap_file"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="add-roaming-fields-to-rated-cdrs" author="antigravity">
+        <!-- voice_rated_cdr -->
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="voice_rated_cdr"/>
+                <not><columnExists tableName="voice_rated_cdr" columnName="imsi"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="voice_rated_cdr">
+            <column name="imsi" type="varchar(15)" defaultValue="000000"/>
+            <column name="msisdn" type="varchar(15)" defaultValue="000000"/>
+            <column name="imei" type="varchar(20)" defaultValue="000000"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-roaming-fields-to-sms-rated-cdrs" author="antigravity">
+        <!-- sms_rated_cdr -->
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="sms_rated_cdr"/>
+                <not><columnExists tableName="sms_rated_cdr" columnName="imsi"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="sms_rated_cdr">
+            <column name="imsi" type="varchar(15)" defaultValue="000000"/>
+            <column name="msisdn" type="varchar(15)" defaultValue="000000"/>
+            <column name="imei" type="varchar(20)" defaultValue="000000"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-roaming-fields-to-usage-rated-cdrs" author="antigravity">
+        <!-- usage_rated_cdr -->
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not><columnExists tableName="usage_rated_cdr" columnName="imsi"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="imsi" type="varchar(15)" defaultValue="000000"/>
+            <column name="msisdn" type="varchar(15)" defaultValue="000000"/>
+            <column name="imei" type="varchar(20)" defaultValue="000000"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

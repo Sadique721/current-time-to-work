@@ -1,0 +1,116 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingtapconfiguration">TAP Configuration</a>
+        <span class="text-muted fs-14 ms-2"> / TAP Field Details</span>
+        <span class="text-muted fs-14 ms-2" *ngIf="selectedField?.id">
+          (ID: {{ selectedField.id }})
+        </span>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingtapconfiguration">
+      <i class="feather icon-arrow-left me-2"></i>Back to TAP Field List
+    </a>
+  </div>
+</div>
+
+<div class="row" *ngIf="selectedField">
+  <!-- Basic Details -->
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Basic Details</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Field Name</p>
+              <span class="text-gray-900 fs-13 fw-semibold">{{ selectedField.fieldName || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Call Type</p>
+              <span class="text-gray-900 fs-13">{{ selectedField.callType || "GLOBAL" }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Data Type</p>
+              <span class="text-gray-900 fs-13">{{ selectedField.dataType || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schema & Mappings -->
+  <div class="col-xl-12 mt-3">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Schema & Column Mappings</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">ASN.1 Path</p>
+              <span class="text-gray-900 fs-13 font-monospace">{{ selectedField.asnPath || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Out Source Column (TAP OUT)</p>
+              <span class="text-gray-900 fs-13">{{ selectedField.outSourceColumn || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">In Target Column (TAP IN)</p>
+              <span class="text-gray-900 fs-13">{{ selectedField.inTargetColumn || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Defaults -->
+  <div class="col-xl-12 mt-3">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Settings & Defaults</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Default Value</p>
+              <span class="text-gray-900 fs-13">{{ selectedField.defaultValue || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Mandatory</p>
+              <span class="badge" [ngClass]="(selectedField.mandatory ?? selectedField.isMandatory) ? 'bg-danger-transparent text-danger' : 'bg-success-transparent text-success'">
+                {{ (selectedField.mandatory ?? selectedField.isMandatory) ? 'YES' : 'NO' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!selectedField" class="p-5 text-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-2">Loading field details...</p>
+</div>

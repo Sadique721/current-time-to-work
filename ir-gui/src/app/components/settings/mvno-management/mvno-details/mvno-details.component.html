@@ -1,0 +1,197 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" (click)="MvnoBasicDetail()"
+          >{{ mvnoData.name }} Details</a
+        >
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-primary ms-2" (click)="showMvnoInvoice()">
+      <i class="ti ti-file-invoice me-2"></i>MVNO Invoice Details
+    </a>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-primary ms-2" (click)="showMvnoPayment()">
+      <i class="ti ti-cash me-2"></i>Payment Details
+    </a>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-primary ms-2" (click)="showDunningAudit()">
+      <i class="ti ti-cash me-2"></i>Dunning Audit
+    </a>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-primary ms-2" (click)="showMvnoLedger()">
+      <i class="ti ti-cash me-2"></i>Ledger Details
+    </a>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary ms-2" [routerLink]="routes.mvnoManagement">
+      <i class="feather icon-arrow-left me-2"></i>Back to MVNO List
+    </a>
+  </div>
+</div>
+<div class="col-xl-12" *ngIf="isMvnoBasicdetailsShow">
+  <div class="card rounded-0 border-0">
+    <div
+      class="card-header border-0 rounded-0 bg-light d-flex align-items-center"
+    >
+      <h6>Basic information</h6>
+    </div>
+    <div class="card-body pb-0">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Name</p>
+            <span class="text-gray-900 fs-13">{{ mvnoData.name || "-" }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">UserName</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.username || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Suffix</p>
+            <span class="text-gray-900 fs-13">
+              {{ mvnoData.suffix || "-" }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Email</p>
+            <span class="text-gray-900 fs-13">
+              {{ mvnoData.email || "-" }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Phone</p>
+            <span class="text-gray-900 fs-13">
+              {{ mvnoData.phone || "-" }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Header</p>
+            <span class="text-gray-900 fs-13">
+              {{ mvnoData.mvnoHeader || "-" }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Footer</p>
+            <span class="text-gray-900 fs-13">
+              {{ mvnoData.mvnoFooter || "-" }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">2FAuth Enabled</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.isTwoFactorEnabled || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Payment Due Days</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.mvnoPaymentDueDays || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Address</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.address || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Roles</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.roleId || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">ISP Commission</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.ispCommissionPercentage || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">ISP Bill Generation Day</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.ispBillDay || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Client Id</p>
+            <span class="text-gray-900 fs-13">{{
+              mvnoData.clientId || "-"
+            }}</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <p class="fs-13 mb-2">Status</p>
+            <span
+              class="badge table-badge"
+              [ngClass]="{
+                'bg-success':
+                  mvnoData.status === 'ACTIVE' || mvnoData.status === 'Active',
+                'bg-danger':
+                  mvnoData.status === 'INACTIVE' ||
+                  mvnoData.status === 'Inactive' ||
+                  mvnoData.status === 'TERMINATED' ||
+                  mvnoData.status === 'Terminated',
+              }"
+            >
+              {{ mvnoData.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-container *ngIf="isMvnoInvoiceShow">
+  <app-mvno-invoice [mvnoId]="mvnoData?.id"></app-mvno-invoice>
+</ng-container>
+
+<ng-container *ngIf="isMvnoPaymentShow">
+  <app-mvno-payment [mvnoId]="mvnoData?.id"></app-mvno-payment>
+</ng-container>
+
+<ng-container *ngIf="isMvnoDunningAuditShow">
+  <app-mvno-dunning-audit
+    [mvnoData]="mvnoData"
+    [mvnoId]="mvnoId"
+  ></app-mvno-dunning-audit>
+  ></ng-container
+>
+
+<ng-container *ngIf="isMvnoLedgerShow">
+  <app-mvno-ledger [mvnoId]="mvnoData?.id"></app-mvno-ledger>
+</ng-container>

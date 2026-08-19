@@ -1,0 +1,86 @@
+<div class="account-content">
+  <div class="login-wrapper bg-img">
+    <div class="login-content authent-content">
+      <form [formGroup]="loginForm">
+        <div class="login-userset">
+          <div class="login-logo logo-normal">
+            <img src="assets/img/ktpl-logo.png" alt="img" />
+          </div>
+
+          <div class="login-userheading">
+            <h3>Sign In</h3>
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label"
+              >Username<span class="text-danger">*</span></label
+            >
+            <div class="input-group">
+              <input
+                type="text"
+                id="username"
+                formControlName="username"
+                class="form-control border-end-0"
+                [ngClass]="{
+                  'is-invalid':
+                    loginForm.get('username')?.invalid &&
+                    loginForm.get('username')?.touched,
+                }"
+              />
+              <span class="input-group-text border-start-0">
+                <i class="ti ti-user"></i>
+              </span>
+            </div>
+            <div
+              *ngIf="
+                loginForm.get('username')?.invalid &&
+                loginForm.get('username')?.touched
+              "
+              class="invalid-feedback"
+            >
+              Please enter username.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label"
+              >Password<span class="text-danger">*</span></label
+            >
+            <div class="input-group">
+              <input
+                id="password"
+                [type]="password[1] ? 'text' : 'password'"
+                formControlName="password"
+                class="border-end-0 form-control"
+                [ngClass]="{
+                  'is-invalid':
+                    loginForm.get('password')?.invalid &&
+                    loginForm.get('password')?.touched,
+                }"
+              />
+              <span class="input-group-text border-start-0"
+                ><i
+                  [ngClass]="password[1] ? 'ti ti-eye' : 'ti ti-eye-off'"
+                  (click)="togglePassword(1)"
+                ></i
+              ></span>
+            </div>
+            <div
+              *ngIf="
+                loginForm.get('password')?.invalid &&
+                loginForm.get('password')?.touched
+              "
+              class="invalid-feedback"
+            >
+              Please enter password.
+            </div>
+          </div>
+          <div class="form-login">
+            <button type="button" class="btn btn-login" (click)="checkLogin()">
+              Sign In
+            </button>
+          </div>
+          <div class="form-sociallink mt-2"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Drop old selection_type column if it exists before adding the renamed column.
+         Fresh DB  : column never existed -> MARK_RAN.
+         Partial DB: already dropped -> MARK_RAN.
+         Full DB   : old column exists -> dropped. -->
+    <changeSet id="drop-rpg-old-selection-type" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <columnExists tableName="rate_package_groups" columnName="selection_type"/>
+            </and>
+        </preConditions>
+        <comment>Drop old selection_type column from rate_package_groups before adding rate_package_selection_type</comment>
+        <dropColumn tableName="rate_package_groups" columnName="selection_type"/>
+        <rollback>
+            <addColumn tableName="rate_package_groups">
+                <column name="selection_type" type="ENUM('PRIORITY','EXPRESSION')" defaultValue="PRIORITY">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+    <!-- Add rate_package_selection_type column to rate_package_groups.
+         PRIORITY  = ordered fallback by priority number (existing behaviour).
+         CALL_TYPE = matched by call type (MO_VOICE, MT_VOICE, MO_SMS, MT_SMS) for ROAMING.
+         Fresh DB  : table not yet created -> MARK_RAN.
+         Partial DB: column already exists -> MARK_RAN.
+         Full DB   : column missing -> added with default PRIORITY. -->
+    <changeSet id="add-rpg-selection-type" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <not>
+                    <columnExists tableName="rate_package_groups" columnName="rate_package_selection_type"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_package_groups">
+            <column name="rate_package_selection_type" type="ENUM('PRIORITY','CALL_TYPE')" defaultValue="PRIORITY"
+                    remarks="How a RatePackage is selected within this group: PRIORITY (ordered fallback) or CALL_TYPE (matched by call type for ROAMING)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_package_groups" columnName="rate_package_selection_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Drop expression column from rate_package_groups if it exists.
+         Fresh DB  : column never existed -> MARK_RAN.
+         Partial DB: already dropped -> MARK_RAN.
+         Full DB   : column exists -> dropped. -->
+    <changeSet id="add-rpg-expression" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <columnExists tableName="rate_package_groups" columnName="expression"/>
+            </and>
+        </preConditions>
+        <comment>Drop expression column from rate_package_groups — selection is now handled by rate_package_selection_type</comment>
+        <dropColumn tableName="rate_package_groups" columnName="expression"/>
+        <rollback>
+            <addColumn tableName="rate_package_groups">
+                <column name="expression" type="TEXT">
+                    <constraints nullable="true"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+    <!-- Remove ROAMING from interconnect_type ENUM in partners table.
+         Fresh DB  : column does not exist yet -> MARK_RAN.
+         Partial DB: ROAMING already removed -> sqlCheck returns 0 -> MARK_RAN.
+         Full DB   : ROAMING still present -> data migrated to IP, ENUM altered. -->
+    <changeSet id="remove-roaming-interconnect-type-partners" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="partners"/>
+                <columnExists tableName="partners" columnName="interconnect_type"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'partners'
+                    AND COLUMN_NAME = 'interconnect_type'
+                    AND COLUMN_TYPE LIKE '%ROAMING%'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <comment>Remove ROAMING value from partners.interconnect_type ENUM — ROAMING partners identified via lineOfBusiness field instead</comment>
+        <sql>UPDATE partners SET interconnect_type = 'IP' WHERE interconnect_type = 'ROAMING'</sql>
+        <modifyDataType tableName="partners" columnName="interconnect_type" newDataType="ENUM('IP','SS7','SIP')"/>
+        <rollback>
+            <modifyDataType tableName="partners" columnName="interconnect_type" newDataType="ENUM('IP','SS7','SIP','ROAMING')"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Remove ROAMING from interconnect_type ENUM in scheduler_configuration table.
+         Fresh DB  : column does not exist yet -> MARK_RAN.
+         Partial DB: ROAMING already removed -> sqlCheck returns 0 -> MARK_RAN.
+         Full DB   : ROAMING still present -> data migrated to IP, ENUM altered. -->
+    <changeSet id="remove-roaming-interconnect-type-scheduler" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_configuration"/>
+                <columnExists tableName="scheduler_configuration" columnName="interconnect_type"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'scheduler_configuration'
+                    AND COLUMN_NAME = 'interconnect_type'
+                    AND COLUMN_TYPE LIKE '%ROAMING%'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <comment>Remove ROAMING value from scheduler_configuration.interconnect_type ENUM</comment>
+        <sql>UPDATE scheduler_configuration SET interconnect_type = 'IP' WHERE interconnect_type = 'ROAMING'</sql>
+        <modifyDataType tableName="scheduler_configuration" columnName="interconnect_type" newDataType="ENUM('IP','SS7','SIP')"/>
+        <rollback>
+            <modifyDataType tableName="scheduler_configuration" columnName="interconnect_type" newDataType="ENUM('IP','SS7','SIP','ROAMING')"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add EXPRESSION to rate_package_selection_type ENUM -->
+    <changeSet id="add-expression-to-rpg-selection-type" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <columnExists tableName="rate_package_groups" columnName="rate_package_selection_type"/>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'rate_package_groups'
+                    AND COLUMN_NAME = 'rate_package_selection_type'
+                    AND COLUMN_TYPE LIKE '%EXPRESSION%'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <comment>Add EXPRESSION to rate_package_selection_type ENUM for dynamic rate package resolution</comment>
+        <modifyDataType tableName="rate_package_groups" columnName="rate_package_selection_type" newDataType="ENUM('PRIORITY','CALL_TYPE','EXPRESSION')"/>
+        <rollback>
+            <modifyDataType tableName="rate_package_groups" columnName="rate_package_selection_type" newDataType="ENUM('PRIORITY','CALL_TYPE')"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

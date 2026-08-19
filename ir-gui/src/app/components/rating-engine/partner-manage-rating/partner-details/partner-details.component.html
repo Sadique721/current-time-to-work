@@ -1,0 +1,315 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingpartner">Partner Details</a>
+        <span class="text-muted fs-14 ms-2" *ngIf="selectedPartner?.partnerId">
+          (ID: {{ selectedPartner.partnerId }})
+        </span>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingpartner">
+      <i class="feather icon-arrow-left me-2"></i>Back to Partner List
+    </a>
+  </div>
+</div>
+
+<!-- Basic Information -->
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Basic Information</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Partner Name</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ selectedPartner.partnerName || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Partner Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.partnerCode || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Partner Type</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.partnerType || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Status</p>
+              <span class="badge table-badge"
+                [ngClass]="{
+                  'bg-success': selectedPartner.status === 'ACTIVE',
+                  'bg-danger': selectedPartner.status === 'INACTIVE'
+                }">
+                {{ selectedPartner.status || "-" }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Line of Business</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.lineOfBusiness || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Organization</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.organizationName || selectedPartner.organizationId || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3" *ngIf="selectedPartner.lineOfBusiness !== 'INTERCONNECT'">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">TADIG Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.tadigCode || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact & Address -->
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Contact & Address</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Contact Person</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.contactPersonName || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Email</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.email || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Phone Number</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.phoneNumber || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Country</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.country || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">City</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.city || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Postal Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.postalCode || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Address</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.addressLine1 || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interconnect Settings -->
+<div class="row mt-3" *ngIf="selectedPartner.lineOfBusiness === 'INTERCONNECT'">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Interconnect Settings</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Interconnect Type</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.interconnectType || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3" *ngIf="selectedPartner.ipAddress">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">IP Address</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.ipAddress }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Point Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.pointCode || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Routing Prefix</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.routingPrefix || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Roaming Settings -->
+<div class="row mt-3" *ngIf="selectedPartner.lineOfBusiness === 'ROAMING'">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Roaming Settings</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">TADIG Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.tadigCode || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Home PLMN (HPLMN)</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.hplmn || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">TAP Version</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.tapVersion || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">TAP Profile Group</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.tapProfileGroupName || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">TAP SFTP Route Type</p>
+              <span class="text-gray-900 fs-13 fw-semibold text-primary">{{ selectedPartner.tapSftpRouteType || "-" }}</span>
+            </div>
+          </div>
+
+          <!-- Direct SFTP Details -->
+          <ng-container *ngIf="selectedPartner.tapSftpRouteType === 'DIRECT'">
+            <div class="col-md-3">
+              <div class="mb-3">
+                <p class="fs-13 mb-1 text-muted">SFTP Host</p>
+                <span class="text-gray-900 fs-13">{{ selectedPartner.sftpHost || "-" }}</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <p class="fs-13 mb-1 text-muted">SFTP Port</p>
+                <span class="text-gray-900 fs-13">{{ selectedPartner.sftpPort || "-" }}</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <p class="fs-13 mb-1 text-muted">SFTP Username</p>
+                <span class="text-gray-900 fs-13">{{ selectedPartner.sftpUsername || "-" }}</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <p class="fs-13 mb-1 text-muted">SFTP Remote Path (Outbox)</p>
+                <span class="text-gray-900 fs-13">{{ selectedPartner.sftpRemotePath || "-" }}</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <p class="fs-13 mb-1 text-muted">SFTP Inbox Path</p>
+                <span class="text-gray-900 fs-13">{{ selectedPartner.sftpInboxPath || "-" }}</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- VIA Clearing House Details -->
+          <div class="col-md-3" *ngIf="selectedPartner.tapSftpRouteType === 'VIA_CLEARING_HOUSE'">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Clearing House</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.clearingHouseName || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Billing & Financial -->
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Billing & Financial</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Billing Currency</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.billingCurrency || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Billing Cycle</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.billingCycle || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Payment Terms</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.paymentTerms || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Tax Number</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.taxNumber || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Bank Account Number</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.bankAccountNumber || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">SWIFT Code</p>
+              <span class="text-gray-900 fs-13">{{ selectedPartner.swiftCode || "-" }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

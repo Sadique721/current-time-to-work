@@ -1,0 +1,1297 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-1">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="account_agreements"/>
+            </not>
+        </preConditions>
+        <createTable tableName="account_agreements">
+            <column autoIncrement="true" name="account_agreement_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="invoice_format" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agreement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-2">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="accounts"/>
+            </not>
+        </preConditions>
+        <createTable tableName="accounts">
+            <column autoIncrement="true" name="account_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="account_code" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="partner_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_plan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-3">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="agreements"/>
+            </not>
+        </preConditions>
+        <createTable tableName="agreements">
+            <column autoIncrement="true" name="agreement_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="agreement_code" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="billing_cycle_period" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="billing_cycle_start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="settlement_type" type="ENUM('NET_SETTLEMENT', 'OUTGOING_SETTLEMENT', 'INCOMING_SETTLEMENT')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-4">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="countries"/>
+            </not>
+        </preConditions>
+        <createTable tableName="countries">
+            <column autoIncrement="true" name="country_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="country_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="VARCHAR(3)"/>
+            <column name="currency_symbol" type="VARCHAR(10)"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-5">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="invoices"/>
+            </not>
+        </preConditions>
+        <createTable tableName="invoices">
+            <column autoIncrement="true" name="invoice_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="billing_cycle_end" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="billing_cycle_start" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_total" type="DECIMAL(15, 2)"/>
+            <column name="generated_date" type="datetime"/>
+            <column name="net_amount" type="DECIMAL(15, 2)"/>
+            <column name="net_payable_by" type="VARCHAR(255)"/>
+            <column name="pdf_checksum" type="VARCHAR(255)"/>
+            <column name="pdf_error_reason" type="TEXT"/>
+            <column name="pdf_file_path" type="VARCHAR(255)"/>
+            <column name="pdf_generated_at" type="datetime"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="vendor_total" type="DECIMAL(15, 2)"/>
+            <column name="xml_content" type="TEXT"/>
+            <column name="agreement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-6">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="organizations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="organizations">
+            <column autoIncrement="true" name="organization_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="address" type="VARCHAR(500)"/>
+            <column name="legal_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="suffix_name" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-7">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="partners"/>
+            </not>
+        </preConditions>
+        <createTable tableName="partners">
+            <column autoIncrement="true" name="partner_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="address_line1" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_person_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="VARCHAR(100)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_code" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="partner_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_type" type="ENUM('VENDOR', 'CUSTOMER', 'CARRIER', 'BOTH', 'INVALID_TYPE')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="ENUM('ACTIVE', 'INACTIVE')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-8">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="prefixes"/>
+            </not>
+        </preConditions>
+        <createTable tableName="prefixes">
+            <column autoIncrement="true" name="prefix_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="prefix" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="prefix_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-9">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="product_plan_associations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="product_plan_associations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="end_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_plan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_package_group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-10">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="product_plans"/>
+            </not>
+        </preConditions>
+        <createTable tableName="product_plans">
+            <column autoIncrement="true" name="product_plan_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="description" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="package_type" type="ENUM('SELLING', 'BUYING')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-11">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="pulse_config"/>
+            </not>
+        </preConditions>
+        <createTable tableName="pulse_config">
+            <column autoIncrement="true" name="pulse_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="no_of_units" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pulse_name" type="VARCHAR(255)"/>
+            <column name="service_type" type="ENUM('VOICE', 'SMS', 'USAGE')"/>
+            <column name="unit" type="ENUM('SECOND', 'MINUTE', 'EVENT', 'KB', 'MB', 'GB', 'BYTE')"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-12">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rate_details"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rate_details">
+            <column autoIncrement="true" name="rate_details_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="current_version" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination_country_code" type="VARCHAR(255)"/>
+            <column name="destination_country_name" type="VARCHAR(255)"/>
+            <column name="destination_prefix" type="VARCHAR(255)"/>
+            <column name="destination_prefix_name" type="VARCHAR(255)"/>
+            <column name="end_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="rate" type="DOUBLE"/>
+            <column name="source_country_code" type="VARCHAR(255)"/>
+            <column name="source_country_name" type="VARCHAR(255)"/>
+            <column name="source_prefix" type="VARCHAR(255)"/>
+            <column name="source_prefix_name" type="VARCHAR(255)"/>
+            <column name="start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination_country_id" type="BIGINT"/>
+            <column name="rate_package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_country_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-13">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rate_details_history"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rate_details_history">
+            <column autoIncrement="true" name="history_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="destination_country_code" type="VARCHAR(255)"/>
+            <column name="destination_country_name" type="VARCHAR(255)"/>
+            <column name="destination_prefix" type="VARCHAR(255)"/>
+            <column name="destination_prefix_name" type="VARCHAR(255)"/>
+            <column name="end_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="rate" type="DOUBLE"/>
+            <column name="rate_details_id" type="BIGINT"/>
+            <column name="rate_package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_country_code" type="VARCHAR(255)"/>
+            <column name="source_country_name" type="VARCHAR(255)"/>
+            <column name="source_prefix" type="VARCHAR(255)"/>
+            <column name="source_prefix_name" type="VARCHAR(255)"/>
+            <column name="start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination_country_id" type="BIGINT"/>
+            <column name="source_country_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-14">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rate_package_associations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rate_package_associations">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="end_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_package_group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-15">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rate_package_groups"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rate_package_groups">
+            <column autoIncrement="true" name="rate_package_group_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="description" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="package_type" type="ENUM('SELLING', 'BUYING')">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-16">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rate_packages"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rate_packages">
+            <column autoIncrement="true" name="rate_package_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="package_desc" type="VARCHAR(255)"/>
+            <column name="package_name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="price_rounding" type="ENUM('UPPER', 'LOWER', 'DEFAULT')"/>
+            <column name="rate_package_type" type="ENUM('DESTINATION_BASED', 'SOURCE_DESTINATION_BASED')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rounding" type="ENUM('UPPER', 'LOWER', 'DEFAULT')"/>
+            <column name="service_type" type="ENUM('VOICE', 'SMS', 'USAGE')"/>
+            <column name="subtype" type="VARCHAR(255)"/>
+            <column name="type" type="ENUM('SELLING', 'BUYING')"/>
+            <column name="pulse_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-17">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rated_cdr"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rated_cdr">
+            <column autoIncrement="true" name="rated_cdr_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="called_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="calling_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration_minutes" type="DECIMAL(10, 2)"/>
+            <column name="end_time" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="incoming_is_source_destination_match" type="BIT(1)"/>
+            <column name="incoming_matched_destination_prefix" type="VARCHAR(255)"/>
+            <column name="incoming_matched_source_prefix" type="VARCHAR(255)"/>
+            <column name="incoming_rate_detail_id" type="BIGINT"/>
+            <column name="incoming_rate_package_id" type="BIGINT"/>
+            <column name="incoming_rate_package_name" type="VARCHAR(255)"/>
+            <column name="incoming_rating_failure_reason" type="VARCHAR(255)"/>
+            <column name="incoming_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="incoming_total_cost" type="DECIMAL(10, 4)"/>
+            <column name="is_summarized" type="BIT(1)"/>
+            <column name="outgoing_account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="outgoing_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="outgoing_is_source_destination_match" type="BIT(1)"/>
+            <column name="outgoing_matched_destination_prefix" type="VARCHAR(255)"/>
+            <column name="outgoing_matched_source_prefix" type="VARCHAR(255)"/>
+            <column name="outgoing_rate_detail_id" type="BIGINT"/>
+            <column name="outgoing_rate_package_id" type="BIGINT"/>
+            <column name="outgoing_rate_package_name" type="VARCHAR(255)"/>
+            <column name="outgoing_rating_failure_reason" type="VARCHAR(255)"/>
+            <column name="outgoing_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="outgoing_total_cost" type="DECIMAL(10, 4)"/>
+            <column name="rated_at" type="datetime"/>
+            <column name="source_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-18">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="rated_summary"/>
+            </not>
+        </preConditions>
+        <createTable tableName="rated_summary">
+            <column autoIncrement="true" name="summary_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="account_code" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="destination_country_code" type="VARCHAR(255)"/>
+            <column name="destination_country_name" type="VARCHAR(255)"/>
+            <column name="destination_prefix" type="VARCHAR(255)"/>
+            <column name="destination_prefix_name" type="VARCHAR(255)"/>
+            <column name="direction" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_id" type="BIGINT"/>
+            <column name="partner_name" type="VARCHAR(255)"/>
+            <column name="service_type" type="VARCHAR(255)"/>
+            <column name="source_country_code" type="VARCHAR(255)"/>
+            <column name="source_country_name" type="VARCHAR(255)"/>
+            <column name="source_prefix" type="VARCHAR(255)"/>
+            <column name="source_prefix_name" type="VARCHAR(255)"/>
+            <column name="summary_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_calls" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_charge" type="DECIMAL(10, 4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_duration" type="DECIMAL(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-19">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="scheduler_audit_log"/>
+            </not>
+        </preConditions>
+        <createTable tableName="scheduler_audit_log">
+            <column autoIncrement="true" name="audit_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="cdr_end_time" type="datetime"/>
+            <column name="cdr_start_time" type="datetime"/>
+            <column name="config_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_details" type="TEXT"/>
+            <column name="event_message" type="TEXT"/>
+            <column name="event_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="execution_time_ms" type="BIGINT"/>
+            <column name="records_processed" type="BIGINT"/>
+            <column name="scheduler_status_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-20">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="scheduler_configuration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="scheduler_configuration">
+            <column autoIncrement="true" name="config_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="interconnect_type" type="ENUM('IP', 'SS7', 'SIP')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interval_type" type="ENUM('HOUR', 'DAY', 'WEEK')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interval_value" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueNumeric="0" name="is_active" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_timestamp" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targeted_interval_type" type="ENUM('HOUR', 'DAY', 'WEEK')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targeted_max_interval_value" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targeted_timestamp" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-21">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="scheduler_status"/>
+            </not>
+        </preConditions>
+        <createTable tableName="scheduler_status">
+            <column autoIncrement="true" name="scheduler_status_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="config_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime"/>
+            <column name="last_scheduler_run_time" type="datetime"/>
+            <column name="next_scheduler_start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="ENUM('PENDING', 'RUNNING', 'SUCCESS', 'FAILED','CANCELLED')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targeted_rated_cdr_end_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="targeted_rated_cdr_start_time" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-22">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="source_cdr_configuration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="source_cdr_configuration">
+            <column autoIncrement="true" name="source_cdr_configuration_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="field_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-23">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="source_configuration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="source_configuration">
+            <column autoIncrement="true" name="source_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="source_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="topic_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-24">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="source_cdr_configuration"
+                        indexName="UK5j467qc3gn4he5gej9l8g64v7"/>
+            </not>
+        </preConditions>
+
+        <addUniqueConstraint columnNames="source_id, field_name" constraintName="UK5j467qc3gn4he5gej9l8g64v7" tableName="source_cdr_configuration"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-25">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="accounts"
+                        indexName="FK59dv45byf36e1xnu0xt4ni1b9"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FK59dv45byf36e1xnu0xt4ni1b9" tableName="accounts">
+            <column name="product_plan_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-26">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_details"
+                        indexName="FK5rkaeo5cm4e8k15blhfkt86nq"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FK5rkaeo5cm4e8k15blhfkt86nq" tableName="rate_details">
+            <column name="rate_package_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-27">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="prefixes"
+                        indexName="FK6qvk6e589tabjqbdqcxwav0uh"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FK6qvk6e589tabjqbdqcxwav0uh" tableName="prefixes">
+            <column name="country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-28">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="account_agreements"
+                        indexName="FK9s6iftb4m36x6tx2gcrmm2fsk"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FK9s6iftb4m36x6tx2gcrmm2fsk" tableName="account_agreements">
+            <column name="account_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-29">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="scheduler_status"
+                        indexName="FKbgsom8j9ed6unws2qkx0x6fbr"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKbgsom8j9ed6unws2qkx0x6fbr" tableName="scheduler_status">
+            <column name="config_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-30">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="account_agreements"
+                        indexName="FKd7o7oyomdavno9v2uqq3fk84u"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKd7o7oyomdavno9v2uqq3fk84u" tableName="account_agreements">
+            <column name="agreement_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-31">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_details"
+                        indexName="FKgqtdkp0kebw1uoavbh9cb6toh"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKgqtdkp0kebw1uoavbh9cb6toh" tableName="rate_details">
+            <column name="destination_country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-32">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="invoices"
+                        indexName="FKj76kf5l9gf5fxiyi94t7a1jmq"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKj76kf5l9gf5fxiyi94t7a1jmq" tableName="invoices">
+            <column name="agreement_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-33">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="partners"
+                        indexName="FKl0911wa0difi5kvkmsf2nkwam"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKl0911wa0difi5kvkmsf2nkwam" tableName="partners">
+            <column name="organization_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-34">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_details"
+                        indexName="FKodph0mwib232o7q0ey4yn7w6q"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKodph0mwib232o7q0ey4yn7w6q" tableName="rate_details">
+            <column name="source_country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-35">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_details_history"
+                        indexName="FKp7ese6aemtqr47p9xsa3beaok"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKp7ese6aemtqr47p9xsa3beaok" tableName="rate_details_history">
+            <column name="source_country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-36">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_details_history"
+                        indexName="FKp95d1kmpcnlk03tjoniifbdem"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKp95d1kmpcnlk03tjoniifbdem" tableName="rate_details_history">
+            <column name="destination_country_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-37">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_packages"
+                        indexName="FKqpogw9eu0qcgy7yuhb00w7tf4"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKqpogw9eu0qcgy7yuhb00w7tf4" tableName="rate_packages">
+            <column name="pulse_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-38">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="accounts"
+                        indexName="FKqqbg5ws2n5jvnbko8rywssht7"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="FKqqbg5ws2n5jvnbko8rywssht7" tableName="accounts">
+            <column name="partner_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-39">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="product_plan_associations"
+                        indexName="idx_product_plan_id"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="idx_product_plan_id" tableName="product_plan_associations">
+            <column name="product_plan_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-40">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="product_plan_associations"
+                        indexName="idx_rate_package_group_id"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="idx_rate_package_group_id" tableName="product_plan_associations">
+            <column name="rate_package_group_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-41">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_package_associations"
+                        indexName="idx_rate_package_group_id"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="idx_rate_package_group_id" tableName="rate_package_associations">
+            <column name="rate_package_group_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-42">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <indexExists
+                        tableName="rate_package_associations"
+                        indexName="idx_rate_package_id"/>
+            </not>
+        </preConditions>
+        <createIndex associatedWith="" indexName="idx_rate_package_id" tableName="rate_package_associations">
+            <column name="rate_package_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-43">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK2dah4yyr4fm4hxjw0arftmcwe"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="rate_package_id" baseTableName="rate_package_associations" constraintName="FK2dah4yyr4fm4hxjw0arftmcwe" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="rate_package_id" referencedTableName="rate_packages" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-44">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK3r2kqi70b93dyupykodiy9ij0"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="product_plan_id" baseTableName="product_plan_associations" constraintName="FK3r2kqi70b93dyupykodiy9ij0" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="product_plan_id" referencedTableName="product_plans" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-45">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK3w1tdxlblyw1ghtuv765mgila"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="rate_package_group_id" baseTableName="product_plan_associations" constraintName="FK3w1tdxlblyw1ghtuv765mgila" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="rate_package_group_id" referencedTableName="rate_package_groups" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-46">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK59dv45byf36e1xnu0xt4ni1b9"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="product_plan_id" baseTableName="accounts" constraintName="FK59dv45byf36e1xnu0xt4ni1b9" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="product_plan_id" referencedTableName="product_plans" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-47">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK5dlou33rjip6rs4h7rhrx0o9q"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="rate_package_group_id" baseTableName="rate_package_associations" constraintName="FK5dlou33rjip6rs4h7rhrx0o9q" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="rate_package_group_id" referencedTableName="rate_package_groups" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-48">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK5rkaeo5cm4e8k15blhfkt86nq"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="rate_package_id" baseTableName="rate_details" constraintName="FK5rkaeo5cm4e8k15blhfkt86nq" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="rate_package_id" referencedTableName="rate_packages" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-49">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK6qvk6e589tabjqbdqcxwav0uh"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="country_id" baseTableName="prefixes" constraintName="FK6qvk6e589tabjqbdqcxwav0uh" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="country_id" referencedTableName="countries" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-50">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK9s6iftb4m36x6tx2gcrmm2fsk"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="account_agreements" constraintName="FK9s6iftb4m36x6tx2gcrmm2fsk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="account_id" referencedTableName="accounts" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-51">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKbgsom8j9ed6unws2qkx0x6fbr"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="config_id" baseTableName="scheduler_status" constraintName="FKbgsom8j9ed6unws2qkx0x6fbr" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="config_id" referencedTableName="scheduler_configuration" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-52">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKd7o7oyomdavno9v2uqq3fk84u"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="agreement_id" baseTableName="account_agreements" constraintName="FKd7o7oyomdavno9v2uqq3fk84u" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="agreement_id" referencedTableName="agreements" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-53">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKfhn99ay80s4gr28eokhd9loml"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="source_id" baseTableName="source_cdr_configuration" constraintName="FKfhn99ay80s4gr28eokhd9loml" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="source_id" referencedTableName="source_configuration" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-54">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKgqtdkp0kebw1uoavbh9cb6toh"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="destination_country_id" baseTableName="rate_details" constraintName="FKgqtdkp0kebw1uoavbh9cb6toh" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="country_id" referencedTableName="countries" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-55">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKj76kf5l9gf5fxiyi94t7a1jmq"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="agreement_id" baseTableName="invoices" constraintName="FKj76kf5l9gf5fxiyi94t7a1jmq" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="agreement_id" referencedTableName="agreements" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-56">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKl0911wa0difi5kvkmsf2nkwam"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="partners" constraintName="FKl0911wa0difi5kvkmsf2nkwam" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="organization_id" referencedTableName="organizations" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-57">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKodph0mwib232o7q0ey4yn7w6q"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="source_country_id" baseTableName="rate_details" constraintName="FKodph0mwib232o7q0ey4yn7w6q" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="country_id" referencedTableName="countries" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-58">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKp7ese6aemtqr47p9xsa3beaok"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="source_country_id" baseTableName="rate_details_history" constraintName="FKp7ese6aemtqr47p9xsa3beaok" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="country_id" referencedTableName="countries" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-59">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKp95d1kmpcnlk03tjoniifbdem"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="destination_country_id" baseTableName="rate_details_history" constraintName="FKp95d1kmpcnlk03tjoniifbdem" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="country_id" referencedTableName="countries" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-60">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKqpogw9eu0qcgy7yuhb00w7tf4"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="pulse_id" baseTableName="rate_packages" constraintName="FKqpogw9eu0qcgy7yuhb00w7tf4" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="pulse_id" referencedTableName="pulse_config" validate="true"/>
+    </changeSet>
+    <changeSet author="GOVIND SIRSATH" id="1772623160218-61">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FKqqbg5ws2n5jvnbko8rywssht7"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="partner_id" baseTableName="accounts" constraintName="FKqqbg5ws2n5jvnbko8rywssht7" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="partner_id" referencedTableName="partners" validate="true"/>
+    </changeSet>
+
+    <!-- SchedulerStatus table changes:
+         1. next_scheduler_start_time, targeted_rated_cdr_start_time, targeted_rated_cdr_end_time → nullable -->
+    <changeSet author="Ajay kumar" id="1772623160218-62">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="scheduler_status"/>
+        </preConditions>
+
+        <!-- next_scheduler_start_time → nullable -->
+        <modifyDataType tableName="scheduler_status"
+                        columnName="next_scheduler_start_time"
+                        newDataType="datetime"/>
+        <dropNotNullConstraint tableName="scheduler_status"
+                               columnName="next_scheduler_start_time"
+                               columnDataType="datetime"/>
+
+        <!-- targeted_rated_cdr_start_time → nullable -->
+        <modifyDataType tableName="scheduler_status"
+                        columnName="targeted_rated_cdr_start_time"
+                        newDataType="datetime"/>
+        <dropNotNullConstraint tableName="scheduler_status"
+                               columnName="targeted_rated_cdr_start_time"
+                               columnDataType="datetime"/>
+
+        <!-- targeted_rated_cdr_end_time → nullable -->
+        <modifyDataType tableName="scheduler_status"
+                        columnName="targeted_rated_cdr_end_time"
+                        newDataType="datetime"/>
+        <dropNotNullConstraint tableName="scheduler_status"
+                               columnName="targeted_rated_cdr_end_time"
+                               columnDataType="datetime"/>
+
+        <sql>
+            ALTER TABLE scheduler_status
+            MODIFY COLUMN status ENUM('PENDING', 'RUNNING', 'SUCCESS', 'FAILED') NOT NULL;
+        </sql>
+    </changeSet>
+    <changeSet author="Ajay kumar" id="1772623160218-63">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_status"/>
+                <columnExists tableName="scheduler_status" columnName="created_at"/>
+            </and>
+        </preConditions>
+
+        <dropColumn tableName="scheduler_status" columnName="created_at"/>
+
+        <addColumn tableName="scheduler_status">
+            <column name="created_date" type="datetime"/>
+        </addColumn>
+
+        <addColumn tableName="scheduler_status">
+            <column name="modified_date" type="datetime"/>
+        </addColumn>
+
+        <addColumn tableName="scheduler_status">
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Ajay kumar" id="1772623160218-64">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_audit_log"/>
+                <columnExists tableName="scheduler_audit_log" columnName="created_at"/>
+            </and>
+        </preConditions>
+
+        <dropColumn tableName="scheduler_audit_log" columnName="created_at"/>
+
+        <addColumn tableName="scheduler_audit_log">
+            <column name="created_date" type="datetime"/>
+        </addColumn>
+
+        <addColumn tableName="scheduler_audit_log">
+            <column name="modified_date" type="datetime"/>
+        </addColumn>
+
+        <addColumn tableName="scheduler_audit_log">
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Ajay Kumar" id="1772623160218-65">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="tblm_template_configuration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblm_template_configuration">
+            <column autoIncrement="true" name="template_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="template_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_description" type="VARCHAR(255)"/>
+            <column name="template_path" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_content_hash" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Ajay Kumar" id="1772623160218-66">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="agreements"/>
+                <not>
+                    <columnExists tableName="agreements" columnName="template_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="template_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Ajay Kumar" id="1772623160218-67">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="tblm_template_configuration"/>
+                <not>
+                    <indexExists tableName="tblm_template_configuration" indexName="uk_template_name_deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="tblm_template_configuration" unique="true" indexName="uk_template_name_deleted_at">
+            <column name="template_name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="Ajay Kumar" id="1772623160218-68">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="template_id"/>
+                <not>
+                    <foreignKeyConstraintExists foreignKeyName="fk_agreement_template"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="template_id" baseTableName="agreements" constraintName="fk_agreement_template" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="template_id" referencedTableName="tblm_template_configuration" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

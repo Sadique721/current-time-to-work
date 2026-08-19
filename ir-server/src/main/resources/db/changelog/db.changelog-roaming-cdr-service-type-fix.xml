@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Fix roaming_cdrs.service_type ENUM to include USAGE (matches Java ServiceType enum).
+         The original table creation used ENUM('VOICE','SMS','DATA') but the Java enum uses USAGE, not DATA.
+         Other tables (rate_packages, pulse_config) were already updated in db.changelog-roaming-features.xml
+         but roaming_cdrs was missed. -->
+    <changeSet id="roaming-cdr-service-type-fix-001" author="system">
+        <comment>Align roaming_cdrs.service_type ENUM with Java ServiceType enum (add USAGE, keep DATA for backward compat)</comment>
+        <sql>ALTER TABLE roaming_cdrs MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA','USAGE')</sql>
+        <rollback>
+            <sql>ALTER TABLE roaming_cdrs MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA')</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Also fix roaming_rated_summary.service_type which has the same mismatch -->
+    <changeSet id="roaming-cdr-service-type-fix-002" author="system">
+        <comment>Align roaming_rated_summary.service_type ENUM with Java ServiceType enum</comment>
+        <sql>ALTER TABLE roaming_rated_summary MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA','USAGE')</sql>
+        <rollback>
+            <sql>ALTER TABLE roaming_rated_summary MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA')</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Also fix roaming_iot_rates.service_type which also uses the old DATA value -->
+    <changeSet id="roaming-cdr-service-type-fix-003" author="system">
+        <comment>Align roaming_iot_rates.service_type ENUM with Java ServiceType enum</comment>
+        <sql>ALTER TABLE roaming_iot_rates MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA','USAGE') NOT NULL</sql>
+        <rollback>
+            <sql>ALTER TABLE roaming_iot_rates MODIFY COLUMN service_type ENUM('VOICE','SMS','DATA') NOT NULL</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="roaming-cdr-service-type-fix-004" author="system">
+        <comment>Add total_usage and event_nos columns to roaming_cdrs</comment>
+        <addColumn tableName="roaming_cdrs">
+            <column name="total_usage" type="DECIMAL(20,6)"/>
+            <column name="event_nos" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-tap-file-record-id-to-voice-rated-cdr" author="Ajay kumar">
+
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="voice_rated_cdr"/>
+                <tableExists tableName="tap_file_records"/>
+                <not>
+                    <columnExists tableName="voice_rated_cdr" columnName="tap_file_record_id"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="voice_rated_cdr">
+            <column name="tap_file_record_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="voice_rated_cdr"
+                baseColumnNames="tap_file_record_id"
+                constraintName="fk_voice_rated_cdr_tap_file_record"
+                referencedTableName="tap_file_records"
+                referencedColumnNames="tap_file_id"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+
+    </changeSet>
+
+    <changeSet id="add-tap-file-record-id-to-sms-rated-cdr" author="Ajay kumar">
+
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="sms_rated_cdr"/>
+                <tableExists tableName="tap_file_records"/>
+                <not>
+                    <columnExists tableName="sms_rated_cdr" columnName="tap_file_record_id"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="sms_rated_cdr">
+            <column name="tap_file_record_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="sms_rated_cdr"
+                baseColumnNames="tap_file_record_id"
+                constraintName="fk_sms_rated_cdr_tap_file_record"
+                referencedTableName="tap_file_records"
+                referencedColumnNames="tap_file_id"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+    </changeSet>
+
+    <changeSet id="add-tap-file-record-id-to-usage-rated-cdr" author="Ajay kumar">
+
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <tableExists tableName="tap_file_records"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="tap_file_record_id"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="usage_rated_cdr">
+            <column name="tap_file_record_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="usage_rated_cdr"
+                baseColumnNames="tap_file_record_id"
+                constraintName="fk_usage_rated_cdr_tap_file_record"
+                referencedTableName="tap_file_records"
+                referencedColumnNames="tap_file_id"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+    </changeSet>
+
+</databaseChangeLog>

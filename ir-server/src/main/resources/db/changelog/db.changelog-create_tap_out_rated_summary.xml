@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="roaming-tap-out-summary-001" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_out_rated_summary"/></not>
+        </preConditions>
+        <createTable tableName="tap_out_rated_summary">
+            <column autoIncrement="true" name="summary_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="summary_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tap_file_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_tap_out_summary_file" referencedTableName="tap_file_records" referencedColumnNames="tap_file_id"/>
+            </column>
+            <column name="partner_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_tap_out_summary_partner" referencedTableName="partners" referencedColumnNames="partner_id"/>
+            </column>
+            <column name="total_calls" type="INT"/>
+            <column name="total_sms" type="INT"/>
+            <column name="total_duration_sec" type="BIGINT"/>
+            <column name="total_data_volume" type="DECIMAL(19,4)"/>
+            <column name="total_charge" type="DECIMAL(15,6)"/>
+            <column name="currency" type="VARCHAR(3)"/>
+            <column name="is_invoiced" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-tap-out-summary-002" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="roaming_summary_scheduler_status"/></not>
+        </preConditions>
+        <createTable tableName="roaming_summary_scheduler_status">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="datetime"/>
+            <column name="end_time" type="datetime"/>
+            <column name="records_processed" type="INT"/>
+            <column name="error_message" type="TEXT"/>
+            <column name="retry_count" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="roaming-tap-out-summary-003-rename-volume" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tap_out_rated_summary" columnName="total_data_volume"/>
+        </preConditions>
+        <renameColumn tableName="tap_out_rated_summary" oldColumnName="total_data_volume" newColumnName="total_usage_bytes" columnDataType="DECIMAL(19,4)"/>
+    </changeSet>
+</databaseChangeLog>

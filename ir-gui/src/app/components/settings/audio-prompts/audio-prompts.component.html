@@ -1,0 +1,174 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Audio Prompts Management</h4>
+      <h6>Manage your Audio Prompt files</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn d-flex gap-2">
+    <button
+      class="btn btn-primary"
+      *ngIf="permission.create"
+      (click)="openAudioPromptAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Create Audio Prompts
+    </button>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center flex-wrap gap-2">
+      <div class="search-input" style="min-width: 300px">
+        <input
+          [formControl]="searchDataValue"
+          type="search"
+          class="form-control"
+          placeholder="Search by Audio Prompt Name"
+          (keydown.enter)="searchData()"
+        />
+      </div>
+
+      <button class="btn btn-primary" (click)="searchData()">Search</button>
+      <button class="btn btn-outline-secondary" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div *ngIf="!isLoading">
+      <div class="table-responsive audio-prompts-table-wrapper">
+        <table class="table datatable audio-prompts-table">
+          <thead class="thead-light">
+            <tr>
+              <th style="width: 80px">Sr. No</th>
+              <th>Name</th>
+              <th class="play-download-col">Play/Download</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let prompt of tableData; let i = index">
+              <td>{{ serialNumberArray[i] }}</td>
+              <td class="name-col">{{ prompt.name }}</td>
+              <td class="play-download-col">
+                <div class="audio-player-wrapper">
+                  <div class="audio-player">
+                    <button
+                      class="audio-control-btn play-pause-btn"
+                      (click)="
+                        isPlaying(prompt.id)
+                          ? pausePrompt(prompt)
+                          : playPrompt(prompt)
+                      "
+                      [title]="isPlaying(prompt.id) ? 'Pause' : 'Play'"
+                    >
+                      <i
+                        class="ti ti-player-pause"
+                        *ngIf="isPlaying(prompt.id)"
+                      ></i>
+                      <i
+                        class="ti ti-player-play"
+                        *ngIf="!isPlaying(prompt.id)"
+                      ></i>
+                    </button>
+
+                    <button
+                      class="audio-control-btn stop-btn"
+                      *ngIf="isPlaying(prompt.id) || isPaused(prompt.id)"
+                      (click)="stopPrompt(prompt)"
+                      title="Stop"
+                    >
+                      <i class="ti ti-player-stop"></i>
+                    </button>
+
+                    <div class="time-display">
+                      {{ getCurrentTime(prompt.id) }} /
+                      {{ getDuration(prompt) }}
+                    </div>
+
+                    <div class="progress-bar-container">
+                      <input
+                        type="range"
+                        class="audio-progress-bar"
+                        [value]="prompt.currentTime || 0"
+                        [max]="prompt.duration || 0"
+                        (input)="seekAudio(prompt.id, $event)"
+                        [disabled]="
+                          !isPlaying(prompt.id) && !isPaused(prompt.id)
+                        "
+                      />
+                    </div>
+
+                    <button
+                      class="audio-control-btn volume-btn"
+                      (click)="toggleMute(prompt.id)"
+                      [title]="isMuted(prompt.id) ? 'Unmute' : 'Mute'"
+                    >
+                      <i class="ti ti-volume" *ngIf="!isMuted(prompt.id)"></i>
+                      <i
+                        class="ti ti-volume-off"
+                        *ngIf="isMuted(prompt.id)"
+                      ></i>
+                    </button>
+
+                    <button
+                      class="audio-control-btn download-btn"
+                      (click)="downloadPrompt(prompt)"
+                      title="Download"
+                    >
+                      <i class="ti-arrow-down"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="confirm-text p-2"
+                    *ngIf="permission.delete"
+                    matTooltip="Delete"
+                    matTooltipPosition="above"
+                    (click)="confirmDelete(prompt.id)"
+                    style="cursor: pointer"
+                  >
+                    <i data-feather="trash-2" class="feather icon-trash-2"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="tableData.length === 0">
+              <td colspan="4">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-custom-pagination></app-custom-pagination>
+    </div>
+  </div>
+</div>

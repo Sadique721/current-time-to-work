@@ -1,0 +1,140 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item">{{ selectedSource?.sourceName || "-" }} Details</a>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a
+      class="btn btn-secondary"
+      [routerLink]="routes.ratingsourceconfiguration"
+    >
+      <i class="feather icon-arrow-left me-2"></i>Back to Source Configuration
+      List
+    </a>
+  </div>
+</div>
+
+<div class="row" *ngIf="selectedSource">
+  <div class="col-xl-8">
+    <div class="card rounded-0 border-0">
+      <div
+        class="card-header border-0 rounded-0 bg-light d-flex align-items-center"
+      >
+        <h6>Basic Details</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-2">Source Name</p>
+              <span class="text-gray-900 fs-13">{{
+                selectedSource.sourceName || "-"
+              }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-2">Topic Name</p>
+              <span class="text-gray-900 fs-13">{{
+                selectedSource.topicName || "-"
+              }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2">Service Type</p>
+              <span class="text-gray-900 fs-13">{{
+                selectedSource.serviceType || "-"
+              }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2">Status</p>
+              <span class="text-gray-900 fs-13">
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-success': selectedSource.status === 'enabled',
+                    'bg-danger': selectedSource.status === 'disabled',
+                  }"
+                >
+                  {{ selectedSource.status || "-" }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div
+        class="card-header border-0 rounded-0 bg-light d-flex align-items-center"
+      >
+        <h6>Source CDR Configuration</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <p-table
+            [value]="sourceCdrListData"
+            [columns]="cols"
+            [reorderableColumns]="true"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            (onRowReorder)="onRowReorder($event)"
+            styleClass="p-datatable-striped"
+          >
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th style="width: 3rem"></th>
+                <th *ngFor="let col of columns" pReorderableColumn>
+                  {{ col.header }}
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template
+              pTemplate="body"
+              let-rowData
+              let-columns="columns"
+              let-index="rowIndex"
+            >
+              <tr [pReorderableRow]="index">
+                <td><span class="pi pi-bars" pReorderableRowHandle></span></td>
+                <td *ngFor="let col of columns">
+                  {{ rowData[col.field] }}
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center">
+                  <h5 class="no-record">No CDR configuration found</h5>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="mt-4 text-end">
+          <a
+            class="btn btn-primary"
+            (click)="updateSourceCdr()"
+            [class.disabled]="
+              !sourceCdrListData || sourceCdrListData.length === 0
+            "
+          >
+            <i class="ti ti-check me-2"></i>
+            Update Sequence
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

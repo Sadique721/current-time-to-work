@@ -1,0 +1,157 @@
+.search-set {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .search-input {
+    position: relative;
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      pointer-events: none;
+    }
+
+    input {
+      padding-right: 35px;
+    }
+  }
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked+.slider {
+      background-color: #ff9800;
+    }
+
+    &:focus+.slider {
+      box-shadow: 0 0 1px #ff9800;
+    }
+
+    &:checked+.slider:before {
+      transform: translateX(26px);
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+    }
+
+    &.round {
+      border-radius: 24px;
+
+      &:before {
+        border-radius: 50%;
+      }
+    }
+  }
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #ff9800;
+}
+
+.input-group {
+  .input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-right: 0;
+
+    i {
+      color: #6c757d;
+      font-size: 1rem;
+    }
+  }
+
+  .form-control {
+    border-left: 0;
+
+    &:focus {
+      border-color: #ff9800;
+      box-shadow: none;
+
+      +.btn-outline-secondary {
+        border-color: #ff9800;
+      }
+    }
+  }
+
+  .btn-outline-secondary {
+    border-color: #dee2e6;
+    color: #6c757d;
+
+    &:hover {
+      background-color: #f8f9fa;
+      border-color: #adb5bd;
+      color: #495057;
+    }
+
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+.input-group {
+  .btn-outline-secondary {
+    min-width: 40px;
+
+    &:first-child {
+      border-right: 0;
+    }
+
+    &:last-child {
+      border-left: 0;
+    }
+  }
+
+  input[type="number"] {
+    text-align: center;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    &:focus {
+      border-left-color: #ff9800;
+      border-right-color: #ff9800;
+    }
+  }
+}
+

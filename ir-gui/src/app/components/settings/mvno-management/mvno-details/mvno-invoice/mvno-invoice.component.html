@@ -1,0 +1,451 @@
+<div class="card table-list-card-xl">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <h5 class="card-title">Invoice Details</h5>
+  </div>
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-6 d-flex align-items-end gap-2">
+        <custom-date
+          [formControlRef]="fromDate"
+          placeholder="Start Date"
+          (change)="onDateChange()"
+        ></custom-date>
+        <custom-date
+          [formControlRef]="toDate"
+          placeholder="To Date"
+          [minDate]="fromDate.value"
+          (change)="onDateChange()"
+        ></custom-date>
+        <button
+          type="button"
+          class="btn btn-primary ms-2 mb-3"
+          (click)="searchInvoices()"
+          [disabled]="!fromDate.value || !toDate.value"
+        >
+          Search
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-secondary mb-3"
+          (click)="clearSearch()"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Customer</th>
+            <th>Invoice Number</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Due Date</th>
+            <th>Total Amount</th>
+            <th>Adjusted Amount</th>
+            <th>Unpaid Amount</th>
+            <th>Bill Run Status</th>
+            <th>Bill Date</th>
+            <th>Payment Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (invoice of invoiceList; track invoice.id; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ invoice.customerName || "-" }}</td>
+              <td>
+                @if (invoice.docnumber) {
+                  <a
+                    href="javascript:void(0)"
+                    class="text-primary cursor-pointer"
+                    (click)="openInvoiceDetail(invoice)"
+                  >
+                    {{ invoice.docnumber }}
+                  </a>
+                } @else {
+                  <span class="text-muted">NA</span>
+                }
+              </td>
+              <td>{{ invoice.startdate | date: "dd-MM-yyyy" }}</td>
+              <td>{{ invoice.endate | date: "dd-MM-yyyy" }}</td>
+              <td>{{ invoice.duedate | date: "dd-MM-yyyy" }}</td>
+              <td>
+                {{ invoice.totalamount | currency: "USD" : "symbol" : "1.2-2" }}
+              </td>
+              <td>
+                @if (invoice.adjustedAmount) {
+                  <a
+                    href="javascript:void(0)"
+                    class="text-primary cursor-pointer"
+                    (click)="openPaymentDetail(invoice.id)"
+                  >
+                    {{
+                      invoice.adjustedAmount
+                        | currency: "USD" : "symbol" : "1.2-2"
+                    }}
+                  </a>
+                } @else {
+                  <span>{{ 0 | currency: "USD" : "symbol" : "1.2-2" }}</span>
+                }
+              </td>
+              <td>
+                {{
+                  invoice.totalamount - (invoice.adjustedAmount || 0)
+                    | currency: "USD" : "symbol" : "1.2-2"
+                }}
+              </td>
+              <td>
+                <span class="badge bg-success">{{
+                  invoice.billrunstatus
+                }}</span>
+              </td>
+              <td>{{ invoice.billdate | date: "yyyy-MM-dd" }}</td>
+              <td>
+                @if (invoice.paymentStatus) {
+                  <span class="badge bg-success">{{
+                    invoice.paymentStatus
+                  }}</span>
+                } @else {
+                  <span class="badge bg-warning">UnPaid</span>
+                }
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  @if (
+                    invoice.billrunstatus === "Exported" ||
+                    invoice.billrunstatus === "Printed"
+                  ) {
+                    <a
+                      class="me-2 p-2"
+                      title="Download PDF"
+                      (click)="downloadPDF(invoice.id, invoice.customerName)"
+                    >
+                      <i class="feather icon-download text-primary"></i>
+                    </a>
+                  }
+                  <a
+                    class="me-2 p-2"
+                    [class.disabled]="!invoice.docnumber"
+                    title="Generate PDF"
+                    (click)="generatePDF(invoice.id)"
+                  >
+                    <i class="feather icon-file-text text-success"></i>
+                  </a>
+                  <a
+                    class="me-2 p-2"
+                    title="Customer Invoice List"
+                    (click)="
+                      getCustomerInvoiceList(invoice.id, invoice.customerName)
+                    "
+                  >
+                    <i class="feather icon-list text-info"></i>
+                  </a>
+                  @if (canCancelRegenerate(invoice)) {
+                    <a
+                      class="me-2 p-2"
+                      title="Cancel and Regenerate"
+                      (click)="cancelRegenerate(invoice)"
+                    >
+                      <i class="feather icon-refresh-ccw text-warning"></i>
+                    </a>
+                  }
+                  <a
+                    class="me-2 p-2"
+                    [class.disabled]="
+                      invoice.ispPayloadStatusCode === '200' ||
+                      !invoice.ispPayloadStatusCode
+                    "
+                    title="Resend Payload"
+                    (click)="resendPayload(invoice)"
+                  >
+                    <i class="feather icon-send text-secondary"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (invoiceList.length === 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record text-center">No invoice records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="modal fade"
+      [class.show]="isInvoiceDetailsModel"
+      [style.display]="isInvoiceDetailsModel ? 'block' : 'none'"
+      *ngIf="isInvoiceDetailsModel"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Invoice Details</h5>
+            <button
+              type="button"
+              class="btn-close"
+              (click)="invoiceModelClose()"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row" *ngIf="viewInvoiceData">
+              <div class="col-md-6">
+                <p>
+                  <strong>Invoice Number:</strong>
+                  {{ viewInvoiceData.docnumber || "-" }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  <strong>Customer Name:</strong>
+                  {{ viewInvoiceData.customerName || "-" }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  <strong>Total Amount:</strong>
+                  {{
+                    viewInvoiceData.totalamount
+                      | currency: "USD" : "symbol" : "1.2-2"
+                  }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  <strong>Bill Date:</strong>
+                  {{ viewInvoiceData.billdate | date: "dd-MM-yyyy" }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  <strong>Due Date:</strong>
+                  {{ viewInvoiceData.duedate | date: "dd-MM-yyyy" }}
+                </p>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  <strong>Status:</strong>
+                  {{ viewInvoiceData.billrunstatus || "-" }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="invoiceModelClose()"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="modal-backdrop fade"
+      [class.show]="isInvoiceDetailsModel"
+      *ngIf="isInvoiceDetailsModel"
+    ></div>
+    <hr class="line-border" />
+    <div class="row mt-4">
+      <div class="col-md-3">
+        <custom-select
+          label="Charge Type"
+          [options]="chargeTypeList"
+          optionValue="value"
+          optionLabel="text"
+          [formControlRef]="selectedChargeType"
+          [filter]="true"
+          filterBy="text"
+          (onOptionChange)="onChargeTypeChange()"
+        ></custom-select>
+      </div>
+      <div class="col-md-3">
+        <custom-input
+          label="Invoice Amount"
+          [formControlRef]="customerInvoiceTotalAmount"
+          placeholder="Total Amount"
+          type="number"
+        ></custom-input>
+      </div>
+      <div class="col-md-3">
+        <custom-input
+          label="Commission (%)"
+          [formControlRef]="commission"
+          placeholder="Enter Commission"
+          type="number"
+        ></custom-input>
+      </div>
+      <div class="col-md-3">
+        <custom-input
+          label="Commission Amount"
+          [formControlRef]="commissionAmount"
+          placeholder="Commission Amount"
+          type="number"
+        ></custom-input>
+      </div>
+      <div class="col-lg-2 col-md-2 dataGroup" style="padding-top: 2.3%">
+        <button
+          id="add"
+          (click)="onAddCharge()"
+          class="btn btn-primary ms-2"
+          [disabled]="commissionAmount.value == 0"
+        >
+          <i class="ti ti-circle-plus me-2"></i>
+          Add
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="table-responsive mt-4"
+      *ngIf="mvnoChagesListFormmArray.length > 0"
+    >
+      <table class="table coa-table">
+        <thead>
+          <tr>
+            <th style="padding-left: 5px">Charge Type</th>
+            <th>Invoice Amount</th>
+            <th>Commission(%)</th>
+            <th>Commission Amount</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="
+              let row of mvnoChagesListFormmArray.controls;
+              let index = index
+            "
+          >
+            <td style="padding-left: 5px">
+              <custom-input
+                [formControlRef]="$any(row.get('chargeTypeText'))"
+                placeholder="Select Charge Type"
+                type="text"
+              ></custom-input>
+            </td>
+            <td>
+              <custom-input
+                [formControlRef]="$any(row.get('invoiceAmount'))"
+                placeholder="Enter invoice Amount"
+                type="number"
+              ></custom-input>
+            </td>
+            <td>
+              <custom-input
+                [formControlRef]="$any(row.get('commission'))"
+                placeholder="Enter Commission"
+                type="number"
+              ></custom-input>
+            </td>
+            <td>
+              <custom-input
+                [formControlRef]="$any(row.get('commissionAmount'))"
+                type="number"
+              ></custom-input>
+            </td>
+            <td class="action-table-data">
+              <a
+                class="confirm-text p-2 mb-3"
+                matTooltip="Delete"
+                matTooltipPosition="above"
+                (click)="deleteAddedCharge(index, row)"
+              >
+                <i data-feather="trash-2" class="feather icon-trash-2"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="row mt-3" *ngIf="mvnoChagesListFormmArray.length > 0">
+      <div class="col-lg-12 text-end">
+        <label class="fw-bold me-3"
+          >Total Amount:
+          {{ totalAmount | currency: "USD" : "symbol" : "1.2-2" }}</label
+        >
+        <button
+          type="button"
+          class="btn btn-primary ms-2"
+          (click)="generateInvoice()"
+        >
+          Generate Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  [class.show]="showRemarkModal"
+  [style.display]="showRemarkModal ? 'block' : 'none'"
+  *ngIf="showRemarkModal"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{
+            invoiceCancelRemarksType === "cancel_regenerate"
+              ? "Cancel & Regenerate Invoice"
+              : "Invoice Action"
+          }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="closeInvoiceCancelRemark()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cancelRemarks" class="form-label"
+            >Remarks <span class="text-danger">*</span></label
+          >
+          <textarea
+            id="cancelRemarks"
+            class="form-control"
+            rows="4"
+            placeholder="Enter remarks for cancellation and regeneration"
+            [(ngModel)]="invoiceCancelRemarks"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-outline-secondary ms-2"
+          (click)="closeInvoiceCancelRemark()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary ms-2"
+          (click)="cancelRegenerateInvoice()"
+          [disabled]="!invoiceCancelRemarks.trim()"
+        >
+          Confirm Action
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal-backdrop fade"
+  [class.show]="showRemarkModal"
+  *ngIf="showRemarkModal"
+></div>

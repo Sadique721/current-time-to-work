@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- ===================================================================
+         Changeset 1: Add apply_on column to tax_configs
+         Supports BASE (first tax, always on base amount) and
+         CUMULATIVE (tax-on-tax, accumulates prior tax amounts).
+         =================================================================== -->
+    <changeSet id="tax-enh-001-add-apply-on" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <not><columnExists tableName="tax_configs" columnName="apply_on"/></not>
+            </and>
+        </preConditions>
+        <comment>Add apply_on column to tax_configs (BASE or CUMULATIVE) for tax-on-tax support</comment>
+        <addColumn tableName="tax_configs">
+            <column name="apply_on" type="VARCHAR(20)" defaultValue="BASE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 2: Create states reference table
+         Stores state/province/region data keyed by country ISO code.
+         =================================================================== -->
+    <changeSet id="tax-enh-002-create-states" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="states"/></not>
+        </preConditions>
+        <comment>Create states reference table for state-level tax jurisdiction</comment>
+        <createTable tableName="states">
+            <column name="state_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="country_iso" type="VARCHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="states"
+                             columnNames="country_iso, state_code"
+                             constraintName="uk_states_country_state"/>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 3: Seed state data for India
+         =================================================================== -->
+    <changeSet id="tax-enh-003-seed-states-in" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'IN'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Indian states for GST jurisdiction</comment>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="AP"/><column name="state_name" value="Andhra Pradesh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="AR"/><column name="state_name" value="Arunachal Pradesh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="AS"/><column name="state_name" value="Assam"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="BR"/><column name="state_name" value="Bihar"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="CT"/><column name="state_name" value="Chhattisgarh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="DL"/><column name="state_name" value="Delhi"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="GA"/><column name="state_name" value="Goa"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="GJ"/><column name="state_name" value="Gujarat"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="HR"/><column name="state_name" value="Haryana"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="HP"/><column name="state_name" value="Himachal Pradesh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="JH"/><column name="state_name" value="Jharkhand"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="KA"/><column name="state_name" value="Karnataka"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="KL"/><column name="state_name" value="Kerala"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="MP"/><column name="state_name" value="Madhya Pradesh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="MH"/><column name="state_name" value="Maharashtra"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="MN"/><column name="state_name" value="Manipur"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="ML"/><column name="state_name" value="Meghalaya"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="MZ"/><column name="state_name" value="Mizoram"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="NL"/><column name="state_name" value="Nagaland"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="OR"/><column name="state_name" value="Odisha"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="PB"/><column name="state_name" value="Punjab"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="RJ"/><column name="state_name" value="Rajasthan"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="SK"/><column name="state_name" value="Sikkim"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="TN"/><column name="state_name" value="Tamil Nadu"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="TG"/><column name="state_name" value="Telangana"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="TR"/><column name="state_name" value="Tripura"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="UP"/><column name="state_name" value="Uttar Pradesh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="UT"/><column name="state_name" value="Uttarakhand"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="WB"/><column name="state_name" value="West Bengal"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="AN"/><column name="state_name" value="Andaman and Nicobar Islands"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="CH"/><column name="state_name" value="Chandigarh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="DN"/><column name="state_name" value="Dadra and Nagar Haveli and Daman and Diu"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="JK"/><column name="state_name" value="Jammu and Kashmir"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="LA"/><column name="state_name" value="Ladakh"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="LD"/><column name="state_name" value="Lakshadweep"/>
+        </insert>
+        <insert tableName="states">
+            <column name="country_iso" value="IN"/><column name="state_code" value="PY"/><column name="state_name" value="Puducherry"/>
+        </insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 4: Seed state data for United States
+         =================================================================== -->
+    <changeSet id="tax-enh-004-seed-states-us" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'US'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed US states for sales tax jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="AL"/><column name="state_name" value="Alabama"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="AK"/><column name="state_name" value="Alaska"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="AZ"/><column name="state_name" value="Arizona"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="AR"/><column name="state_name" value="Arkansas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="CA"/><column name="state_name" value="California"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="CO"/><column name="state_name" value="Colorado"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="CT"/><column name="state_name" value="Connecticut"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="DE"/><column name="state_name" value="Delaware"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="FL"/><column name="state_name" value="Florida"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="GA"/><column name="state_name" value="Georgia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="HI"/><column name="state_name" value="Hawaii"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="ID"/><column name="state_name" value="Idaho"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="IL"/><column name="state_name" value="Illinois"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="IN"/><column name="state_name" value="Indiana"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="IA"/><column name="state_name" value="Iowa"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="KS"/><column name="state_name" value="Kansas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="KY"/><column name="state_name" value="Kentucky"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="LA"/><column name="state_name" value="Louisiana"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="ME"/><column name="state_name" value="Maine"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MD"/><column name="state_name" value="Maryland"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MA"/><column name="state_name" value="Massachusetts"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MI"/><column name="state_name" value="Michigan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MN"/><column name="state_name" value="Minnesota"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MS"/><column name="state_name" value="Mississippi"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MO"/><column name="state_name" value="Missouri"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="MT"/><column name="state_name" value="Montana"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NE"/><column name="state_name" value="Nebraska"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NV"/><column name="state_name" value="Nevada"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NH"/><column name="state_name" value="New Hampshire"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NJ"/><column name="state_name" value="New Jersey"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NM"/><column name="state_name" value="New Mexico"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NY"/><column name="state_name" value="New York"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="NC"/><column name="state_name" value="North Carolina"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="ND"/><column name="state_name" value="North Dakota"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="OH"/><column name="state_name" value="Ohio"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="OK"/><column name="state_name" value="Oklahoma"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="OR"/><column name="state_name" value="Oregon"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="PA"/><column name="state_name" value="Pennsylvania"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="RI"/><column name="state_name" value="Rhode Island"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="SC"/><column name="state_name" value="South Carolina"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="SD"/><column name="state_name" value="South Dakota"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="TN"/><column name="state_name" value="Tennessee"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="TX"/><column name="state_name" value="Texas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="UT"/><column name="state_name" value="Utah"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="VT"/><column name="state_name" value="Vermont"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="VA"/><column name="state_name" value="Virginia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="WA"/><column name="state_name" value="Washington"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="WV"/><column name="state_name" value="West Virginia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="WI"/><column name="state_name" value="Wisconsin"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="WY"/><column name="state_name" value="Wyoming"/></insert>
+        <insert tableName="states"><column name="country_iso" value="US"/><column name="state_code" value="DC"/><column name="state_name" value="District of Columbia"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 5: Seed state data for United Kingdom
+         =================================================================== -->
+    <changeSet id="tax-enh-005-seed-states-gb" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'GB'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed UK countries for VAT jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="GB"/><column name="state_code" value="ENG"/><column name="state_name" value="England"/></insert>
+        <insert tableName="states"><column name="country_iso" value="GB"/><column name="state_code" value="SCT"/><column name="state_name" value="Scotland"/></insert>
+        <insert tableName="states"><column name="country_iso" value="GB"/><column name="state_code" value="WLS"/><column name="state_name" value="Wales"/></insert>
+        <insert tableName="states"><column name="country_iso" value="GB"/><column name="state_code" value="NIR"/><column name="state_name" value="Northern Ireland"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 6: Seed state data for Australia
+         =================================================================== -->
+    <changeSet id="tax-enh-006-seed-states-au" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'AU'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Australian states for GST jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="NSW"/><column name="state_name" value="New South Wales"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="VIC"/><column name="state_name" value="Victoria"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="QLD"/><column name="state_name" value="Queensland"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="WA"/><column name="state_name" value="Western Australia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="SA"/><column name="state_name" value="South Australia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="TAS"/><column name="state_name" value="Tasmania"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="ACT"/><column name="state_name" value="Australian Capital Territory"/></insert>
+        <insert tableName="states"><column name="country_iso" value="AU"/><column name="state_code" value="NT"/><column name="state_name" value="Northern Territory"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 7: Seed state data for Canada
+         =================================================================== -->
+    <changeSet id="tax-enh-007-seed-states-ca" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'CA'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Canadian provinces for sales tax jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="AB"/><column name="state_name" value="Alberta"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="BC"/><column name="state_name" value="British Columbia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="MB"/><column name="state_name" value="Manitoba"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="NB"/><column name="state_name" value="New Brunswick"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="NL"/><column name="state_name" value="Newfoundland and Labrador"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="NS"/><column name="state_name" value="Nova Scotia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="ON"/><column name="state_name" value="Ontario"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="PE"/><column name="state_name" value="Prince Edward Island"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="QC"/><column name="state_name" value="Quebec"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="SK"/><column name="state_name" value="Saskatchewan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="NT"/><column name="state_name" value="Northwest Territories"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="NU"/><column name="state_name" value="Nunavut"/></insert>
+        <insert tableName="states"><column name="country_iso" value="CA"/><column name="state_code" value="YT"/><column name="state_name" value="Yukon"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 8: Seed state data for Malaysia (has state-level GST)
+         =================================================================== -->
+    <changeSet id="tax-enh-008-seed-states-my" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'MY'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Malaysian states for GST jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="JHR"/><column name="state_name" value="Johor"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="KDH"/><column name="state_name" value="Kedah"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="KTN"/><column name="state_name" value="Kelantan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="MLK"/><column name="state_name" value="Malacca"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="NSM"/><column name="state_name" value="Negeri Sembilan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="PHG"/><column name="state_name" value="Pahang"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="PNG"/><column name="state_name" value="Penang"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="PRK"/><column name="state_name" value="Perak"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="PLS"/><column name="state_name" value="Perlis"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="SBH"/><column name="state_name" value="Sabah"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="SWK"/><column name="state_name" value="Sarawak"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="SGR"/><column name="state_name" value="Selangor"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="TRG"/><column name="state_name" value="Terengganu"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="KUL"/><column name="state_name" value="Kuala Lumpur"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="LBN"/><column name="state_name" value="Labuan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MY"/><column name="state_code" value="PJ"/><column name="state_name" value="Putrajaya"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 9: Seed state data for Brazil
+         =================================================================== -->
+    <changeSet id="tax-enh-009-seed-states-br" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'BR'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Brazilian states for ICMS tax jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="AC"/><column name="state_name" value="Acre"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="AL"/><column name="state_name" value="Alagoas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="AP"/><column name="state_name" value="Amapa"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="AM"/><column name="state_name" value="Amazonas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="BA"/><column name="state_name" value="Bahia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="CE"/><column name="state_name" value="Ceara"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="DF"/><column name="state_name" value="Distrito Federal"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="ES"/><column name="state_name" value="Espirito Santo"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="GO"/><column name="state_name" value="Goias"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="MA"/><column name="state_name" value="Maranhao"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="MT"/><column name="state_name" value="Mato Grosso"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="MS"/><column name="state_name" value="Mato Grosso do Sul"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="MG"/><column name="state_name" value="Minas Gerais"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="PA"/><column name="state_name" value="Para"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="PB"/><column name="state_name" value="Paraiba"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="PR"/><column name="state_name" value="Parana"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="PE"/><column name="state_name" value="Pernambuco"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="PI"/><column name="state_name" value="Piaui"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="RJ"/><column name="state_name" value="Rio de Janeiro"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="RN"/><column name="state_name" value="Rio Grande do Norte"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="RS"/><column name="state_name" value="Rio Grande do Sul"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="RO"/><column name="state_name" value="Rondonia"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="RR"/><column name="state_name" value="Roraima"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="SC"/><column name="state_name" value="Santa Catarina"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="SP"/><column name="state_name" value="Sao Paulo"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="SE"/><column name="state_name" value="Sergipe"/></insert>
+        <insert tableName="states"><column name="country_iso" value="BR"/><column name="state_code" value="TO"/><column name="state_name" value="Tocantins"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 10: Seed state data for Mexico
+         =================================================================== -->
+    <changeSet id="tax-enh-010-seed-states-mx" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM states WHERE country_iso = 'MX'
+            </sqlCheck>
+        </preConditions>
+        <comment>Seed Mexican states for tax jurisdiction</comment>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="AGU"/><column name="state_name" value="Aguascalientes"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="BCN"/><column name="state_name" value="Baja California"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="BCS"/><column name="state_name" value="Baja California Sur"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="CAM"/><column name="state_name" value="Campeche"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="CHP"/><column name="state_name" value="Chiapas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="CHH"/><column name="state_name" value="Chihuahua"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="CDMX"/><column name="state_name" value="Ciudad de Mexico"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="COA"/><column name="state_name" value="Coahuila"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="COL"/><column name="state_name" value="Colima"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="DUR"/><column name="state_name" value="Durango"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="GUA"/><column name="state_name" value="Guanajuato"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="GRO"/><column name="state_name" value="Guerrero"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="HID"/><column name="state_name" value="Hidalgo"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="JAL"/><column name="state_name" value="Jalisco"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="MEX"/><column name="state_name" value="Estado de Mexico"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="MIC"/><column name="state_name" value="Michoacan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="MOR"/><column name="state_name" value="Morelos"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="NAY"/><column name="state_name" value="Nayarit"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="NLE"/><column name="state_name" value="Nuevo Leon"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="OAX"/><column name="state_name" value="Oaxaca"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="PUE"/><column name="state_name" value="Puebla"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="QUE"/><column name="state_name" value="Queretaro"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="ROO"/><column name="state_name" value="Quintana Roo"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="SLP"/><column name="state_name" value="San Luis Potosi"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="SIN"/><column name="state_name" value="Sinaloa"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="SON"/><column name="state_name" value="Sonora"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="TAB"/><column name="state_name" value="Tabasco"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="TAM"/><column name="state_name" value="Tamaulipas"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="TLA"/><column name="state_name" value="Tlaxcala"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="VER"/><column name="state_name" value="Veracruz"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="YUC"/><column name="state_name" value="Yucatan"/></insert>
+        <insert tableName="states"><column name="country_iso" value="MX"/><column name="state_code" value="ZAC"/><column name="state_name" value="Zacatecas"/></insert>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 11: Remove old Phase 1 seed data (runs BEFORE FK exists)
+         Soft-deletes duplicate/seed tax configs so that the FK constraint
+         created in later changesets does not block cleanup. Uses UPDATE
+         (soft-delete) instead of DELETE to be safe on partial databases
+         where the FK might already exist. Uses MIN subquery instead of
+         ROW_NUMBER() for database independence.
+         =================================================================== -->
+    <changeSet id="tax-enh-016-remove-seed-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="country_code"/>
+                <not>
+                    <changeSetExecuted id="tax-enh-016-remove-seed-tax-configs" author="system"
+                                       changeLogFile="db/changelog/db.changelog-tax-enhancements.xml"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Soft-delete duplicate seed tax configs — now managed from frontend UI</comment>
+        <sql>
+            UPDATE tax_configs
+            SET is_deleted = true, deleted_at = CURRENT_TIMESTAMP
+            WHERE is_deleted = false
+              AND tax_config_id IN (
+                SELECT * FROM (
+                  SELECT MIN(tc2.tax_config_id)
+                  FROM tax_configs tc2
+                  WHERE tc2.is_deleted = false
+                  GROUP BY tc2.country_code, tc2.tax_type, tc2.effective_from
+                ) AS tmp
+              )
+        </sql>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 12: Create agreement_tax_configs join table
+          Enables multiple ordered tax configurations per agreement with
+          tax-on-tax accumulation support.
+          =================================================================== -->
+    <changeSet id="tax-enh-011-create-agreement-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="agreement_tax_configs"/></not>
+        </preConditions>
+        <comment>Create agreement_tax_configs join table for multi-tax per agreement</comment>
+        <createTable tableName="agreement_tax_configs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="agreement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_config_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="apply_order" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="accumulate_from_orders" type="VARCHAR(50)"/>
+        </createTable>
+        <addUniqueConstraint tableName="agreement_tax_configs"
+                             columnNames="agreement_id, apply_order"
+                             constraintName="uk_agreement_tax_order"/>
+        <addForeignKeyConstraint baseTableName="agreement_tax_configs"
+                                 baseColumnNames="agreement_id"
+                                 constraintName="fk_atc_agreement"
+                                 referencedTableName="agreements"
+                                 referencedColumnNames="agreement_id"
+                                 onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="agreement_tax_configs"
+                                 baseColumnNames="tax_config_id"
+                                 constraintName="fk_atc_tax_config"
+                                 referencedTableName="tax_configs"
+                                 referencedColumnNames="tax_config_id"
+                                 onDelete="RESTRICT"/>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 13: Migrate old single FK data to agreement_tax_configs
+          For all agreements with tax_config_id set, insert a row with
+          apply_order = 1 and accumulate_from_orders = NULL (matching old
+          single-tax behavior).
+          =================================================================== -->
+    <changeSet id="tax-enh-012-migrate-old-tax-fk" author="system" dbms="!derby">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreement_tax_configs"/>
+                <tableExists tableName="agreements"/>
+                <not>
+                    <changeSetExecuted id="tax-enh-012-migrate-old-tax-fk" author="system"
+                                       changeLogFile="db/changelog/db.changelog-tax-enhancements.xml"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Migrate existing single tax_config_id FK data to agreement_tax_configs join table</comment>
+        <sql>
+            INSERT INTO agreement_tax_configs (agreement_id, tax_config_id, apply_order, accumulate_from_orders)
+            SELECT a.agreement_id, a.tax_config_id, 1, NULL
+            FROM agreements a
+            WHERE a.tax_config_id IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1 FROM agreement_tax_configs atc
+                WHERE atc.agreement_id = a.agreement_id
+            )
+        </sql>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 14: Add new columns to agreements table (Phase 2)
+          Adds place of supply, customer/supplier jurisdiction fields.
+         =================================================================== -->
+    <changeSet id="tax-enh-013-add-agreement-columns" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <not><columnExists tableName="agreements" columnName="place_of_supply_rule"/></not>
+            </and>
+        </preConditions>
+        <comment>Add place of supply and jurisdiction columns to agreements table</comment>
+        <addColumn tableName="agreements">
+            <column name="place_of_supply_rule" type="VARCHAR(30)"/>
+        </addColumn>
+        <addColumn tableName="agreements">
+            <column name="customer_country_code" type="VARCHAR(2)"/>
+        </addColumn>
+        <addColumn tableName="agreements">
+            <column name="customer_state_code" type="VARCHAR(10)"/>
+        </addColumn>
+        <addColumn tableName="agreements">
+            <column name="supplier_country_code" type="VARCHAR(2)"/>
+        </addColumn>
+        <addColumn tableName="agreements">
+            <column name="supplier_state_code" type="VARCHAR(10)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 15: Add invoice audit columns (Phase 2)
+          Adds tax calculation date, export treatment flag, state snapshots,
+         and place of supply rule to invoices.
+         =================================================================== -->
+    <changeSet id="tax-enh-014-add-invoice-audit-columns" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <not><columnExists tableName="invoices" columnName="tax_calculation_date"/></not>
+            </and>
+        </preConditions>
+        <comment>Add audit and snapshot columns to invoices for multi-country tax</comment>
+        <addColumn tableName="invoices">
+            <column name="tax_calculation_date" type="DATE"/>
+        </addColumn>
+        <addColumn tableName="invoices">
+            <column name="is_export_treatment" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+        <addColumn tableName="invoices">
+            <column name="customer_state_code" type="VARCHAR(10)"/>
+        </addColumn>
+        <addColumn tableName="invoices">
+            <column name="supplier_state_code" type="VARCHAR(10)"/>
+        </addColumn>
+        <addColumn tableName="invoices">
+            <column name="place_of_supply_rule" type="VARCHAR(30)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 16: Create invoice_tax_details table
+          Stores per-line-item tax breakdown for multi-tax invoices,
+         providing a complete audit trail.
+         =================================================================== -->
+    <changeSet id="tax-enh-015-create-invoice-tax-details" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="invoice_tax_details"/></not>
+        </preConditions>
+        <comment>Create invoice_tax_details table for per-line-item tax breakdown</comment>
+        <createTable tableName="invoice_tax_details">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="invoice_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="apply_order" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_config_id" type="BIGINT"/>
+            <column name="tax_type" type="VARCHAR(20)"/>
+            <column name="tax_rate" type="DECIMAL(5,2)"/>
+            <column name="taxable_amount" type="DECIMAL(19,6)"/>
+            <column name="tax_amount" type="DECIMAL(19,6)"/>
+            <column name="apply_on" type="VARCHAR(20)"/>
+            <column name="accumulate_from_orders" type="VARCHAR(50)"/>
+            <column name="cgst_amount" type="DECIMAL(19,6)"/>
+            <column name="sgst_amount" type="DECIMAL(19,6)"/>
+            <column name="igst_amount" type="DECIMAL(19,6)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="invoice_tax_details"
+                                 baseColumnNames="invoice_id"
+                                 constraintName="fk_itd_invoice"
+                                 referencedTableName="invoices"
+                                 referencedColumnNames="invoice_id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- ===================================================================
+          Changeset 17: Make countries.iso_code NOT NULL
+         The iso_code column was added in db.changelog-add-iso-code.xml
+         without a NOT NULL constraint. Since backfill has populated all
+         existing records, we can now enforce it.
+         =================================================================== -->
+    <changeSet id="tax-enh-017-make-iso-code-not-null" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="countries"/>
+                <columnExists tableName="countries" columnName="iso_code"/>
+                <not>
+                    <changeSetExecuted id="tax-enh-017-make-iso-code-not-null" author="system"
+                                       changeLogFile="db/changelog/db.changelog-tax-enhancements.xml"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Backfill any remaining null iso_codes and add NOT NULL constraint</comment>
+        <sql>
+            UPDATE countries SET iso_code = UPPER(SUBSTRING(name, 1, 2)) WHERE iso_code IS NULL
+        </sql>
+        <addNotNullConstraint tableName="countries"
+                              columnName="iso_code"
+                              columnDataType="VARCHAR(2)"
+                              defaultNullValue="XX"/>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 18a: Drop old FK constraint on agreements.tax_config_id
+         The old single-tax FK has been superceded by the agreement_tax_configs
+         join table. Data was migrated in changeset tax-enh-012. The column
+         itself is dropped in the next changeset.
+         =================================================================== -->
+    <changeSet id="tax-enh-018a-drop-tax-fk" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_agreement_tax_config"/>
+            </and>
+        </preConditions>
+        <comment>Drop old FK constraint fk_agreement_tax_config — replaced by agreement_tax_configs join table</comment>
+        <dropForeignKeyConstraint baseTableName="agreements"
+                                  constraintName="fk_agreement_tax_config"/>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 18b: Drop old tax_config_id column from agreements
+         The old single-tax FK column is no longer needed. All data has been
+         migrated to agreement_tax_configs (changeset tax-enh-012) and the
+         FK constraint was dropped (changeset tax-enh-018a).
+         This runs after tax-enh-018a to ensure FK is dropped first.
+         =================================================================== -->
+    <changeSet id="tax-enh-018b-drop-tax-config-id-column" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="tax_config_id"/>
+            </and>
+        </preConditions>
+        <comment>Drop old tax_config_id column from agreements — data migrated to agreement_tax_configs</comment>
+        <dropColumn tableName="agreements" columnName="tax_config_id"/>
+    </changeSet>
+
+    <!-- ===================================================================
+         Changeset 19: Simplify Tax Engine (Generic Telecom Billing Migration)
+         Drops all split, location, and place-of-supply columns from tax_configs,
+         agreements, invoices, and invoice_tax_details.
+         Designed for 100% safety on fresh, partial, or full databases.
+         =================================================================== -->
+    <changeSet id="tax-telecom-001-drop-unique-constraint-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <uniqueConstraintExists tableName="tax_configs" constraintName="uk_tax_config"/>
+            </and>
+        </preConditions>
+        <comment>Drop legacy country/region unique constraint from tax_configs</comment>
+        <dropUniqueConstraint tableName="tax_configs" constraintName="uk_tax_config"/>
+    </changeSet>
+
+    <!-- DROP TAX_CONFIGS COLUMNS SAFELY -->
+    <changeSet id="tax-telecom-002a-drop-country-code-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="country_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="country_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002b-drop-region-code-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="region_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="region_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002c-drop-is-split-applicable-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="is_split_applicable"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="is_split_applicable"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002d-drop-split1-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="split_component_1_name"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="split_component_1_name"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002e-drop-split2-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="split_component_2_name"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="split_component_2_name"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002f-drop-split3-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="split_component_3_name"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="split_component_3_name"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-002g-drop-place-of-supply-rule-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <columnExists tableName="tax_configs" columnName="place_of_supply_rule"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="tax_configs" columnName="place_of_supply_rule"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-003-add-generic-unique-constraint-tax-configs" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tax_configs"/>
+                <not><indexExists tableName="tax_configs" indexName="uk_generic_tax_config"/></not>
+            </and>
+        </preConditions>
+        <comment>Add generic, country-agnostic unique constraint to tax_configs</comment>
+        <addUniqueConstraint tableName="tax_configs"
+                             columnNames="tax_type, effective_from, deleted_at"
+                             constraintName="uk_generic_tax_config"/>
+    </changeSet>
+
+    <!-- DROP AGREEMENTS COLUMNS SAFELY -->
+    <changeSet id="tax-telecom-004a-drop-cust-country-agreements" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="customer_country_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="customer_country_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-004b-drop-cust-state-agreements" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="customer_state_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="customer_state_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-004c-drop-supp-country-agreements" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="supplier_country_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="supplier_country_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-004d-drop-supp-state-agreements" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="supplier_state_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="supplier_state_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-004e-drop-pos-rule-agreements" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="place_of_supply_rule"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="place_of_supply_rule"/>
+    </changeSet>
+
+    <!-- DROP INVOICES COLUMNS SAFELY -->
+    <changeSet id="tax-telecom-005a-drop-tax-country-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="tax_country_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="tax_country_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005b-drop-export-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="is_export_treatment"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="is_export_treatment"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005c-drop-cust-state-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="customer_state_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="customer_state_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005d-drop-supp-state-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="supplier_state_code"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="supplier_state_code"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005e-drop-pos-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="place_of_supply_rule"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="place_of_supply_rule"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005f-drop-cgst-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="cgst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="cgst_amount"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005g-drop-sgst-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="sgst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="sgst_amount"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-005h-drop-igst-invoices" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <columnExists tableName="invoices" columnName="igst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoices" columnName="igst_amount"/>
+    </changeSet>
+
+    <!-- DROP INVOICE_TAX_DETAILS COLUMNS SAFELY -->
+    <changeSet id="tax-telecom-006a-drop-cgst-itd" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoice_tax_details"/>
+                <columnExists tableName="invoice_tax_details" columnName="cgst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoice_tax_details" columnName="cgst_amount"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-006b-drop-sgst-itd" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoice_tax_details"/>
+                <columnExists tableName="invoice_tax_details" columnName="sgst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoice_tax_details" columnName="sgst_amount"/>
+    </changeSet>
+
+    <changeSet id="tax-telecom-006c-drop-igst-itd" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoice_tax_details"/>
+                <columnExists tableName="invoice_tax_details" columnName="igst_amount"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="invoice_tax_details" columnName="igst_amount"/>
+    </changeSet>
+
+</databaseChangeLog>

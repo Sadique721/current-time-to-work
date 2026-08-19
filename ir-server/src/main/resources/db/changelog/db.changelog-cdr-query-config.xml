@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Create cdr_query_config table -->
+    <changeSet id="cdr_query_config_1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="cdr_query_config"/></not>
+        </preConditions>
+        <createTable tableName="cdr_query_config">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="query_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fetch_query" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_delete" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="DATETIME"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_at" type="DATETIME"/>
+            <column name="created_by" type="VARCHAR(100)"/>
+            <column name="modified_by" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Drop fetch_query from tblm_error_rate_request -->
+    <changeSet id="cdr_query_config_2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblm_error_rate_request" columnName="fetch_query"/>
+        </preConditions>
+        <dropColumn tableName="tblm_error_rate_request" columnName="fetch_query"/>
+    </changeSet>
+
+    <!-- Add query FK columns to tblm_error_rate_request -->
+    <changeSet id="cdr_query_config_3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="tblm_error_rate_request" columnName="voice_query_id"/></not>
+        </preConditions>
+        <addColumn tableName="tblm_error_rate_request">
+            <column name="voice_query_id" type="BIGINT"/>
+            <column name="sms_query_id" type="BIGINT"/>
+            <column name="usage_query_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add FK constraints to tblm_error_rate_request -->
+    <changeSet id="cdr_query_config_4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_error_req_voice_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="tblm_error_rate_request" baseColumnNames="voice_query_id"
+                                 constraintName="fk_error_req_voice_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="cdr_query_config_5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_error_req_sms_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="tblm_error_rate_request" baseColumnNames="sms_query_id"
+                                 constraintName="fk_error_req_sms_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="cdr_query_config_6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_error_req_usage_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="tblm_error_rate_request" baseColumnNames="usage_query_id"
+                                 constraintName="fk_error_req_usage_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- Drop fetch_query from re_rate_request -->
+    <changeSet id="cdr_query_config_7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="re_rate_request" columnName="fetch_query"/>
+        </preConditions>
+        <dropColumn tableName="re_rate_request" columnName="fetch_query"/>
+    </changeSet>
+
+    <!-- Add query FK columns to re_rate_request -->
+    <changeSet id="cdr_query_config_8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="re_rate_request" columnName="voice_query_id"/></not>
+        </preConditions>
+        <addColumn tableName="re_rate_request">
+            <column name="voice_query_id" type="BIGINT"/>
+            <column name="sms_query_id" type="BIGINT"/>
+            <column name="usage_query_id" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add FK constraints to re_rate_request -->
+    <changeSet id="cdr_query_config_9" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_rerate_req_voice_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="re_rate_request" baseColumnNames="voice_query_id"
+                                 constraintName="fk_rerate_req_voice_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="cdr_query_config_10" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_rerate_req_sms_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="re_rate_request" baseColumnNames="sms_query_id"
+                                 constraintName="fk_rerate_req_sms_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="cdr_query_config_11" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_rerate_req_usage_query"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="re_rate_request" baseColumnNames="usage_query_id"
+                                 constraintName="fk_rerate_req_usage_query"
+                                 referencedTableName="cdr_query_config" referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

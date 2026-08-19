@@ -1,0 +1,104 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Exchange Rates</h4>
+      <h6>Manage and view system exchange rates</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        <i class="ti ti-chevron-up"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Table Card -->
+<div class="card table-list-card">
+  <!-- Card Header: Filters (Clearing House style) -->
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+    <div class="search-set d-flex align-items-center flex-wrap gap-2">
+      <div class="search-input">
+        <custom-input
+          [formControlRef]="searchControl"
+          type="text"
+          placeholder="Search..."
+          (keydown.enter)="fetchData()"
+        ></custom-input>
+      </div>
+
+      <custom-date
+        [formControlRef]="dateControl"
+        [showTime]="false"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [timeOnly]="false"
+        [placeholder]="'Valid From'"
+        [dateFormat]="'yy-mm-dd'"
+        [hourFormat]="'24'"
+        appendTo="body"
+        class="ms-1"
+      ></custom-date>
+
+      <button class="btn btn-primary ms-2" (click)="fetchData()">
+        <i class="ti ti-search me-1"></i>Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        <i class="ti ti-x me-1"></i>Clear
+      </button>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 text-muted fs-13">
+      <i class="ti ti-list-details"></i>
+      <span>Showing {{ totalRecords }} record(s)</span>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Base Currency</th>
+            <th>Target Currency</th>
+            <th class="text-end">Rate</th>
+            <th>Valid From</th>
+            <th>Target Precision</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rate of ratesList; track rate.id; let index = $index) {
+          <tr>
+            <td>{{ paginationSkip + index + 1 }}</td>
+            <td>{{ rate.baseCurrency }}</td>
+            <td>{{ rate.targetCurrency }}</td>
+            <td class="text-end fw-bold">{{ rate.rate | number:'1.6-6' }}</td>
+            <td class="text-nowrap">{{ rate.validFrom | date:'dd-MMM-yyyy' }}</td>
+            <td>{{ rate.targetCurrencyPrecision }}</td>
+          </tr>
+          }
+
+          @if (ratesList.length === 0) {
+          <tr>
+            <td colspan="6">
+              <h5 class="no-record">No exchange rates found</h5>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

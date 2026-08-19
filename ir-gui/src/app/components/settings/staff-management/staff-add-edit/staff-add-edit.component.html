@@ -1,0 +1,382 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ staffData?.id ? "Update " : "Create " }} Staff</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Collapse"
+        id="collapse-header"
+        matTooltip="Collapse"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary"
+          (click)="onClose()"
+        >
+          <i class="feather icon-arrow-left me-2"></i>Back to Staff List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h4>Profile</h4>
+  </div>
+  <div class="card-body profile-body">
+    <h5 class="mb-2">
+      <i class="ti ti-user text-primary me-1"></i>Basic Information
+    </h5>
+    <form [formGroup]="staffGroupForm">
+      <div class="profile-pic-upload image-field">
+        @if (imageUrl) {
+          <div class="profile-pic p-2 position-relative">
+            <img
+              [src]="imageUrl"
+              class="object-fit-cover h-100 rounded-1"
+              alt="user"
+            />
+          </div>
+        }
+
+        @if (!imageUrl) {
+          <div class="profile-pic text-center">
+            <span>
+              <i class="ti ti-circle-plus mb-1 fs-16"></i> Add Image
+            </span>
+          </div>
+        }
+
+        <div class="new-employee-field mt-2">
+          <div class="d-inline-flex align-items-center gap-2">
+            <input
+              type="file"
+              id="profileImageUpload"
+              (change)="onFileChangeUpload($event)"
+              accept=".jpg,.jpeg,.png"
+              style="display: none"
+            />
+            <label for="profileImageUpload" class="btn btn-primary fs-13">
+              {{ imageUrl ? "Change Image" : "Upload Image" }}
+            </label>
+            @if (imageUrl) {
+              <button
+                type="button"
+                class="btn btn-danger fs-13"
+                (click)="deleteImage()"
+              >
+                Delete Image
+              </button>
+            }
+          </div>
+          <span class="fs-13 fw-medium mt-2 d-block">
+            Upload an image below 2 MB, Accepted File format JPG, PNG
+          </span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Username"
+              [formControlRef]="staffGroupForm | getControl: 'username'"
+              type="text"
+              placeholder="Enter Username"
+            >
+            </custom-input>
+          </div>
+        </div>
+
+        @if (staffGroupForm.get("password")?.enabled) {
+          <div class="col-lg-4 col-md-6 col-12">
+            <div class="mb-3">
+              <mat-label class="col-form-label"
+                >Password <span class="text-danger">*</span></mat-label
+              >
+              <div class="pass-group input-group input-group-sm">
+                <input
+                  [type]="password[1] ? 'text' : 'password'"
+                  class="pass-input form-control"
+                  placeholder="Enter Password"
+                  formControlName="password"
+                  [ngClass]="{
+                    'is-invalid':
+                      staffGroupForm.get('password')?.invalid &&
+                      staffGroupForm.get('password')?.touched,
+                  }"
+                />
+                <span
+                  class="ti toggle-password"
+                  [ngClass]="password[1] ? 'ti-eye' : 'ti-eye-off'"
+                  (click)="togglePassword(1)"
+                ></span>
+              </div>
+              <div
+                *ngIf="
+                  staffGroupForm.get('password')?.invalid &&
+                  staffGroupForm.get('password')?.touched
+                "
+                class="invalid-feedback-msg"
+              >
+                Password must be 8–16 characters, include at least one uppercase
+                letter, one lowercase letter, one number, and one special
+                character
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Email"
+              [formControlRef]="staffGroupForm | getControl: 'email'"
+              type="text"
+            >
+            </custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="First Name"
+              [formControlRef]="staffGroupForm | getControl: 'firstname'"
+              type="text"
+            >
+            </custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Last Name"
+              [formControlRef]="staffGroupForm | getControl: 'lastname'"
+              type="text"
+            >
+            </custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Status"
+              [options]="statusOption"
+              optionValue="value_field"
+              optionLabel="display_field"
+              [formControlRef]="staffGroupForm | getControl: 'status'"
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <mat-label class="col-form-label"
+              >Mobile <span class="text-danger">*</span></mat-label
+            >
+            <div class="custom-country-code d-flex flex-row">
+              <p-select
+                [options]="countryCodeList"
+                optionValue="dial_code"
+                optionLabel="dial_code"
+                [filter]="true"
+                [size]="'small'"
+                formControlName="countryCode"
+              >
+                <ng-template pTemplate="selectedItem" let-selectedOption>
+                  <div class="flex align-items-center gap-2">
+                    <div>{{ selectedOption.dial_code }}</div>
+                  </div>
+                </ng-template>
+                <ng-template let-searchOption pTemplate="item">
+                  <div class="flex align-items-center gap-2">
+                    <div>{{ searchOption.dial_code }}</div>
+                  </div>
+                </ng-template>
+              </p-select>
+              <input
+                pInputText
+                placeholder="Enter Mobile"
+                formControlName="phone"
+                class="form-control"
+                maxlength="{{ mobileNoLengthFromSystemConfig }}"
+                [ngClass]="{
+                  'is-invalid':
+                    staffGroupForm.get('phone')?.invalid &&
+                    staffGroupForm.get('phone')?.touched,
+                }"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Roles"
+              [options]="loggedInUserRoleList"
+              optionValue="id"
+              optionLabel="rolename"
+              [formControlRef]="staffGroupForm | getControl: 'roleIds'"
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              [isMultiSelect]="true"
+              label="Teams"
+              [options]="teamList"
+              optionValue="id"
+              optionLabel="name"
+              [formControlRef]="staffGroupForm | getControl: 'teamIds'"
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              [isMultiSelect]="true"
+              label="Service Area"
+              [options]="serviceAreaList"
+              optionValue="id"
+              optionLabel="name"
+              [formControlRef]="
+                staffGroupForm | getControl: 'serviceAreaIdsList'
+              "
+              [filter]="true"
+              [showClear]="true"
+              (onOptionChange)="serviceAreaChange($event)"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              [isMultiSelect]="true"
+              label="Business Unit"
+              [options]="businessUnitList"
+              optionValue="id"
+              optionLabel="buname"
+              optionDisabled="flag"
+              [formControlRef]="
+                staffGroupForm | getControl: 'businessUnitIdsList'
+              "
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Agent"
+              [options]="agentList"
+              optionValue="id"
+              optionLabel="name"
+              [formControlRef]="staffGroupForm | getControl: 'agentid'"
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Branch"
+              [options]="branchList"
+              optionValue="id"
+              optionLabel="name"
+              [formControlRef]="staffGroupForm | getControl: 'branchId'"
+              [filter]="true"
+              [showClear]="true"
+            >
+            </custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="HRMS ID"
+              [formControlRef]="staffGroupForm | getControl: 'hrmsId'"
+              type="text"
+            >
+            </custom-input>
+          </div>
+        </div>
+
+        @if (staffGroupForm.get("parentStaffId")?.enabled) {
+          <div class="col-lg-4 col-md-6 col-12">
+            <div class="mb-3">
+              <custom-select
+                label="Parent Staff"
+                [options]="parentStaffList"
+                optionValue="id"
+                optionLabel="firstname"
+                [formControlRef]="staffGroupForm | getControl: 'parentStaffId'"
+                [filter]="true"
+                [showClear]="true"
+              >
+              </custom-select>
+            </div>
+          </div>
+        }
+
+        <div class="col-12 d-flex justify-content-end">
+          <button
+            class="btn btn-secondary me-2 shadow-none"
+            type="button"
+            (click)="onClose()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary shadow-none"
+            type="button"
+            (click)="submit()"
+          >
+            {{ staffData && staffData?.id ? "Update" : "Save" }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

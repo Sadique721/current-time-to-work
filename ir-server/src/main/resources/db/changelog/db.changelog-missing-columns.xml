@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Add missing columns to entities based on revision db6e44ec9ac0da774cc620cc81321358c4292fbb
+        
+        This migration adds all columns that are expected by the Java entities but missing from the database schema.
+    -->
+
+    <!-- 1. Add missing columns to partners table -->
+    <changeSet id="missing-cols-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="billing_currency"/>
+            </not>
+        </preConditions>
+        <comment>Add missing financial and technical columns to partners table</comment>
+        
+        <addColumn tableName="partners">
+            <column name="billing_currency" type="VARCHAR(3)" defaultValue="USD">
+                <constraints nullable="false"/>
+            </column>
+            <column name="billing_cycle" type="ENUM('MONTHLY', 'QUARTERLY', 'YEARLY')" defaultValue="MONTHLY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_terms" type="VARCHAR(100)" defaultValue="NET_30">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_number" type="VARCHAR(50)" defaultValue="N/A">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_account_number" type="VARCHAR(50)" defaultValue="N/A">
+                <constraints nullable="false"/>
+            </column>
+            <column name="swift_code" type="VARCHAR(11)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="point_code" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(45)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="routing_prefix" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 2. Add tadig_code column separately (already exists in roaming changelog but may not be applied) -->
+    <changeSet id="missing-cols-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="tadig_code"/>
+            </not>
+        </preConditions>
+        <comment>Add tadig_code column to partners table if not exists</comment>
+        
+        <addColumn tableName="partners">
+            <column name="tadig_code" type="VARCHAR(6)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 3. Add interconnect_type column if not exists -->
+    <changeSet id="missing-cols-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="interconnect_type"/>
+            </not>
+        </preConditions>
+        <comment>Add interconnect_type column to partners table if not exists</comment>
+        
+        <addColumn tableName="partners">
+            <column name="interconnect_type" type="ENUM('IP','SS7','SIP','ROAMING')" defaultValue="IP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 4. Add clearing_house_id FK column if not exists -->
+    <changeSet id="missing-cols-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="clearing_house_id"/>
+            </not>
+        </preConditions>
+        <comment>Add clearing_house_id FK column to partners table if not exists</comment>
+        
+        <addColumn tableName="partners">
+            <column name="clearing_house_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 5. Add FK constraint for clearing_house_id if clearing_houses table exists -->
+    <changeSet id="missing-cols-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="clearing_houses"/>
+                <columnExists tableName="partners" columnName="clearing_house_id"/>
+                <not>
+                    <foreignKeyConstraintExists foreignKeyName="fk_partner_clearing_house"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Add FK constraint for partners.clearing_house_id</comment>
+        
+        <addForeignKeyConstraint baseTableName="partners" baseColumnNames="clearing_house_id"
+                                 referencedTableName="clearing_houses" referencedColumnNames="id"
+                                 constraintName="fk_partner_clearing_house"/>
+    </changeSet>
+
+    <!-- 6. Add missing columns to agreements table -->
+    <changeSet id="missing-cols-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="agreements" columnName="next_billing_cycle_start_date"/>
+            </not>
+        </preConditions>
+        <comment>Add missing columns to agreements table</comment>
+        
+        <addColumn tableName="agreements">
+            <column name="next_billing_cycle_start_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_incoming_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_outgoing_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_net_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_settlement_template_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="outgoing_settlement_template_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="net_settlement_template_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 7. Add missing PLMN columns to agreements table if not exists -->
+    <changeSet id="missing-cols-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="agreements" columnName="home_plmn"/>
+            </not>
+        </preConditions>
+        <comment>Add PLMN columns to agreements table if not exists</comment>
+        
+        <addColumn tableName="agreements">
+            <column name="home_plmn" type="VARCHAR(6)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visitor_plmn" type="VARCHAR(6)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tap_direction" type="ENUM('TAP_IN','TAP_OUT')">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 8. Add FK constraints for template columns in agreements if template table exists -->
+    <changeSet id="missing-cols-8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tblm_template_configuration"/>
+                <columnExists tableName="agreements" columnName="incoming_settlement_template_id"/>
+                <not>
+                    <foreignKeyConstraintExists foreignKeyName="fk_agreement_incoming_template"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Add FK constraints for agreement template columns</comment>
+        
+        <addForeignKeyConstraint baseTableName="agreements" baseColumnNames="incoming_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration" referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_incoming_template"/>
+        <addForeignKeyConstraint baseTableName="agreements" baseColumnNames="outgoing_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration" referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_outgoing_template"/>
+        <addForeignKeyConstraint baseTableName="agreements" baseColumnNames="net_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration" referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_net_template"/>
+    </changeSet>
+
+    <!-- 9. Add missing columns to rate_packages table -->
+    <changeSet id="missing-cols-9" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_packages" columnName="currency"/>
+            </not>
+        </preConditions>
+        <comment>Add currency column to rate_packages table if not exists</comment>
+        
+        <addColumn tableName="rate_packages">
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 10. Update agreements table to remove old settlement_type and add deleted_at -->
+    <changeSet id="missing-cols-10" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="agreements" columnName="settlement_type"/>
+                <not>
+                    <columnExists tableName="agreements" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Update agreements table structure</comment>
+        
+        <dropColumn tableName="agreements" columnName="settlement_type"/>
+        <addColumn tableName="agreements">
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 11. Update partners table unique constraint to include deleted_at -->
+    <changeSet id="missing-cols-11" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <not>
+                    <columnExists tableName="partners" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Add deleted_at column to partners table</comment>
+        
+        <addColumn tableName="partners">
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 12. Update unique constraints to include deleted_at for soft delete support -->
+    <changeSet id="missing-cols-12" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="partners" columnName="deleted_at"/>
+                <not>
+                    <indexExists tableName="partners" indexName="uk_partners_partner_code"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Update unique constraints for soft delete support</comment>
+        
+        <dropUniqueConstraint tableName="partners" constraintName="partner_code"/>
+        <addUniqueConstraint tableName="partners" columnNames="partner_code,deleted_at" 
+                             constraintName="uk_partners_partner_code"/>
+    </changeSet>
+
+    <changeSet id="missing-cols-13" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="agreements" columnName="deleted_at"/>
+                <not>
+                    <indexExists tableName="agreements" indexName="uk_agreements_agreement_code"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Update agreements unique constraint for soft delete support</comment>
+        
+        <dropUniqueConstraint tableName="agreements" constraintName="agreement_code"/>
+        <addUniqueConstraint tableName="agreements" columnNames="agreement_code,deleted_at" 
+                             constraintName="uk_agreements_agreement_code"/>
+    </changeSet>
+
+    <!-- 14. Fix data types in tap_file_records table to match entity expectations -->
+    <changeSet id="missing-cols-14" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_file_records"/>
+                <or>
+                    <sqlCheck expectedResult="1">
+                        SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() 
+                        AND TABLE_NAME = 'tap_file_records'
+                        AND COLUMN_NAME = 'tap_decimal_places'
+                        AND DATA_TYPE = 'int'
+                    </sqlCheck>
+                    <sqlCheck expectedResult="1">
+                        SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() 
+                        AND TABLE_NAME = 'tap_file_records'
+                        AND COLUMN_NAME = 'total_charge'
+                        AND DATA_TYPE = 'bigint'
+                    </sqlCheck>
+                    <sqlCheck expectedResult="1">
+                        SELECT COUNT(*) FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = DATABASE() 
+                        AND TABLE_NAME = 'tap_file_records'
+                        AND COLUMN_NAME = 'total_records'
+                        AND DATA_TYPE = 'int'
+                    </sqlCheck>
+                </or>
+            </and>
+        </preConditions>
+        <comment>Fix data types in tap_file_records to match BigInteger entity fields</comment>
+        
+        <modifyDataType tableName="tap_file_records" columnName="total_records" newDataType="DECIMAL(38,0)"/>
+        <modifyDataType tableName="tap_file_records" columnName="total_charge" newDataType="DECIMAL(38,0)"/>
+        <modifyDataType tableName="tap_file_records" columnName="tap_decimal_places" newDataType="DECIMAL(38,0)"/>
+    </changeSet>
+
+    <!-- 15. Add missing deleted_at column to zone_rate_mappings table -->
+    <changeSet id="missing-cols-15" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="zone_rate_mappings"/>
+                <not>
+                    <columnExists tableName="zone_rate_mappings" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Add missing deleted_at column to zone_rate_mappings table for BaseEntity compatibility</comment>
+        
+        <addColumn tableName="zone_rate_mappings">
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 16. Add missing deleted_at column to zones table -->
+    <changeSet id="missing-cols-16" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="zones"/>
+                <not>
+                    <columnExists tableName="zones" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <comment>Add missing deleted_at column to zones table for BaseEntity compatibility</comment>
+        
+        <addColumn tableName="zones">
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 17. Drop subtype column from rate_packages table (master package concept removed) -->
+    <changeSet id="missing-cols-17" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <columnExists tableName="rate_packages" columnName="subtype"/>
+        </preConditions>
+
+        <dropColumn tableName="rate_packages" columnName="subtype"/>
+
+        <comment>Drop subtype column from rate_packages - master package concept removed</comment>
+    </changeSet>
+
+    <changeSet id="missing-cols-18" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+            <columnExists tableName="accounts" columnName="deleted_at"/>
+        </preConditions>
+        
+        <comment>Clean epoch (1970-01-01) values - idempotent, safe for fresh/partial/full DB</comment>
+        
+        <!-- Accounts cleanup -->
+        <update tableName="accounts">
+            <column name="deleted_at" valueComputed="NULL"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = false</where>
+        </update>
+        <update tableName="accounts">
+            <column name="deleted_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = true</where>
+        </update>
+        
+        <!-- Partners cleanup (same epoch bug) -->
+        <update tableName="partners">
+            <column name="deleted_at" valueComputed="NULL"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = false</where>
+        </update>
+        <update tableName="partners">
+            <column name="deleted_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = true</where>
+        </update>
+        
+        <!-- Agreements cleanup (same epoch bug) -->
+        <update tableName="agreements">
+            <column name="deleted_at" valueComputed="NULL"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = false</where>
+        </update>
+        <update tableName="agreements">
+            <column name="deleted_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <where>deleted_at = '1970-01-01 00:00:00' AND is_deleted = true</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="missing-cols-19" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+            <columnExists tableName="accounts" columnName="product_plan_id"/>
+            <!-- Only run if OLD index exists (product_plan_id NOT in index columns) -->
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'accounts' 
+                AND index_name = 'uk_accounts_account_code'
+                AND column_name = 'product_plan_id'
+            </sqlCheck>
+        </preConditions>
+        
+        <comment>Replace (account_code, deleted_at) with (account_code, product_plan_id, deleted_at)</comment>
+        
+        <dropIndex tableName="accounts" indexName="uk_accounts_account_code"/>
+        
+        <createIndex tableName="accounts" indexName="uk_accounts_account_code">
+            <column name="account_code"/>
+            <column name="product_plan_id"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        
+        <rollback>
+            <dropIndex tableName="accounts" indexName="uk_accounts_account_code"/>
+            <createIndex tableName="accounts" indexName="uk_accounts_account_code">
+                <column name="account_code"/>
+                <column name="deleted_at"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+    <!-- Replace line_of_business with service_type in source_configuration table -->
+    <changeSet id="missing-cols-20" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="source_configuration"/>
+            <columnExists tableName="source_configuration" columnName="line_of_business"/>
+        </preConditions>
+
+        <comment>Drop line_of_business column from source_configuration table</comment>
+        <dropColumn tableName="source_configuration" columnName="line_of_business"/>
+    </changeSet>
+
+    <changeSet id="missing-cols-21" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="source_configuration"/>
+            <not>
+                <columnExists tableName="source_configuration" columnName="service_type"/>
+            </not>
+        </preConditions>
+
+        <comment>Add service_type column to source_configuration table with ENUM('VOICE','SMS','USAGE') NOT NULL DEFAULT 'VOICE'</comment>
+        <addColumn tableName="source_configuration">
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')" defaultValue="VOICE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- ============================================ -->
+    <!-- Rating Engine Refactor: Remove fallback,     -->
+    <!-- priority from associations; add serviceType  -->
+    <!-- to ProductPlanAssociation                    -->
+    <!-- ============================================ -->
+
+    <changeSet id="rating-refactor-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="rate_package_associations"/>
+            <columnExists tableName="rate_package_associations" columnName="is_fallback"/>
+        </preConditions>
+        <comment>Remove is_fallback column from rate_package_associations</comment>
+        <dropColumn tableName="rate_package_associations" columnName="is_fallback"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="rate_package_associations"/>
+            <columnExists tableName="rate_package_associations" columnName="priority"/>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.columns
+                WHERE table_schema = DATABASE()
+                AND table_name = 'rate_package_associations'
+                AND column_name = 'priority'
+                AND is_nullable = 'YES'
+            </sqlCheck>
+        </preConditions>
+        <comment>Make priority nullable in rate_package_associations (required for INTERCONNECT, null for ROAMING)</comment>
+        <modifyDataType tableName="rate_package_associations" columnName="priority" newDataType="INT"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_plan_associations"/>
+            <columnExists tableName="product_plan_associations" columnName="is_fallback"/>
+        </preConditions>
+        <comment>Remove is_fallback column from product_plan_associations</comment>
+        <dropColumn tableName="product_plan_associations" columnName="is_fallback"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_plan_associations"/>
+            <columnExists tableName="product_plan_associations" columnName="priority"/>
+        </preConditions>
+        <comment>Remove priority column from product_plan_associations</comment>
+        <dropColumn tableName="product_plan_associations" columnName="priority"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_plan_associations"/>
+            <columnExists tableName="product_plan_associations" columnName="start_time"/>
+        </preConditions>
+        <comment>Remove start_time column from product_plan_associations</comment>
+        <dropColumn tableName="product_plan_associations" columnName="start_time"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_plan_associations"/>
+            <columnExists tableName="product_plan_associations" columnName="end_time"/>
+        </preConditions>
+        <comment>Remove end_time column from product_plan_associations</comment>
+        <dropColumn tableName="product_plan_associations" columnName="end_time"/>
+    </changeSet>
+
+    <changeSet id="rating-refactor-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="product_plan_associations"/>
+            <not>
+                <columnExists tableName="product_plan_associations" columnName="service_type"/>
+            </not>
+        </preConditions>
+        <comment>Add service_type column to product_plan_associations (VOICE/SMS/USAGE, NOT NULL DEFAULT 'VOICE')</comment>
+        <addColumn tableName="product_plan_associations">
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')" defaultValue="VOICE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add line_of_business column to rate_package_groups table -->
+    <changeSet id="rating-refactor-8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="rate_package_groups"/>
+            <not>
+                <columnExists tableName="rate_package_groups" columnName="line_of_business"/>
+            </not>
+        </preConditions>
+        <comment>Add line_of_business column to rate_package_groups (INTERCONNECT/ROAMING, NOT NULL DEFAULT 'INTERCONNECT')</comment>
+        <addColumn tableName="rate_package_groups">
+            <column name="line_of_business" type="ENUM('INTERCONNECT','ROAMING')" defaultValue="INTERCONNECT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Rename account_code to account_code_or_hplmn in accounts table -->
+    <!-- Supports both INTERCONNECT (user account code) and ROAMING (Home PLMN code) use cases -->
+    <changeSet id="missing-cols-22" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+            <columnExists tableName="accounts" columnName="account_code"/>
+            <not>
+                <columnExists tableName="accounts" columnName="account_code_or_hplmn"/>
+            </not>
+        </preConditions>
+        <comment>Rename account_code to account_code_or_hplmn - dual-purpose field for INTERCONNECT account codes and ROAMING HPLMN codes</comment>
+        <renameColumn tableName="accounts"
+                      oldColumnName="account_code"
+                      newColumnName="account_code_or_hplmn"
+                      columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+    <!-- Rebuild unique index on accounts after column rename -->
+    <changeSet id="missing-cols-23" author="system">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+            <columnExists tableName="accounts" columnName="account_code_or_hplmn"/>
+            <indexExists tableName="accounts" indexName="uk_accounts_account_code"/>
+            <!-- Only rebuild if index still references old column name -->
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE()
+                AND table_name = 'accounts'
+                AND index_name = 'uk_accounts_account_code'
+                AND column_name = 'account_code'
+            </sqlCheck>
+        </preConditions>
+        <comment>Rebuild unique index uk_accounts_account_code to reference renamed column account_code_or_hplmn</comment>
+        <dropIndex tableName="accounts" indexName="uk_accounts_account_code"/>
+        <createIndex tableName="accounts" indexName="uk_accounts_account_code" unique="true">
+            <column name="account_code_or_hplmn"/>
+            <column name="product_plan_id"/>
+            <column name="deleted_at"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Make interconnect_type nullable: required only for INTERCONNECT line of business -->
+    <changeSet id="partner-interconnect-nullable" author="system">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <columnExists tableName="partners" columnName="interconnect_type"/>
+                <sqlCheck expectedResult="NO">
+                    SELECT IS_NULLABLE FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'partners'
+                    AND COLUMN_NAME = 'interconnect_type'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <comment>Make interconnect_type nullable - only required for INTERCONNECT line of business. Skipped on fresh DB (column absent) or if already nullable.</comment>
+        <modifyDataType tableName="partners" columnName="interconnect_type" newDataType="ENUM('IP','SS7','SIP')"/>
+        <dropNotNullConstraint tableName="partners" columnName="interconnect_type" columnDataType="ENUM('IP','SS7','SIP')"/>
+    </changeSet>
+
+</databaseChangeLog>

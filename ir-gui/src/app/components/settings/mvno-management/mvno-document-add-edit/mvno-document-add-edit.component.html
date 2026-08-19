@@ -1,0 +1,132 @@
+<div class="col" id="mvno-document-add-edit">
+  <div class="modal-header">
+    <div class="page-title">
+      <h4>{{ isEditMode ? "Edit " : "Create " }} MVNO Document</h4>
+    </div>
+
+    <div class="page-btn">
+      <button type="button" class="btn me-2 btn-secondary" (click)="onClose()">
+        <i class="feather icon-arrow-left me-2"></i>Back to List
+      </button>
+    </div>
+  </div>
+  <div class="modal-body pt-1">
+    <form class="col-lg-10" [formGroup]="mvnoDocumnetFG">
+      <div class="row">
+        <div class="col-lg-5">
+          <custom-select
+            label="Verification Mode"
+            [options]="VerificationModeValue"
+            optionValue="text"
+            optionLabel="text"
+            [filter]="true"
+            filterBy="text"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'mode'"
+          ></custom-select>
+        </div>
+        <div class="col-lg-5">
+          <custom-select
+            label="Document Type"
+            [options]="docTypeList"
+            optionValue="value"
+            optionLabel="text"
+            [filter]="true"
+            filterBy="text"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'docType'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="Document Sub Type"
+            [options]="docSubTypeList"
+            optionValue="text"
+            optionLabel="text"
+            [filter]="true"
+            filterBy="text"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'docSubType'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="mb-3 col">
+            <mat-label class="col-form-label col-lg-2"
+              >Select Document
+              <span class="text-danger">*</span>
+            </mat-label>
+            <div class="input-group input-group-sm">
+              <input
+                type="file"
+                (change)="onFileChangeUpload($event)"
+                class="form-control"
+                formControlName="filename"
+                autocomplete="off"
+                [ngClass]="{
+                  'is-invalid':
+                    (mvnoDocumnetFG | getControl: 'filename').hasValidator(
+                      isControlRequired
+                    ) &&
+                    (mvnoDocumnetFG | getControl: 'filename').invalid &&
+                    (mvnoDocumnetFG | getControl: 'filename').touched,
+                }"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="Document Status"
+            [options]="documentStatusList"
+            optionValue="value"
+            optionLabel="value"
+            [filter]="true"
+            filterBy="value"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'docStatus'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-date
+            label="Start Date"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'startDate'"
+          >
+          </custom-date>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-date
+            [minDate]="(mvnoDocumnetFG | getControl: 'startDate')?.value"
+            label="End Date"
+            [formControlRef]="mvnoDocumnetFG | getControl: 'endDate'"
+          >
+          </custom-date>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-textarea
+            [formControlRef]="mvnoDocumnetFG | getControl: 'remark'"
+            [rows]="5"
+            [cols]="30"
+          ></custom-textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-md-12 card-body modal-footer row pt-3">
+    <button
+      type="button"
+      class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="onClose()"
+    >
+      Cancel
+    </button>
+    <button
+      class="btn btn-primary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="submit()"
+    >
+      {{ data && data?.id ? "Update" : "Save" }}
+    </button>
+  </div>
+</div>

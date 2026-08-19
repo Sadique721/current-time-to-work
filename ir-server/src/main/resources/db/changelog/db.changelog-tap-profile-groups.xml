@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- 1. Add service_type column to tap_profiles -->
+    <changeSet id="tap-profile-group-01-add-service-type" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profiles"/>
+                <not><columnExists tableName="tap_profiles" columnName="service_type"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="tap_profiles">
+            <column name="service_type" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 2. Create tap_profile_groups table -->
+    <changeSet id="tap-profile-group-02-create-groups" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_profile_groups"/></not>
+        </preConditions>
+        <createTable tableName="tap_profile_groups">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tap_profile_groups"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date"  type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 2b. Drop unique constraint on tap_profile_groups.name if it exists (soft-delete incompatible) -->
+    <changeSet id="tap-profile-group-02b-drop-name-unique" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profile_groups"/>
+                <indexExists indexName="uk_tap_profile_group_name" tableName="tap_profile_groups"/>
+            </and>
+        </preConditions>
+        <dropUniqueConstraint tableName="tap_profile_groups" constraintName="uk_tap_profile_group_name"/>
+    </changeSet>
+
+    <!-- 3. Create join table tap_profile_group_profiles -->
+    <changeSet id="tap-profile-group-03-create-join-table" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profile_groups"/>
+                <tableExists tableName="tap_profiles"/>
+                <not><tableExists tableName="tap_profile_group_profiles"/></not>
+            </and>
+        </preConditions>
+        <createTable tableName="tap_profile_group_profiles">
+            <column name="group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="profile_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="tap_profile_group_profiles" columnNames="group_id, profile_id"
+                       constraintName="pk_tap_profile_group_profiles"/>
+        <addForeignKeyConstraint constraintName="fk_tpgp_group"
+                baseTableName="tap_profile_group_profiles" baseColumnNames="group_id"
+                referencedTableName="tap_profile_groups" referencedColumnNames="id"
+                onDelete="CASCADE"/>
+        <addForeignKeyConstraint constraintName="fk_tpgp_profile"
+                baseTableName="tap_profile_group_profiles" baseColumnNames="profile_id"
+                referencedTableName="tap_profiles" referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- 4. Add tap_profile_group_id FK column to partners -->
+    <changeSet id="tap-profile-group-04-add-group-fk-to-partners" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <tableExists tableName="tap_profile_groups"/>
+                <not><columnExists tableName="partners" columnName="tap_profile_group_id"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="tap_profile_group_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="fk_partner_tap_profile_group"
+                baseTableName="partners" baseColumnNames="tap_profile_group_id"
+                referencedTableName="tap_profile_groups" referencedColumnNames="id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <!-- 5. Drop old tap_profile_id FK and column from partners -->
+    <changeSet id="tap-profile-group-05-drop-old-profile-fk" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_partner_tap_profile"/>
+            </and>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="partners" constraintName="fk_partner_tap_profile"/>
+    </changeSet>
+
+    <changeSet id="tap-profile-group-06-drop-old-profile-index" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <indexExists indexName="idx_partner_tap_profile_id"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="partners" indexName="idx_partner_tap_profile_id"/>
+    </changeSet>
+
+    <changeSet id="tap-profile-group-07-drop-old-profile-column" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <columnExists tableName="partners" columnName="tap_profile_id"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="partners" columnName="tap_profile_id"/>
+    </changeSet>
+
+</databaseChangeLog>

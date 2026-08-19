@@ -1,0 +1,132 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Lead Status Management</h4>
+      <h6>Manage your Lead Status</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn d-flex gap-2">
+    <button
+      class="btn btn-primary"
+      *ngIf="permission.create"
+      (click)="openLeadStatusAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Create Lead Status
+    </button>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center flex-wrap gap-2">
+      <div class="search-input" style="min-width: 250px">
+        <input
+          [formControl]="searchDataValue"
+          type="search"
+          class="form-control"
+          placeholder="Search by Lead Status Name"
+          (keydown.enter)="searchData()"
+        />
+      </div>
+
+      <button class="btn btn-primary" (click)="searchData()">Search</button>
+      <button class="btn btn-outline-secondary" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading lead status...</p>
+    </div>
+
+    <div *ngIf="!isLoading">
+      <div class="table-responsive brand-table">
+        <table class="table datatable">
+          <thead class="thead-light">
+            <tr>
+              <th style="width: 80px">Sr. No</th>
+              <th>Status Name</th>
+              <th>Code</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of tableData; let i = index">
+              <td>{{ serialNumberArray[i] }}</td>
+              <td>{{ data.statusName }}</td>
+              <td>{{ data.code }}</td>
+              <td>
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    [checked]="data.status"
+                    (change)="toggleStatus(data)"
+                  />
+                  <span class="slider round"></span>
+                </label>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="me-2 p-2"
+                    *ngIf="permission.edit"
+                    matTooltip="Edit"
+                    matTooltipPosition="above"
+                    (click)="openLeadStatusAddEdit(data)"
+                    style="cursor: pointer"
+                  >
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    class="confirm-text p-2"
+                    *ngIf="permission.delete"
+                    matTooltip="Delete"
+                    matTooltipPosition="above"
+                    (click)="confirmDelete(data.id)"
+                    style="cursor: pointer"
+                  >
+                    <i data-feather="trash-2" class="feather icon-trash-2"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="tableData.length === 0">
+              <td colspan="5">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-custom-pagination></app-custom-pagination>
+    </div>
+  </div>
+</div>

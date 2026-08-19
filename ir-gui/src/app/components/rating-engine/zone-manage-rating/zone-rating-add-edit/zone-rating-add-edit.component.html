@@ -1,0 +1,164 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ selectedZoneRating?.zoneId ? "Update" : "Create" }} Zone</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <div class="page-btn mt-0">
+        <button type="button" class="btn me-2 btn-secondary" (click)="onClose()">
+          <i class="feather icon-arrow-left me-2"></i>Back to Zone List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div class="card d-flex flex-column">
+  <div class="card-body">
+        <form [formGroup]="zoneForm">
+          <div class="row">
+            <!-- Zone Name -->
+            <div class="col-lg-6">
+              <custom-input label="Name" [formControlRef]="zoneForm | getControl: 'zoneName'"
+                placeholder="e.g. ZONE_EU, ZONE_AFRICA"></custom-input>
+            </div>
+
+            <!-- Priority -->
+            <div class="col-lg-6">
+              <custom-input label="Priority" type="number" [formControlRef]="zoneForm | getControl: 'priority'"
+                placeholder="Enter priority (e.g. 1)"></custom-input>
+            </div>
+
+            <!-- Prefix Input -->
+            <div class="col-lg-12">
+              <label class="form-label fw-semibold">Prefix Input</label>
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <button type="button" class="btn btn-sm" [class.btn-primary]="prefixInputMode === 'MANUAL'"
+                  [class.btn-outline-secondary]="prefixInputMode !== 'MANUAL'" (click)="onPrefixModeChange('MANUAL')">
+                  Manual Entry
+                </button>
+                <button type="button" class="btn btn-sm" [class.btn-primary]="prefixInputMode === 'DROPDOWN'"
+                  [class.btn-outline-secondary]="prefixInputMode !== 'DROPDOWN'"
+                  (click)="onPrefixModeChange('DROPDOWN')">
+                  Select from List
+                </button>
+              </div>
+
+              <div *ngIf="prefixInputMode === 'MANUAL'" class="border rounded p-3 bg-light">
+                <custom-textarea label="Prefixes" [formControlRef]="zoneForm | getControl: 'prefixPattern'"
+                  placeholder="e.g. 23801, 23802, 26201, 91, 44"></custom-textarea>
+                <small class="text-muted mt-1 d-block">
+                  Enter comma-separated prefixes (digits only, max 15 digits each).
+                </small>
+                <div *ngIf="manualValidationErrors.length" class="mt-2">
+                  <div *ngFor="let error of manualValidationErrors" class="text-danger small">
+                    {{ error }}
+                  </div>
+                </div>
+                <div *ngIf="manualValidationSuccess" class="mt-2 text-success small">
+                  {{ manualValidationSuccess }}
+                </div>
+              </div>
+
+              <div *ngIf="prefixInputMode === 'DROPDOWN'" class="border rounded p-3 bg-light">
+                <div class="mb-3">
+                  <input type="text" class="form-control" placeholder="Search by country, prefix name, value..."
+                    [value]="prefixSearch" (input)="onPrefixSearchInput($event)" />
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="prefixTypeFilter === 'ALL'"
+                    [class.btn-outline-secondary]="prefixTypeFilter !== 'ALL'"
+                    (click)="onPrefixTypeFilterChange('ALL')">
+                    All
+                  </button>
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="prefixTypeFilter === 'INTERCONNECT'"
+                    [class.btn-outline-secondary]="prefixTypeFilter !== 'INTERCONNECT'"
+                    (click)="onPrefixTypeFilterChange('INTERCONNECT')">
+                    INTERCONNECT
+                  </button>
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="prefixTypeFilter === 'ROAMING'"
+                    [class.btn-outline-secondary]="prefixTypeFilter !== 'ROAMING'"
+                    (click)="onPrefixTypeFilterChange('ROAMING')">
+                    ROAMING
+                  </button>
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="prefixTypeFilter === 'COUNTRY'"
+                    [class.btn-outline-secondary]="prefixTypeFilter !== 'COUNTRY'"
+                    (click)="onPrefixTypeFilterChange('COUNTRY')">
+                    Country Codes
+                  </button>
+                </div>
+
+
+
+                <div *ngIf="selectedPrefixItems.length || lastClearedItems.length" class="mb-3 d-flex justify-content-between align-items-center">
+                  <ng-container *ngIf="selectedPrefixItems.length">
+                    <div class="small text-muted">{{ selectedPrefixItems.length }} selected</div>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-danger"
+                      (click)="clearAllPrefixes()">
+                      Clear all
+                    </button>
+                  </ng-container>
+                  <ng-container *ngIf="!selectedPrefixItems.length && lastClearedItems.length">
+                    <div class="small text-muted">Cleared {{ lastClearedItems.length }} items</div>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-primary"
+                      (click)="undoClearAll()">
+                      <i class="ti ti-arrow-back-up me-1"></i>Undo
+                    </button>
+                  </ng-container>
+                </div>
+                <div *ngIf="selectedPrefixItems.length" class="mb-3">
+                  <div class="d-flex flex-wrap gap-2">
+                    <span *ngFor="let item of selectedPrefixItems"
+                      class="badge bg-light text-dark border rounded px-3 py-2 fs-13 fw-normal d-inline-flex align-items-center gap-2">
+                      {{ item.label }}
+                      <i class="ti ti-x cursor-pointer text-secondary" (click)="removeSelectedItem(item)"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="border rounded bg-white" style="max-height: 260px; overflow-y: auto;">
+                  <div *ngIf="prefixOptionsLoading" class="p-3 text-muted">Loading...</div>
+                  <div *ngIf="!prefixOptionsLoading && !filteredPrefixOptions.length" class="p-3 text-muted">
+                    No options found.
+                  </div>
+                  <div *ngFor="let option of filteredPrefixOptions"
+                    class="d-flex align-items-center justify-content-between p-2 border-bottom"
+                    style="cursor: pointer;"
+                    (click)="togglePrefixSelection(option)">
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="checkbox" [checked]="isOptionSelected(option)"
+                        style="pointer-events: none;" tabindex="-1" />
+                      <div>
+                        <div class="fw-semibold">{{ option.label }}</div>
+                        <div class="small text-muted">{{ option.value }} · {{ option.prefixType || option.sourceType }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="col-lg-12">
+              <custom-textarea label="Description" [formControlRef]="zoneForm | getControl: 'description'"
+                placeholder="Enter optional zone description" [rows]="3"></custom-textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+  <div class="card-footer d-flex align-items-center justify-content-between">
+    <button type="button" class="btn btn-secondary fs-13 fw-medium p-2 px-3" (click)="onClose()">
+      Cancel
+    </button>
+    <button class="btn btn-primary fs-13 fw-medium p-2 px-3" (click)="submit()" [disabled]="!canSubmit()">
+      <i class="ti ti-circle-check me-1"></i>
+      {{ selectedZoneRating?.zoneId ? "Update Zone" : "Create Zone" }}
+    </button>
+  </div>
+</div>

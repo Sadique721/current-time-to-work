@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="migrate-call-type-enum-values" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <tableExists tableName="tap_field_mappings"/>
+            <columnExists tableName="tap_field_mappings" columnName="call_type"/>
+        </preConditions>
+        <comment>Migrate deleted CallType enum values to new ones</comment>
+        
+        <!-- tap_field_mappings -->
+        <update tableName="tap_field_mappings">
+            <column name="call_type" value="MO_VOICE"/>
+            <where>call_type = 'MOC'</where>
+        </update>
+        <update tableName="tap_field_mappings">
+            <column name="call_type" value="MT_VOICE"/>
+            <where>call_type = 'MTC'</where>
+        </update>
+        <update tableName="tap_field_mappings">
+            <column name="call_type" value="MO_SMS"/>
+            <where>call_type = 'SMS'</where>
+        </update>
+        <update tableName="tap_field_mappings">
+            <column name="call_type" valueComputed="NULL"/>
+            <where>call_type IN ('SUPPL', 'CONTENT')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="migrate-call-type-roaming-cdrs" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <tableExists tableName="roaming_cdrs"/>
+            <columnExists tableName="roaming_cdrs" columnName="call_type"/>
+        </preConditions>
+        <comment>Convert ENUM to VARCHAR(20) to allow new CallType values (MO_VOICE, MT_VOICE, MO_SMS), then migrate old enum values.
+Idempotent: modifyDataType is a no-op if already VARCHAR; UPDATEs affect 0 rows if already migrated.</comment>
+        <modifyDataType tableName="roaming_cdrs" columnName="call_type" newDataType="VARCHAR(20)"/>
+        <update tableName="roaming_cdrs">
+            <column name="call_type" value="MO_VOICE"/>
+            <where>call_type = 'MOC'</where>
+        </update>
+        <update tableName="roaming_cdrs">
+            <column name="call_type" value="MT_VOICE"/>
+            <where>call_type = 'MTC'</where>
+        </update>
+        <update tableName="roaming_cdrs">
+            <column name="call_type" value="MO_SMS"/>
+            <where>call_type = 'SMS'</where>
+        </update>
+        <update tableName="roaming_cdrs">
+            <column name="call_type" valueComputed="NULL"/>
+            <where>call_type IN ('SUPPL', 'CONTENT')</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="migrate-call-type-rate-package" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <tableExists tableName="rate_package_associations"/>
+            <columnExists tableName="rate_package_associations" columnName="call_type"/>
+        </preConditions>
+        <comment>Convert ENUM to VARCHAR(20) for consistency, then migrate old enum values</comment>
+        <modifyDataType tableName="rate_package_associations" columnName="call_type" newDataType="VARCHAR(20)"/>
+        <update tableName="rate_package_associations">
+            <column name="call_type" value="MO_VOICE"/>
+            <where>call_type = 'MOC'</where>
+        </update>
+        <update tableName="rate_package_associations">
+            <column name="call_type" value="MT_VOICE"/>
+            <where>call_type = 'MTC'</where>
+        </update>
+        <update tableName="rate_package_associations">
+            <column name="call_type" value="MO_SMS"/>
+            <where>call_type = 'SMS'</where>
+        </update>
+        <delete tableName="rate_package_associations">
+            <where>call_type IN ('SUPPL', 'CONTENT')</where>
+        </delete>
+    </changeSet>
+
+    <changeSet id="migrate-call-type-voice-cdrs" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <tableExists tableName="voice_rated_cdr"/>
+            <columnExists tableName="voice_rated_cdr" columnName="call_type"/>
+        </preConditions>
+        <comment>Convert ENUM to VARCHAR(20) for consistency, then migrate old enum values</comment>
+        <modifyDataType tableName="voice_rated_cdr" columnName="call_type" newDataType="VARCHAR(20)"/>
+        <update tableName="voice_rated_cdr">
+            <column name="call_type" value="MO_VOICE"/>
+            <where>call_type = 'MOC'</where>
+        </update>
+        <update tableName="voice_rated_cdr">
+            <column name="call_type" value="MT_VOICE"/>
+            <where>call_type = 'MTC'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="migrate-call-type-sms-cdrs" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <tableExists tableName="sms_rated_cdr"/>
+            <columnExists tableName="sms_rated_cdr" columnName="call_type"/>
+        </preConditions>
+        <comment>Convert ENUM to VARCHAR(20) for consistency, then migrate old enum values</comment>
+        <modifyDataType tableName="sms_rated_cdr" columnName="call_type" newDataType="VARCHAR(20)"/>
+        <update tableName="sms_rated_cdr">
+            <column name="call_type" value="MO_SMS"/>
+            <where>call_type = 'SMS'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

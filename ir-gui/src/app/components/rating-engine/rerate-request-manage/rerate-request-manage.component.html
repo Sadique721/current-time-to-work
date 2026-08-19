@@ -1,0 +1,149 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>ReRate Requests</h4>
+      <h6>Manage re-rating processing requests</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn">
+    <a class="btn btn-primary" (click)="openAddEdit()">
+      <i class="ti ti-circle-plus me-2"></i>Add ReRate Request
+    </a>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center">
+      <div class="search-input">
+        <input
+          [formControl]="searchControl"
+          type="search"
+          class="form-control"
+          placeholder="Search by Audit Name"
+          (keydown.enter)="searchData()"
+        />
+      </div>
+      <button class="btn btn-primary ms-2" (click)="searchData()">
+        Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Audit Name</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Enable</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of tableData; track item.id; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>
+                <a class="nav-link" [routerLink]="['/rating-engine/rerate-requests/details', item.id]">
+                  {{ item.auditName }}
+                </a>
+              </td>
+              <td>
+                <span [ngClass]="getStatusClass(item.status)">{{
+                  item.status
+                }}</span>
+              </td>
+              <td>{{ item.startDate | date: "dd/MM/yyyy" }}</td>
+              <td>{{ item.endDate | date: "dd/MM/yyyy" }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="item.enable ? 'badge-success' : 'badge-secondary'"
+                >
+                  {{ item.enable ? "Enabled" : "Disabled" }}
+                </span>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="me-2 p-2"
+                    [matTooltip]="isLocked(item.status) ? 'Editing is locked for ' + item.status + ' requests' : 'Edit'"
+                    matTooltipPosition="above"
+                    [class.disabled]="isLocked(item.status)"
+                    [style.opacity]="isLocked(item.status) ? '0.4' : '1'"
+                    [style.cursor]="isLocked(item.status) ? 'not-allowed' : 'pointer'"
+                    (click)="!isLocked(item.status) && openAddEdit(item)"
+                  >
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    class="me-2 p-2"
+                    [matTooltip]="
+                      !canReRun(item.status)
+                        ? 'Re-Run is only available for FAILED or COMPLETED requests'
+                        : 'Re-Run'
+                    "
+                    matTooltipPosition="above"
+                    [class.disabled]="!canReRun(item.status)"
+                    [style.opacity]="!canReRun(item.status) ? '0.4' : '1'"
+                    [style.cursor]="
+                      !canReRun(item.status) ? 'not-allowed' : 'pointer'
+                    "
+                    (click)="canReRun(item.status) && reRun(item)"
+                  >
+                    <i class="ti ti-refresh"></i>
+                  </a>
+                  <a
+                    class="confirm-text p-2"
+                    matTooltip="Delete"
+                    matTooltipPosition="above"
+                    (click)="confirmDelete(item)"
+                  >
+                    <i data-feather="trash-2" class="feather icon-trash-2"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (tableData.length === 0) {
+            <tr>
+              <td colspan="7">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

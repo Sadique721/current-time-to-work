@@ -1,0 +1,115 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Role Permission</h4>
+      <h6>Manage your Role Permission</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+
+  <div class="page-btn">
+    <a class="btn btn-primary" (click)="openAddEdit()">
+      <i class="ti ti-circle-plus me-2"></i>Add Role
+    </a>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center">
+      <div class="search-input">
+        <input
+          [formControl]="searchDataValue"
+          type="search"
+          class="form-control"
+          placeholder="Global Search Filter"
+        />
+      </div>
+      <button class="btn btn-primary ms-2" (click)="searchData()">
+        Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Role Name</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of tableData; track data.id; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ data.rolename }}</td>
+              <td>
+                <span
+                  class="badge table-badge"
+                  [ngClass]="{
+                    'bg-success': data.status === 'Active',
+                    'bg-danger': data.status === 'Inactive',
+                  }"
+                >
+                  {{ data.status }}
+                </span>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a class="me-2 p-2" (click)="openAddEdit(data)">
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    class="confirm-text p-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete-modal"
+                    (click)="confirmDelete(data.id)"
+                  >
+                    <i class="feather icon-trash-2 feather-trash-2"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (tableData.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

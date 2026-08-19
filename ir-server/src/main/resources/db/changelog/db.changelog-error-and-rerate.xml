@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="create_rerate_request" author="antigravity">
+        <createTable tableName="re_rate_request">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="request_id" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="audit_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_parameters" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fetch_query" type="TEXT"/>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" type="TEXT"/>
+            <column name="start_date" type="TIMESTAMP"/>
+            <column name="end_date" type="TIMESTAMP"/>
+            <column name="requested_at" type="TIMESTAMP"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_delete" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="TIMESTAMP"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(100)"/>
+            <column name="modified_by" type="VARCHAR(100)"/>
+            <column name="version" type="BIGINT" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_error_rate_request" author="antigravity">
+        <createTable tableName="tblm_error_rate_request">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="request_id" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="request_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_parameters" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fetch_query" type="TEXT"/>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="TIMESTAMP"/>
+            <column name="end_date" type="TIMESTAMP"/>
+            <column name="requested_at" type="TIMESTAMP"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_delete" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="TIMESTAMP"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(100)"/>
+            <column name="modified_by" type="VARCHAR(100)"/>
+            <column name="version" type="BIGINT" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

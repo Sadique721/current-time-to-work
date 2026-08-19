@@ -1,0 +1,257 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" (click)="staffView()"
+          >{{ staffData.firstname }} Details</a
+        >
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a
+      *ngIf="viewReceiptAccess"
+      (click)="receiptView()"
+      class="btn btn-primary"
+    >
+      <i class="ti ti-file-invoice me-2"></i>Staff Receipt Management
+    </a>
+  </div>
+  <div class="page-btn">
+    <a
+      *ngIf="profileWalletAccess"
+      (click)="walletView()"
+      class="btn btn-primary"
+    >
+      <i class="ti ti-cash me-2"></i>Wallet
+    </a>
+  </div>
+  <div class="page-btn">
+    <a
+      *ngIf="profileChangePassWordAccess"
+      class="btn btn-primary"
+      (click)="openChangePasswordDialog()"
+    >
+      <i class="ti ti-lock-cog me-2"></i>Change Password
+    </a>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.staffManagement">
+      <i class="feather icon-arrow-left me-2"></i>Back to Staff List
+    </a>
+  </div>
+</div>
+
+<ng-container *ngIf="isStaffPersonalDataShow">
+  <div class="row">
+    <div class="col-xl-4">
+      <div class="card rounded-0 border-0 theiaStickySidebar">
+        <div class="card-header rounded-0 bg-primary d-flex align-items-center">
+          <span
+            class="avatar avatar-xl avatar-rounded flex-shrink-0 border border-white border-3 me-3"
+          >
+            <img
+              src="../../../../../assets/img/user.png"
+              alt="user"
+              *ngIf="!staffData.profileImage"
+            />
+            <img
+              [src]="staffProfileImage"
+              alt="user"
+              *ngIf="staffData.profileImage"
+            />
+          </span>
+          <div class="me-3">
+            <h6 class="text-white mb-1">{{ staffData.fullName || "-" }}</h6>
+            <span class="badge bg-purple-transparent text-purple">
+              {{
+                staffData.roleName?.length ? staffData.roleName.join(", ") : "-"
+              }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="d-inline-flex align-items-center">
+              <i class="ti ti-user me-2"></i>
+              Username
+            </span>
+            <p class="text-dark">{{ staffData.username || "-" }}</p>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="d-inline-flex align-items-center">
+              <i class="ti ti-mail me-2"></i>
+              Email
+            </span>
+            <p class="text-dark">{{ staffData.email || "-" }}</p>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="d-inline-flex align-items-center">
+              <i class="ti ti-phone me-2"></i>
+              Mobile
+            </span>
+            <p class="text-dark">
+              {{
+                staffData.phone
+                  ? staffData.countryCode
+                    ? `(${staffData.countryCode}) ${staffData.phone}`
+                    : staffData.phone
+                  : "-"
+              }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-8">
+      <div class="card rounded-0 border-0">
+        <div
+          class="card-header border-0 rounded-0 bg-light d-flex align-items-center"
+        >
+          <h6>Basic information</h6>
+        </div>
+        <div class="card-body pb-0">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Firstname</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.firstname || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Lastname</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.lastname || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Roles</p>
+                <span class="text-gray-900 fs-13">
+                  {{
+                    staffData.roleName?.length
+                      ? staffData.roleName.join(", ")
+                      : "-"
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Service Area</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.serviceAreasNameList?.length
+                    ? staffData.serviceAreasNameList.join(", ")
+                    : "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Business Unit</p>
+                <span class="text-gray-900 fs-13">
+                  {{
+                    staffData.businessUnitNamesList?.length
+                      ? staffData.businessUnitNamesList.join(", ")
+                      : "-"
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Team</p>
+                <span class="text-gray-900 fs-13">
+                  {{
+                    staffData.teamNameList?.length
+                      ? staffData.teamNameList.join(", ")
+                      : "-"
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Parent Staff</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.parentstaffname || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Agent</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.agentName || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">HRMS ID</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.hrmsId || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Branch Name</p>
+                <span class="text-gray-900 fs-13">{{
+                  staffData.branchName || "-"
+                }}</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <p class="fs-13 mb-2">Status</p>
+                <span
+                  class="badge table-badge"
+                  [ngClass]="{
+                    'bg-success':
+                      staffData.status === 'ACTIVE' ||
+                      staffData.status === 'Active',
+                    'bg-danger':
+                      staffData.status === 'INACTIVE' ||
+                      staffData.status === 'Inactive' ||
+                      staffData.status === 'TERMINATED' ||
+                      staffData.status === 'Terminated',
+                  }"
+                >
+                  {{ staffData.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="isStaffWalletShow">
+  <app-staff-wallet-ledger
+    [bankList]="bankList"
+    [currency]="currency"
+    [staffDetails]="staffData"
+  ></app-staff-wallet-ledger
+></ng-container>
+
+<ng-container *ngIf="isStaffReceiptDataShow">
+  <app-staff-receipt [selectedStaff]="staffData"></app-staff-receipt>
+</ng-container>
+
+<div
+  class="modal fade"
+  id="change-password"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <app-change-password [selectedStaff]="staffData"></app-change-password>
+  </div>
+</div>

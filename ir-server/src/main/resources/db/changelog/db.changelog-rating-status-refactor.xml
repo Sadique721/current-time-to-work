@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- =========================================================================
+         RATING STATUS REFACTOR & TIME FIELD TYPE MIGRATION
+         Date: 2026-06-19
+         Summary:
+           1. Migrate start_time / end_time from VARCHAR to DATETIME on all three CDR tables
+           2. Drop duration_seconds from sms_rated_cdr (SMS billing is event-count only)
+           3. Split rated_summary.total_calls_or_total_sms → total_calls + total_sms
+           4. Add total_sessions column to rated_summary (for USAGE CDRs)
+           5. Add zone_name column to rated_summary
+           6. Add rating_type column to rated_summary
+           7. Add missing columns to usage_rated_cdr (total_usage / upload / download / is_tap_out_generated / imsi / msisdn / imei / tap_file_record_id)
+    ========================================================================= -->
+
+
+    <!-- =========================================================
+         1a. voice_rated_cdr — migrate start_time to DATETIME
+    ========================================================= -->
+    <changeSet id="voice-cdr-start-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="voice_rated_cdr"/>
+                <columnExists tableName="voice_rated_cdr" columnName="start_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="voice_rated_cdr"
+                        columnName="start_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert voice_rated_cdr.start_time from VARCHAR to DATETIME for correct billing date bucketing.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         1b. voice_rated_cdr — migrate end_time to DATETIME
+    ========================================================= -->
+    <changeSet id="voice-cdr-end-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="voice_rated_cdr"/>
+                <columnExists tableName="voice_rated_cdr" columnName="end_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="voice_rated_cdr"
+                        columnName="end_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert voice_rated_cdr.end_time from VARCHAR to DATETIME.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         2a. sms_rated_cdr — migrate start_time to DATETIME
+    ========================================================= -->
+    <changeSet id="sms-cdr-start-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="sms_rated_cdr"/>
+                <columnExists tableName="sms_rated_cdr" columnName="start_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="sms_rated_cdr"
+                        columnName="start_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert sms_rated_cdr.start_time from VARCHAR to DATETIME for correct billing date bucketing.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         2b. sms_rated_cdr — migrate end_time to DATETIME
+    ========================================================= -->
+    <changeSet id="sms-cdr-end-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="sms_rated_cdr"/>
+                <columnExists tableName="sms_rated_cdr" columnName="end_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="sms_rated_cdr"
+                        columnName="end_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert sms_rated_cdr.end_time from VARCHAR to DATETIME.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         2c. sms_rated_cdr — drop duration_seconds
+             SMS billing unit is message count (event_nos), not duration.
+             The column is misleading and always stored zero.
+    ========================================================= -->
+    <changeSet id="sms-cdr-drop-duration-seconds" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="sms_rated_cdr"/>
+                <columnExists tableName="sms_rated_cdr" columnName="duration_seconds"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="sms_rated_cdr" columnName="duration_seconds"/>
+        <comment>Remove duration_seconds from sms_rated_cdr — SMS billing uses event_nos, not duration.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3a. usage_rated_cdr — migrate start_time to DATETIME
+    ========================================================= -->
+    <changeSet id="usage-cdr-start-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <columnExists tableName="usage_rated_cdr" columnName="start_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="usage_rated_cdr"
+                        columnName="start_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert usage_rated_cdr.start_time from VARCHAR to DATETIME for correct billing date bucketing.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3b. usage_rated_cdr — migrate end_time to DATETIME
+    ========================================================= -->
+    <changeSet id="usage-cdr-end-time-to-datetime" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <columnExists tableName="usage_rated_cdr" columnName="end_time"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="usage_rated_cdr"
+                        columnName="end_time"
+                        newDataType="DATETIME"/>
+        <comment>Convert usage_rated_cdr.end_time from VARCHAR to DATETIME.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3c. usage_rated_cdr — rename usage_amount → total_usage
+             Entity field is totalUsage (was previously usageAmount).
+    ========================================================= -->
+    <changeSet id="usage-cdr-rename-usage-amount-to-total-usage" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <columnExists tableName="usage_rated_cdr" columnName="usage_amount"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="total_usage"/>
+                </not>
+            </and>
+        </preConditions>
+        <renameColumn tableName="usage_rated_cdr"
+                      oldColumnName="usage_amount"
+                      newColumnName="total_usage"
+                      columnDataType="DECIMAL(19,4)"/>
+        <comment>Rename usage_amount to total_usage to align with entity field name totalUsage.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3d. usage_rated_cdr — add upload_usage column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-upload-usage" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="upload_usage"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="upload_usage" type="DECIMAL(19,4)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add upload_usage to usage_rated_cdr for granular data volume tracking.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3e. usage_rated_cdr — add download_usage column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-download-usage" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="download_usage"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="download_usage" type="DECIMAL(19,4)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add download_usage to usage_rated_cdr for granular data volume tracking.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3f. usage_rated_cdr — add imsi column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-imsi" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="imsi"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="imsi" type="VARCHAR(15)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add imsi to usage_rated_cdr for roaming subscriber identification.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3g. usage_rated_cdr — add msisdn column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-msisdn" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="msisdn"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="msisdn" type="VARCHAR(15)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add msisdn to usage_rated_cdr for roaming subscriber identification.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3h. usage_rated_cdr — add imei column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-imei" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="imei"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="imei" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add imei to usage_rated_cdr for device identification.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3i. usage_rated_cdr — add is_tap_out_generated column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-is-tap-out-generated" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="is_tap_out_generated"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="is_tap_out_generated" type="BIT(1)" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add is_tap_out_generated flag to usage_rated_cdr to track TAP OUT file generation per CDR.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         3j. usage_rated_cdr — add tap_file_record_id FK column
+    ========================================================= -->
+    <changeSet id="usage-cdr-add-tap-file-record-id" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="tap_file_record_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="tap_file_record_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add tap_file_record_id FK to usage_rated_cdr to link to the originating TAP file record.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4a. rated_summary — rename total_calls_or_total_sms → total_calls
+             Re-split: the column was previously renamed from total_calls → total_calls_or_total_sms.
+             Now we restore the dedicated total_calls column and add separate total_sms/total_sessions.
+    ========================================================= -->
+    <changeSet id="rated-summary-split-total-calls-from-combined" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <columnExists tableName="rated_summary" columnName="total_calls_or_total_sms"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="total_calls"/>
+                </not>
+            </and>
+        </preConditions>
+        <renameColumn tableName="rated_summary"
+                      oldColumnName="total_calls_or_total_sms"
+                      newColumnName="total_calls"
+                      columnDataType="BIGINT"/>
+        <comment>Rename total_calls_or_total_sms back to total_calls — dedicated per-type columns replace the combined column.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4b. rated_summary — drop NOT NULL on total_calls
+             total_calls is NULL for SMS and USAGE summary rows.
+    ========================================================= -->
+    <changeSet id="rated-summary-total-calls-drop-not-null" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <columnExists tableName="rated_summary" columnName="total_calls"/>
+            </and>
+        </preConditions>
+        <dropNotNullConstraint tableName="rated_summary"
+                               columnName="total_calls"
+                               columnDataType="BIGINT"/>
+        <comment>Allow total_calls to be NULL for SMS and USAGE summary rows.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4c. rated_summary — add total_sms column
+             SUM(event_nos) from SMS CDRs. NULL for VOICE/USAGE rows.
+    ========================================================= -->
+    <changeSet id="rated-summary-add-total-sms" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="total_sms"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="total_sms" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add total_sms to rated_summary — SUM(event_nos) for SMS CDR rows; NULL for VOICE/USAGE rows.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4d. rated_summary — migrate existing SMS data to total_sms
+             For any existing rows where service_type = 'SMS',
+             move total_calls value into total_sms and null out total_calls.
+    ========================================================= -->
+    <changeSet id="rated-summary-migrate-sms-data-to-total-sms" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <columnExists tableName="rated_summary" columnName="total_calls"/>
+                <columnExists tableName="rated_summary" columnName="total_sms"/>
+            </and>
+        </preConditions>
+        <update tableName="rated_summary">
+            <column name="total_sms" valueComputed="total_calls"/>
+            <where>service_type = 'SMS' AND total_sms IS NULL AND total_calls IS NOT NULL</where>
+        </update>
+        <update tableName="rated_summary">
+            <column name="total_calls" value="null"/>
+            <where>service_type = 'SMS'</where>
+        </update>
+        <comment>Backfill total_sms from total_calls for SMS rows; clear total_calls for SMS rows.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4e. rated_summary — add total_sessions column
+             COUNT of USAGE CDRs in the summary group. NULL for VOICE/SMS rows.
+    ========================================================= -->
+    <changeSet id="rated-summary-add-total-sessions" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="total_sessions"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="total_sessions" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add total_sessions to rated_summary — COUNT of USAGE CDR sessions per group; NULL for VOICE/SMS rows.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4f. rated_summary — add zone_name column
+             Populated only for ZONE_DESTINATION_BASED rating path.
+    ========================================================= -->
+    <changeSet id="rated-summary-add-zone-name" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="zone_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add zone_name to rated_summary — populated for ZONE_DESTINATION_BASED rating; NULL for prefix-based rating.</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4g. rated_summary — add rating_type column
+             Identifies the rating path: SOURCE_DESTINATION_BASED | DESTINATION_BASED | ZONE_DESTINATION_BASED
+    ========================================================= -->
+    <changeSet id="rated-summary-add-rating-type" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="rating_type"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="rating_type" type="VARCHAR(30)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add rating_type to rated_summary — records which rating path produced this summary row (SOURCE_DESTINATION_BASED, DESTINATION_BASED, ZONE_DESTINATION_BASED).</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4h. rated_summary — drop NOT NULL from total_duration
+             total_duration is only meaningful for VOICE rows; SMS/USAGE rows have NULL.
+    ========================================================= -->
+    <changeSet id="rated-summary-total-duration-drop-not-null" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <columnExists tableName="rated_summary" columnName="total_duration"/>
+            </and>
+        </preConditions>
+        <dropNotNullConstraint tableName="rated_summary"
+                               columnName="total_duration"
+                               columnDataType="DECIMAL(10,2)"/>
+        <comment>Allow total_duration to be NULL for SMS and USAGE summary rows (duration is only relevant for VOICE).</comment>
+    </changeSet>
+
+    <!-- =========================================================
+         4i. rated_summary — set service_type NOT NULL
+             service_type is always required to distinguish VOICE/SMS/USAGE rows.
+    ========================================================= -->
+    <changeSet id="rated-summary-service-type-not-null" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <columnExists tableName="rated_summary" columnName="service_type"/>
+            </and>
+        </preConditions>
+        <!-- Ensure no NULLs before enforcing the constraint -->
+        <update tableName="rated_summary">
+            <column name="service_type" value="VOICE"/>
+            <where>service_type IS NULL</where>
+        </update>
+        <addNotNullConstraint tableName="rated_summary"
+                              columnName="service_type"
+                              columnDataType="VARCHAR(255)"/>
+        <comment>Enforce NOT NULL on rated_summary.service_type — backfills any existing NULLs with VOICE.</comment>
+    </changeSet>
+
+</databaseChangeLog>

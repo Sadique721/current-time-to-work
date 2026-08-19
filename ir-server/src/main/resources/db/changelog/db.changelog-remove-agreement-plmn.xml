@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="remove-home-plmn-from-agreements" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="home_plmn"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="home_plmn"/>
+    </changeSet>
+
+    <changeSet id="remove-visitor-plmn-from-agreements" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <and>
+                <tableExists tableName="agreements"/>
+                <columnExists tableName="agreements" columnName="visitor_plmn"/>
+            </and>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="visitor_plmn"/>
+    </changeSet>
+
+    <changeSet id="add-total-usage-bytes-to-usage-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <not>
+                <columnExists tableName="usage_rated_cdr" columnName="total_usage_bytes"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="total_usage_bytes" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

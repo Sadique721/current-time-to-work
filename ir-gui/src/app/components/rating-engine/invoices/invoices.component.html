@@ -1,0 +1,231 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Invoice Records</h4>
+      <h6>All generated billing invoices for agreements</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        <i class="ti ti-chevron-up"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Invoices Table Card -->
+<div class="card table-list-card">
+  <!-- Card Header: Filters -->
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <!-- Left side: Filter inputs -->
+    <div class="search-set d-flex align-items-center flex-wrap gap-2">
+      <!-- Search Term: Agreement Code -->
+      <div class="search-input">
+        <custom-input
+          id="invoiceSearchTermFilter"
+          [formControlRef]="filterSearchTerm"
+          type="text"
+          placeholder="Search by Agreement Code"
+        ></custom-input>
+      </div>
+
+      <!-- Status: dropdown -->
+      <div class="search-input ms-2 search-custom-select">
+        <custom-select
+          [formControlRef]="filterStatus"
+          [options]="statusOptions"
+          optionValue="value"
+          optionLabel="label"
+          [filter]="false"
+          
+          placeholder="Status"
+        ></custom-select>
+      </div>
+
+      <!-- Billing Cycle Start From -->
+      <custom-date
+        [formControlRef]="schedulingForm | getControl: 'startDate'"
+        [showTime]="false"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [timeOnly]="false"
+        [placeholder]="'Start date'"
+        [dateFormat]="'yy-mm-dd'"
+        [hourFormat]="'24'"
+        appendTo="body"
+        class="ms-2"
+      ></custom-date>
+
+      <!-- Billing Cycle Start To -->
+      <custom-date
+        [formControlRef]="schedulingForm | getControl: 'endDate'"
+        [showTime]="false"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        [timeOnly]="false"
+        [placeholder]="'End date'"
+        [dateFormat]="'yy-mm-dd'"
+        [hourFormat]="'24'"
+        appendTo="body"
+        class="ms-2"
+      ></custom-date>
+
+      <!-- Agreement ID -->
+      <div class="search-input ms-2">
+        <custom-input
+          id="invoiceAgreementIdFilter"
+          [formControlRef]="filterAgreementId"
+          type="number"
+          placeholder="Agreement ID"
+        ></custom-input>
+      </div>
+
+      <button
+        class="btn btn-primary ms-2"
+        id="invoiceSearchBtn"
+        (click)="searchData()"
+      >
+        <i class="ti ti-search me-1"></i>Search
+      </button>
+      <button
+        class="btn btn-outline-secondary ms-2"
+        id="invoiceClearBtn"
+        (click)="clearSearch()"
+      >
+        <i class="ti ti-x me-1"></i>Clear
+      </button>
+    </div>
+
+    <!-- Right side: record count -->
+    <div class="d-flex align-items-center gap-2 text-muted fs-13">
+      <i class="ti ti-list-details"></i>
+      <span>Showing {{ totalData }} invoice(s)</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Invoice Number</th>
+            <th>Agreement</th>
+            <th>Billing Start</th>
+            <th>Billing End</th>
+            <th>Status</th>
+            <th class="text-end">Customer Total</th>
+            <th class="text-end">Vendor Total</th>
+            <th class="text-end">Net Amount</th>
+            <th>Net Payable By</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of tableData; track row.invoiceId; let index = $index) {
+            <tr>
+              <!-- Serial number -->
+              <td>{{ paginationSkip + index + 1 }}</td>
+
+              <!-- Invoice ID -->
+              <td>
+                <span class="fw-medium text-primary">{{ row.invoiceNumber }}</span>
+              </td>
+
+              <!-- Agreement Code -->
+              <td>
+                <span class="text-primary fw-medium">{{
+                  row.agreementCode
+                }}</span>
+              </td>
+
+              <!-- Billing Cycle Start -->
+              <td class="text-nowrap">
+                {{ row.billingCycleStart | date: "dd-MMM-yyyy" }}
+              </td>
+
+              <!-- Billing Cycle End -->
+              <td class="text-nowrap">
+                {{ row.billingCycleEnd | date: "dd-MMM-yyyy" }}
+              </td>
+
+              <!-- Status Badge -->
+              <td>
+                <span class="badge table-badge {{ statusBadgeClass(row.status) }}">
+                  {{ toLabel(row.status) }}
+                </span>
+              </td>
+
+              <!-- Customer Total -->
+              <td class="text-end text-nowrap">
+                {{ row.customerTotal != null ? (row.customerTotal | number: "1.2-2") : '-' }}
+              </td>
+
+              <!-- Vendor Total -->
+              <td class="text-end text-nowrap">
+                {{ row.vendorTotal != null ? (row.vendorTotal | number: "1.2-2") : '-' }}
+              </td>
+
+              <!-- Net Amount -->
+              <td class="text-end text-nowrap fw-semibold">
+                {{ row.netAmount != null ? (row.netAmount | number: "1.2-2") : '-' }}
+              </td>
+
+              <!-- Net Payable By -->
+              <td>
+                <span
+                  class="badge table-badge"
+                  [ngClass]="{
+                    'bg-primary': row.netPayableBy === 'CUSTOMER',
+                    'bg-success': row.netPayableBy === 'HOST'
+                  }"
+                >
+                  {{ toLabel(row.netPayableBy) }}
+                </span>
+              </td>
+
+              <!-- Action: Download -->
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                  [disabled]="!row.pdfFilePath"
+                  [matTooltip]="
+                    row.pdfFilePath
+                      ? 'Download Invoice PDF'
+                      : 'PDF not available'
+                  "
+                  matTooltipPosition="above"
+                  (click)="downloadInvoice(row)"
+                >
+                  <i class="ti ti-download me-1"></i>Download
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (tableData.length === 0) {
+            <tr>
+              <td colspan="11">
+                <h5 class="no-record">No invoices found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination — same shared component used across the whole Rating Engine -->
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

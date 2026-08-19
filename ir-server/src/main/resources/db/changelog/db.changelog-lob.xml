@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Add line_of_business column to agreements, partners, rate_packages tables.
+
+        Purpose:
+          LineOfBusiness separates the two main billing flows in the system:
+            - INTERCONNECT : Kafka CDR flow → prefix-based RadixTrie rating → rated_cdr → rated_summary → Invoice
+            - ROAMING      : TAP file flow  → zone-based ZonePrefixTrie rating → roaming_cdrs → roaming_rated_summary → TAP OUT file
+
+          All existing rows default to INTERCONNECT to preserve backward compatibility.
+
+        Also adds ZONE to rate_package_type enum:
+          - DESTINATION_BASED       : used by INTERCONNECT — destination prefix RadixTrie lookup
+          - SOURCE_DESTINATION_BASED: used by INTERCONNECT — source+destination prefix RadixTrie lookup
+          - ZONE                    : used by ROAMING      — visitedPlmn ZonePrefixTrie lookup
+    -->
+
+    <!-- 1. Add line_of_business to agreements table -->
+    <changeSet id="lob-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'agreements'
+                AND COLUMN_NAME = 'line_of_business'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE agreements
+            ADD COLUMN line_of_business ENUM('INTERCONNECT', 'ROAMING') NOT NULL DEFAULT 'INTERCONNECT'
+            COMMENT 'Separates billing flow: INTERCONNECT (Kafka CDR) or ROAMING (TAP file)';
+        </sql>
+    </changeSet>
+
+    <!-- 2. Add index on agreements.line_of_business for fast filtering -->
+    <changeSet id="lob-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="agreements" indexName="idx_agreement_lob"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="agreements" indexName="idx_agreement_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 3. Add line_of_business to partners table -->
+    <changeSet id="lob-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'partners'
+                AND COLUMN_NAME = 'line_of_business'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE partners
+            ADD COLUMN line_of_business ENUM('INTERCONNECT', 'ROAMING') NOT NULL DEFAULT 'INTERCONNECT'
+            COMMENT 'Determines rating flow for this partner: INTERCONNECT uses prefix-based rating, ROAMING uses zone-based rating';
+        </sql>
+    </changeSet>
+
+    <!-- 4. Add index on partners.line_of_business -->
+    <changeSet id="lob-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="partners" indexName="idx_partner_lob"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="partners" indexName="idx_partner_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 5. Add line_of_business to rate_packages table -->
+    <changeSet id="lob-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'rate_packages'
+                AND COLUMN_NAME = 'line_of_business'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE rate_packages
+            ADD COLUMN line_of_business ENUM('INTERCONNECT', 'ROAMING') NOT NULL DEFAULT 'INTERCONNECT'
+            COMMENT 'Guards which packages are eligible per flow: INTERCONNECT uses DESTINATION_BASED/SOURCE_DESTINATION_BASED, ROAMING uses ZONE';
+        </sql>
+    </changeSet>
+
+    <!-- 6. Add index on rate_packages.line_of_business -->
+    <changeSet id="lob-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="rate_packages" indexName="idx_rate_package_lob"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="rate_packages" indexName="idx_rate_package_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 7. Add ZONE to rate_package_type enum in rate_packages table
+         ZONE is used exclusively for ROAMING line of business.
+         It enables visitedPlmn-based ZonePrefixTrie lookup instead of E.164 prefix RadixTrie lookup. -->
+    <changeSet id="lob-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'rate_packages'
+                AND COLUMN_NAME = 'rate_package_type'
+                AND COLUMN_TYPE LIKE '%ZONE%'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE rate_packages
+            MODIFY COLUMN rate_package_type
+            ENUM('DESTINATION_BASED', 'SOURCE_DESTINATION_BASED', 'ZONE') NOT NULL;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

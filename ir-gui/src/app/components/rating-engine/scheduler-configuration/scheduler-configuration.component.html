@@ -1,0 +1,281 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Scheduler Configuration</h4>
+      <h6>Manage the rating engine scheduler settings</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        <i class="ti ti-chevron-up"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Latest Status Card -->
+<div class="card table-list-card mb-4">
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <h5 class="fw-bold mb-0">Latest Scheduler Status</h5>
+      <span *ngIf="latestStatus" class="badge table-badge" [ngClass]="{
+          'bg-warning': latestStatus.status === 'PENDING',
+          'bg-success': latestStatus.status === 'SUCCESS',
+          'bg-danger': latestStatus.status === 'FAILED',
+          'bg-info': latestStatus.status === 'IN_PROGRESS'
+        }">
+        {{ latestStatus.status }}
+      </span>
+      <span *ngIf="statusError || (!latestStatus && !isStatusLoading)" class="badge table-badge bg-secondary">
+        Status Unavailable
+      </span>
+    </div>
+    <div class="mb-0 d-flex align-items-center">
+      <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2" (click)="fetchLatestStatus()" [disabled]="isStatusLoading">
+        <i class="ti ti-refresh" [class.fa-spin]="isStatusLoading"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body p-4">
+    <div *ngIf="isStatusLoading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isStatusLoading && (statusError || !latestStatus)" class="text-center py-4 text-muted">
+      Status is currently unavailable or there have been no recent runs.
+    </div>
+
+    <div *ngIf="!isStatusLoading && !statusError && latestStatus" class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <label class="form-label fw-semibold text-muted mb-1">Last Run Time</label>
+        <div class="fs-14 fw-medium text-dark">{{ latestStatus.lastSchedulerRunTime ? (latestStatus.lastSchedulerRunTime | date:'dd-MMM-yyyy HH:mm') : 'N/A' }}</div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <label class="form-label fw-semibold text-muted mb-1">Next Start Time</label>
+        <div class="fs-14 fw-medium text-dark">{{ latestStatus.nextSchedulerStartTime ? (latestStatus.nextSchedulerStartTime | date:'dd-MMM-yyyy HH:mm') : 'N/A' }}</div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <label class="form-label fw-semibold text-muted mb-1">Targeted CDR Start</label>
+        <div class="fs-14 fw-medium text-dark">{{ latestStatus.targetedRatedCdrStartTime ? (latestStatus.targetedRatedCdrStartTime | date:'dd-MMM-yyyy HH:mm') : 'N/A' }}</div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <label class="form-label fw-semibold text-muted mb-1">Targeted CDR End</label>
+        <div class="fs-14 fw-medium text-dark">{{ latestStatus.targetedRatedCdrEndTime ? (latestStatus.targetedRatedCdrEndTime | date:'dd-MMM-yyyy HH:mm') : 'N/A' }}</div>
+      </div>
+      <!-- <div class="col-lg-4 col-md-6">
+        <label class="form-label fw-semibold text-muted mb-1">Created At</label>
+        <div class="fs-14 fw-medium text-dark">{{ latestStatus.createdAt ? (latestStatus.createdAt | date:'dd-MMM-yyyy HH:mm') : 'N/A' }}</div>
+      </div> -->
+    </div>
+  </div>
+</div>
+
+<!-- Main Card -->
+<div class="card table-list-card">
+
+  <!-- Card Header: Status label + badge + toggle, all on one clean line -->
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+
+    <div class="d-flex align-items-center gap-3">
+      <!-- Label -->
+      <h5 class="fw-bold mb-0">Scheduler Status</h5>
+
+      <!-- Status Badge -->
+      <span
+        class="badge table-badge"
+        [ngClass]="{ 'bg-success': isActive, 'bg-danger': !isActive }"
+      >
+        {{ isActive ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+
+    <!-- Toggle Switch (right-aligned) -->
+    <div
+      class="form-check form-switch mb-0 d-flex align-items-center"
+      style="gap: 0.5rem;"
+      [matTooltip]="isToggleDisabled ? 'Save a configuration first before activating the scheduler' : ''"
+      matTooltipPosition="above"
+    >
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        id="schedulerToggle"
+        [checked]="isActive"
+        (change)="toggleActive()"
+        [disabled]="isToggleDisabled || isToggling"
+        [style.cursor]="isToggleDisabled ? 'not-allowed' : 'pointer'"
+        style="width: 2.8em; height: 1.4em;"
+      />
+      <label
+        class="form-check-label fw-medium fs-13 mb-0"
+        for="schedulerToggle"
+        [style.cursor]="isToggleDisabled ? 'not-allowed' : 'pointer'"
+        [style.opacity]="isToggleDisabled ? '0.5' : '1'"
+      >
+        {{ isActive ? 'Turn Off' : 'Turn On' }}
+      </label>
+    </div>
+
+  </div>
+
+  <!-- Form Body — always visible; shows previous data or empty fields -->
+  <div class="card-body p-4">
+    <form [formGroup]="schedulerForm" (ngSubmit)="saveConfig()">
+
+      <div class="row g-4">
+
+        <!-- 1. Start Timestamp -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="startTimestamp">
+            Start Timestamp <span class="text-danger">*</span>
+          </label>
+          <input
+            id="startTimestamp"
+            type="datetime-local"
+            class="form-control"
+            formControlName="startTimestamp"
+            [min]="minStartTimestamp"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('startTimestamp')?.touched &&
+                schedulerForm.get('startTimestamp')?.invalid
+            }"
+          />
+          <div class="invalid-feedback">Start timestamp is required.</div>
+        </div>
+
+        <!-- 2. Interval Type -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="intervalType">
+            Interval Type <span class="text-danger">*</span>
+          </label>
+          <select
+            id="intervalType"
+            class="form-select"
+            formControlName="intervalType"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('intervalType')?.touched &&
+                schedulerForm.get('intervalType')?.invalid
+            }"
+          >
+            <option value="HOUR">Hour</option>
+            <option value="DAY">Day</option>
+            <option value="WEEK">Week</option>
+            <option value="MONTH">Month</option>
+          </select>
+          <div class="invalid-feedback">Interval type is required.</div>
+        </div>
+
+        <!-- 3. Interval Value -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="intervalValue">
+            Interval Value <span class="text-danger">*</span>
+          </label>
+          <input
+            id="intervalValue"
+            type="number"
+            class="form-control"
+            formControlName="intervalValue"
+            min="1"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('intervalValue')?.touched &&
+                schedulerForm.get('intervalValue')?.invalid
+            }"
+          />
+          <div class="invalid-feedback">A valid interval value (≥1) is required.</div>
+        </div>
+
+        <!-- 4. Targeted Timestamp -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="targetedTimestamp">
+            Targeted Timestamp <span class="text-danger">*</span>
+          </label>
+          <input
+            id="targetedTimestamp"
+            type="datetime-local"
+            class="form-control"
+            formControlName="targetedTimestamp"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('targetedTimestamp')?.touched &&
+                schedulerForm.get('targetedTimestamp')?.invalid
+            }"
+          />
+          <div class="invalid-feedback">Targeted timestamp is required.</div>
+        </div>
+
+        <!-- 5. Targeted Interval Type -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="targetedIntervalType">
+            Targeted Interval Type <span class="text-danger">*</span>
+          </label>
+          <select
+            id="targetedIntervalType"
+            class="form-select"
+            formControlName="targetedIntervalType"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('targetedIntervalType')?.touched &&
+                schedulerForm.get('targetedIntervalType')?.invalid
+            }"
+          >
+            <option value="HOUR">Hour</option>
+            <option value="DAY">Day</option>
+            <option value="WEEK">Week</option>
+            <option value="MONTH">Month</option>
+          </select>
+          <div class="invalid-feedback">Targeted interval type is required.</div>
+        </div>
+
+        <!-- 6. Targeted Max Interval Value -->
+        <div class="col-lg-6">
+          <label class="form-label fw-semibold" for="targetedMaxIntervalValue">
+            Targeted Max Interval Value <span class="text-danger">*</span>
+          </label>
+          <input
+            id="targetedMaxIntervalValue"
+            type="number"
+            class="form-control"
+            formControlName="targetedMaxIntervalValue"
+            min="1"
+            [ngClass]="{
+              'is-invalid':
+                schedulerForm.get('targetedMaxIntervalValue')?.touched &&
+                schedulerForm.get('targetedMaxIntervalValue')?.invalid
+            }"
+          />
+          <div class="invalid-feedback">A valid max interval value (≥1) is required.</div>
+        </div>
+
+      </div>
+
+      <!-- Divider + Save Button -->
+      <div class="d-flex justify-content-end pt-4 mt-3 border-top">
+        <button
+          type="submit"
+          class="btn btn-primary fs-13 fw-medium p-2 px-4"
+          [disabled]="schedulerForm.invalid"
+        >
+          <i class="ti ti-device-floppy me-2"></i>Save Configuration
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+
+</div>

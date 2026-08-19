@@ -1,0 +1,42 @@
+<div class="mb-3 col">
+  <mat-label class="col-form-label col-lg-2">
+    {{ label }}
+    <span
+      *ngIf="formControlRef.hasValidator(isControlRequired)"
+      class="text-danger"
+      >*</span
+    >
+  </mat-label>
+
+  <div class="input-group input-group-sm">
+    <p-inputnumber
+      (keydown)="preventE($event)"
+      [useGrouping]="useGrouping"
+      [minFractionDigits]="minFractionDigits"
+      [maxFractionDigits]="maxFractionDigits"
+      [min]="min"
+      [max]="max"
+      [mode]="mode"
+      [formControl]="formControlRef"
+      [prefix]="prefix"
+      [suffix]="suffix"
+      [showButtons]="showButtons"
+      [step]="step"
+      [placeholder]="placeholder"
+      [locale]="locale"
+      [ngClass]="{
+        'ng-invalid ng-dirty':
+          formControlRef.hasValidator(isControlRequired) &&
+          formControlRef.invalid &&
+          formControlRef.touched,
+      }"
+    ></p-inputnumber>
+  </div>
+
+  <div
+    *ngIf="formControlRef.invalid && formControlRef.touched"
+    class="invalid-feedback-msg"
+  >
+    {{ getErrorMessage() }}
+  </div>
+</div>

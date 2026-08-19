@@ -1,0 +1,275 @@
+<div class="col" id="mvno-add-edit">
+  <div class="modal-header">
+    <div class="page-title">
+      <h4>{{ data?.id ? "Update " : "Create " }} MVNO</h4>
+    </div>
+
+    <div class="page-btn">
+      <button type="button" class="btn me-2 btn-secondary" (click)="onClose()">
+        <i class="feather icon-arrow-left me-2"></i>Back to List
+      </button>
+    </div>
+  </div>
+  <div class="modal-body pt-1">
+    <form class="col-lg-10" [formGroup]="mvnoFG">
+      <div class="form-group row mb-3">
+        <div class="col-md-12 ml-12">
+          <label class="profile-image-label">Profile Image</label>
+          <div
+            class="borderuploadphoto"
+            *ngIf="!profileImage"
+            style="
+              border: 1px solid black !important;
+              background: url(../../../../../assets/img/user.png);
+            "
+          >
+            <button
+              type="button"
+              class="upload_btn-profileimage"
+              style="border: none; width: 23%; height: 35px; padding: 5px"
+            >
+              <label for="upload-profileImage">
+                <i class="fa fa-camera"></i
+              ></label>
+              <input
+                type="file"
+                name="photo"
+                id="upload-profileImage"
+                (change)="onFileChangeUpload($event)"
+                accept=".jpg, .jpeg, .png"
+                maxlength="2097152"
+                style="display: none"
+              />
+            </button>
+          </div>
+
+          <div
+            class="borderuploadphoto"
+            *ngIf="profileImage"
+            style="
+                            border: 1px solid black !important;
+                            background: url('{{ profileImage }}');
+                          "
+          >
+            <button
+              *ngIf="profileImage"
+              type="button"
+              class="btn text-gray-9 fs-14 remove-image"
+              (click)="removeImage()"
+            >
+              <i class="ti ti-x"></i>
+            </button>
+            <button
+              type="button"
+              [ngClass]="{ 'margin-left-45': profileImage }"
+              class="upload_btn-profileimage"
+              style="border: none; width: 23%; height: 35px; padding: 5px"
+            >
+              <label for="upload-profileImage"
+                ><i class="fa fa-camera"></i
+              ></label>
+              <input
+                type="file"
+                name="photo"
+                id="upload-profileImage"
+                (change)="onFileChangeUpload($event)"
+                accept="image/*"
+                style="display: none"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-5">
+          <custom-input
+            label="Full Name"
+            [formControlRef]="mvnoFG | getControl: 'fullName'"
+          ></custom-input>
+        </div>
+        <div class="col-lg-5">
+          <custom-input
+            label="Name"
+            [formControlRef]="mvnoFG | getControl: 'name'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Username"
+            [formControlRef]="mvnoFG | getControl: 'username'"
+          ></custom-input>
+        </div>
+
+        <div
+          class="col-lg-5"
+          [ngClass]="{ 'display-row': !data?.id, 'display-block': data?.id }"
+        >
+          <custom-input
+            [ngClass]="{ 'input-90': !data?.id, 'input-100': data?.id }"
+            label="password"
+            errorMessage="Password must be 8–16 characters, include at least one uppercase letter, one lowercase letter, one number, and one special character."
+            [formControlRef]="mvnoFG | getControl: 'password'"
+            [type]="showPassword ? 'text' : 'password'"
+          ></custom-input>
+
+          <div class="password-icon" *ngIf="!data?.id">
+            <i
+              [ngClass]="showPassword ? 'ti ti-eye' : 'ti ti-eye-off'"
+              (click)="showPassword = !showPassword"
+            ></i>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Phone No."
+            [formControlRef]="mvnoFG | getControl: 'phone'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Email"
+            [formControlRef]="mvnoFG | getControl: 'email'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Suffix"
+            [formControlRef]="mvnoFG | getControl: 'suffix'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Log file"
+            [formControlRef]="mvnoFG | getControl: 'logfile'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Header"
+            [formControlRef]="mvnoFG | getControl: 'mvnoHeader'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Footer"
+            [formControlRef]="mvnoFG | getControl: 'mvnoFooter'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5 mt-3">
+          <custom-checkbox
+            label="2FAuth Enabled"
+            [formControlRef]="mvnoFG | getControl: 'isTwoFactorEnabled'"
+          ></custom-checkbox>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="2FAuth Type"
+            [options]="twofaType"
+            optionValue="value"
+            optionLabel="displayName"
+            [formControlRef]="mvnoFG | getControl: 'authEventName'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="Status"
+            [options]="statusOptions"
+            optionValue="label"
+            optionLabel="label"
+            [formControlRef]="mvnoFG | getControl: 'status'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="Roles"
+            [options]="roleList"
+            optionLabel="rolename"
+            optionValue="id"
+            [filter]="true"
+            filterBy="rolename"
+            [formControlRef]="mvnoFG | getControl: 'roleId'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-number-input
+            label="Payment Due Days"
+            [min]="0"
+            [formControlRef]="mvnoFG | getControl: 'mvnoPaymentDueDays'"
+          ></custom-number-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Address"
+            [formControlRef]="mvnoFG | getControl: 'address'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-number-input
+            label="Commission"
+            suffix="%"
+            [min]="1"
+            [formControlRef]="mvnoFG | getControl: 'ispCommissionPercentage'"
+          ></custom-number-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-select
+            label="ISP Bill Generation Day"
+            [options]="days"
+            optionLabel="label"
+            optionValue="label"
+            [filter]="true"
+            filterBy="label"
+            [formControlRef]="mvnoFG | getControl: 'ispBillDay'"
+          ></custom-select>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-input
+            label="Client Id"
+            [formControlRef]="mvnoFG | getControl: 'clientId'"
+          ></custom-input>
+        </div>
+
+        <div class="col-lg-5">
+          <custom-textarea
+            label="Description"
+            [rows]="3"
+            [formControlRef]="mvnoFG | getControl: 'description'"
+          ></custom-textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-md-12 card-body modal-footer row pt-3">
+    <button
+      type="button"
+      class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="onClose()"
+    >
+      Cancel
+    </button>
+    <button
+      class="btn btn-primary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="submit()"
+    >
+      {{ data && data?.id ? "Update" : "Save" }}
+    </button>
+  </div>
+</div>

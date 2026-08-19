@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Contexts:
+          efresh  – empty/fresh schema (first-time install, no tables exist)
+          partial – schema exists but this feature set is missing
+          full    – full re-run guard (all changesets are idempotent via preConditions)
+
+        All changesets use onFail="MARK_RAN" so they are safe to run in any context.
+        Column types use Liquibase database-independent aliases (BIGINT, VARCHAR, BOOLEAN, DATETIME).
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         1. tap_field_mappings  — master registry of all TAP ASN.1 field paths
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-01-create-tap-field-mappings"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_field_mappings"/></not>
+        </preConditions>
+
+        <createTable tableName="tap_field_mappings">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tap_field_mappings"/>
+            </column>
+            <!-- MOC | MTC | GPRS | SMS | SUPPL | CONTENT | null (global) -->
+            <column name="call_type" type="VARCHAR(20)"/>
+            <column name="field_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="asn_path" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- BCD_STRING | ASCII_STRING | INTEGER | DECIMAL | DATE_TIME -->
+            <column name="data_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="out_source_column" type="VARCHAR(100)"/>
+            <column name="in_target_column"  type="VARCHAR(100)"/>
+            <column name="default_value"     type="VARCHAR(255)"/>
+            <column name="is_mandatory" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <!-- BaseEntity audit columns -->
+            <column name="created_date"  type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         2. tap_profiles  — named profile templates
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-02-create-tap-profiles"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_profiles"/></not>
+        </preConditions>
+
+        <createTable tableName="tap_profiles">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tap_profiles"/>
+            </column>
+            <column name="profile_name" type="VARCHAR(100)">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="uk_tap_profile_name"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date"  type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         3. tap_profile_field_mappings  — intersection / override table
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-03-create-tap-profile-field-mappings"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profiles"/>
+                <tableExists tableName="tap_field_mappings"/>
+                <not><tableExists tableName="tap_profile_field_mappings"/></not>
+            </and>
+        </preConditions>
+
+        <createTable tableName="tap_profile_field_mappings">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tap_profile_field_mappings"/>
+            </column>
+            <column name="profile_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tap_field_mapping_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="custom_default_value"  type="VARCHAR(255)"/>
+            <column name="is_mandatory_override" type="BOOLEAN"/>
+            <column name="created_date"  type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="DATETIME"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="fk_tpfm_profile"
+                baseTableName="tap_profile_field_mappings" baseColumnNames="profile_id"
+                referencedTableName="tap_profiles"      referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                constraintName="fk_tpfm_field_mapping"
+                baseTableName="tap_profile_field_mappings" baseColumnNames="tap_field_mapping_id"
+                referencedTableName="tap_field_mappings"   referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addUniqueConstraint
+                constraintName="uk_profile_field_mapping"
+                tableName="tap_profile_field_mappings"
+                columnNames="profile_id, tap_field_mapping_id"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         4. tap_out_config — add tap_profile_id FK column
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-04-add-profile-id-to-tap-out-config"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_config"/>
+                <tableExists tableName="tap_profiles"/>
+                <not><columnExists tableName="tap_out_config" columnName="tap_profile_id"/></not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="tap_out_config">
+            <column name="tap_profile_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                constraintName="fk_tap_out_config_profile"
+                baseTableName="tap_out_config"  baseColumnNames="tap_profile_id"
+                referencedTableName="tap_profiles" referencedColumnNames="id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         5. Fix call_type column type: convert ENUM → VARCHAR(20) if needed.
+            Handles partial/full databases where the column was created as ENUM.
+            Fresh databases already get VARCHAR(20) from changeset 01.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-05-fix-call-type-varchar"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_field_mappings"/>
+                <columnExists tableName="tap_field_mappings" columnName="call_type"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_NAME   = 'tap_field_mappings'
+                      AND COLUMN_NAME  = 'call_type'
+                      AND DATA_TYPE    = 'enum'
+                      AND TABLE_SCHEMA = DATABASE()
+                </sqlCheck>
+            </and>
+        </preConditions>
+
+        <modifyDataType tableName="tap_field_mappings"
+                        columnName="call_type"
+                        newDataType="VARCHAR(20)"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Fix data_type column type: convert ENUM → VARCHAR(50) if needed.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-05b-fix-data-type-varchar"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_field_mappings"/>
+                <columnExists tableName="tap_field_mappings" columnName="data_type"/>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_NAME   = 'tap_field_mappings'
+                      AND COLUMN_NAME  = 'data_type'
+                      AND DATA_TYPE    = 'enum'
+                      AND TABLE_SCHEMA = DATABASE()
+                </sqlCheck>
+            </and>
+        </preConditions>
+
+        <modifyDataType tableName="tap_field_mappings"
+                        columnName="data_type"
+                        newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         6. Indexes for common query patterns
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-06-indexes"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_field_mappings"/>
+                <tableExists tableName="tap_profile_field_mappings"/>
+                <not><indexExists indexName="idx_tfm_call_type"/></not>
+            </and>
+        </preConditions>
+
+        <createIndex indexName="idx_tfm_call_type"
+                     tableName="tap_field_mappings">
+            <column name="call_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tpfm_profile_id"
+                     tableName="tap_profile_field_mappings">
+            <column name="profile_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tap_out_config_profile_id"
+                     tableName="tap_out_config">
+            <column name="tap_profile_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         7. Drop unique constraint on tap_profiles.profile_name
+            Soft-deleted rows block re-insertion; uniqueness is enforced at service level.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-07-drop-profile-name-unique" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profiles"/>
+                <indexExists indexName="uk_tap_profile_name" tableName="tap_profiles"/>
+            </and>
+        </preConditions>
+        <dropUniqueConstraint tableName="tap_profiles" constraintName="uk_tap_profile_name"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         8. Drop unique constraint on tap_profile_field_mappings (profile_id, tap_field_mapping_id)
+            Soft-deleted rows cause duplicate key violations on re-insert.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="tap-profiles-08-drop-profile-field-mapping-unique" author="system" context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_profile_field_mappings"/>
+                <indexExists indexName="uk_profile_field_mapping" tableName="tap_profile_field_mappings"/>
+            </and>
+        </preConditions>
+        <dropUniqueConstraint tableName="tap_profile_field_mappings" constraintName="uk_profile_field_mapping"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,75 @@
+<div class="mb-3 col">
+  <mat-label class="col-form-label col-lg-2">
+    {{ label }}
+    <span
+      *ngIf="
+        !hideRequiredMarker && formControlRef.hasValidator(isControlRequired)
+      "
+      class="text-danger"
+      >*</span
+    >
+  </mat-label>
+
+  <div class="input-group input-group-sm">
+    <input
+      [type]="canTogglePassword ? (showPassword ? 'text' : 'password') : type"
+      class="form-control"
+      [formControl]="formControlRef"
+      [placeholder]="placeholder"
+      [maxlength]="maxLength"
+      autocomplete="off"
+      (keydown.tab)="onKeydown($event)"
+      (blur)="onBlur($event)"
+      [ngClass]="{
+        'is-invalid':
+          formControlRef.hasValidator(isControlRequired) &&
+          formControlRef.invalid &&
+          (formControlRef.touched || formControlRef.dirty),
+      }"
+    />
+
+    <span *ngIf="suffixIcon && !canTogglePassword" class="input-group-text">
+      <i [class]="suffixIcon"></i>
+    </span>
+
+    <button
+      *ngIf="canTogglePassword"
+      class="btn btn-outline-secondary btn-sm"
+      type="button"
+      (click)="showPasswordChange.emit(!showPassword)"
+    >
+      <i [class]="showPassword ? 'ti ti-eye-off' : 'ti ti-eye'"></i>
+    </button>
+  </div>
+
+  <div
+    *ngIf="
+      !hideErrorMessage &&
+      formControlRef.invalid &&
+      (formControlRef.touched || formControlRef.dirty)
+    "
+    class="invalid-feedback-msg"
+  >
+    <ng-container *ngIf="formControlRef.hasError('required')">
+      {{ label }} is required
+    </ng-container>
+    <ng-container *ngIf="formControlRef.hasError('email')">
+      Please enter a valid email address
+    </ng-container>
+    <ng-container *ngIf="formControlRef.hasError('minlength')">
+      Minimum length not met
+    </ng-container>
+    <ng-container *ngIf="formControlRef.hasError('maxlength')">
+      Maximum length exceeded
+    </ng-container>
+    <ng-container
+      *ngIf="
+        !formControlRef.hasError('required') &&
+        !formControlRef.hasError('email') &&
+        errorMessage
+      "
+    >
+      {{ errorMessage }}
+    </ng-container>
+  </div>
+</div>

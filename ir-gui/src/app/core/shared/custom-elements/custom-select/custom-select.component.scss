@@ -1,0 +1,82 @@
+#custom-select {
+  .is-invalid-select {
+    border-color: #ff0000 !important;
+  }
+
+  :focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+  }
+
+  .is-invalid-select:not(:focus) {
+    box-shadow: none !important;
+  }
+
+  .form-select:not(.is-invalid-select) {
+    box-shadow: none !important;
+  }
+
+  .custom-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #000000;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .p-select:not(.p-disabled).p-focus {
+    border-color: #000000;
+  }
+
+  .selected-item-custom {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    padding-left: 2px;
+  }
+
+  .p-select-option-selected {
+    background-color: #797575;
+    color: unset;
+  }
+
+  .is-invalid-select:not(:focus) {
+    box-shadow: none !important;
+  }
+
+  .form-select:not(.is-invalid-select) {
+    box-shadow: none !important;
+  }
+
+  ::ng-deep(.p-placeholder) {
+    color: black !important;
+    opacity: 0.5;
+    display: flex !important;
+    height: 100% !important;
+    width: 100% !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+}
+
+
+.is-invalid-select {
+  border: 1px solid #ff0000 !important;
+  border-radius: 4px !important;
+}
+
+:host ::ng-deep .p-dropdown.is-invalid-select,
+:host ::ng-deep .p-multiselect.is-invalid-select {
+  border-color: #ff0000 !important;
+}
+
+.invalid-feedback-msg {
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 2px;
+}

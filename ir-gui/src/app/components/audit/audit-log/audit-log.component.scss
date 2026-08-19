@@ -1,0 +1,136 @@
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+
+    &:hover {
+      background: #FFB366;
+    }
+  }
+}
+
+.brand-table {
+  table {
+    margin-bottom: 0;
+
+    thead th {
+      font-weight: 600;
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px 8px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 12px 8px;
+      vertical-align: middle;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    &.datatable {
+      min-width: 100%;
+      border-collapse: collapse;
+    }
+  }
+}
+
+.action-table-data {
+  .edit-delete-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+
+      &:hover {
+        opacity: 0.7;
+      }
+
+      i {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+.no-record {
+  padding: 40px 20px;
+  margin: 0;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.search-set {
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch !important;
+
+    .search-input,
+    custom-date,
+    button {
+      width: 100%;
+    }
+  }
+}
+
+
+.card-header {
+  padding: 1rem;
+
+  @media (max-width: 576px) {
+    padding: 0.75rem;
+  }
+}
+
+.card-body {
+  padding: 1rem;
+
+  @media (max-width: 576px) {
+    padding: 0.75rem;
+  }
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .page-btn {
+      width: 100%;
+
+      p-floatlabel {
+        width: 100%;
+
+        p-select {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="add-usage-rated-cdr-table" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="usage_rated_cdr"/>
+            </not>
+        </preConditions>
+        <createTable tableName="usage_rated_cdr">
+            <column name="rated_cdr_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+            <!-- Standard Data Identifiers -->
+            <column name="subscriber_identity" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_point_name" type="VARCHAR(100)"/>
+
+            <column name="start_time" type="VARCHAR(50)"/>
+            <column name="end_time" type="VARCHAR(50)"/>
+            <column name="incoming_account_id" type="VARCHAR(50)"/>
+            <column name="outgoing_account_id" type="VARCHAR(50)"/>
+            <column name="source_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- USAGE specific fields -->
+            <column name="usage_amount" type="DECIMAL(19, 4)"/>
+            <column name="measurement_unit" type="VARCHAR(20)"/>
+
+            <!-- Standard Rating Fields (Incoming) -->
+            <column name="incoming_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="incoming_rate_package_id" type="BIGINT"/>
+            <column name="incoming_rate_package_name" type="VARCHAR(100)"/>
+            <column name="incoming_matched_source_prefix" type="VARCHAR(50)"/>
+            <column name="incoming_matched_destination_prefix" type="VARCHAR(50)"/>
+            <column name="incoming_total_cost" type="DECIMAL(10, 4)"/>
+            <column name="incoming_rate_detail_id" type="BIGINT"/>
+            <column name="incoming_is_source_destination_match" type="BOOLEAN"/>
+            <column name="incoming_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="incoming_rating_failure_reason" type="VARCHAR(255)"/>
+
+            <!-- Standard Rating Fields (Outgoing) -->
+            <column name="outgoing_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="outgoing_rate_package_id" type="BIGINT"/>
+            <column name="outgoing_rate_package_name" type="VARCHAR(100)"/>
+            <column name="outgoing_matched_source_prefix" type="VARCHAR(50)"/>
+            <column name="outgoing_matched_destination_prefix" type="VARCHAR(50)"/>
+            <column name="outgoing_total_cost" type="DECIMAL(10, 4)"/>
+            <column name="outgoing_rate_detail_id" type="BIGINT"/>
+            <column name="outgoing_is_source_destination_match" type="BOOLEAN"/>
+            <column name="outgoing_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="outgoing_rating_failure_reason" type="VARCHAR(255)"/>
+
+            <!-- Master Data references -->
+            <column name="service_type" type="ENUM('VOICE', 'SMS', 'USAGE')"/>
+            <column name="home_plmn" type="VARCHAR(20)"/>
+            <column name="visited_plmn" type="VARCHAR(20)"/>
+            <column name="line_of_business" type="ENUM('INTERCONNECT', 'ROAMING')">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="rated_at" type="TIMESTAMP"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="modified_date" type="TIMESTAMP"/>
+            <column name="is_summarized" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="deleted_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create indices for faster lookup and summarizing -->
+    <changeSet id="add-usage-rated-cdr-indices" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <not><indexExists tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_lob"/></not>
+                <not><indexExists tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_status"/></not>
+                <not><indexExists tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_summarized"/></not>
+            </and>
+        </preConditions>
+        <createIndex tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+        <createIndex tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_status">
+            <column name="incoming_rating_status"/>
+            <column name="outgoing_rating_status"/>
+        </createIndex>
+        <createIndex tableName="usage_rated_cdr" indexName="idx_usage_rated_cdr_summarized">
+            <column name="is_summarized"/>
+            <column name="rated_at"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

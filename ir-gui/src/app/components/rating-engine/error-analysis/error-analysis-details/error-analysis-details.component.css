@@ -1,0 +1,8 @@
+.ready-status-ready {
+  background-color: #e8f5e9;
+  border-color: #c8e6c9 !important;
+}
+.ready-status-not-ready {
+  background-color: #ffebee;
+  border-color: #ffcdd2 !important;
+}

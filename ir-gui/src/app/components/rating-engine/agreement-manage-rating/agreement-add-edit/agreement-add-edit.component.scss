@@ -1,0 +1,109 @@
+:host {
+  display: block;
+  width: 100%;
+
+  .card {
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+
+
+
+// ─── Account Selection List (Step 2) ─────────────────────────────────────────
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  .account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1.5px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+
+    &:hover {
+      border-color: var(--bs-primary, #4f52ba);
+      background: rgba(79, 82, 186, 0.04);
+    }
+
+    &.selected {
+      border-color: var(--bs-primary, #4f52ba);
+      background: rgba(79, 82, 186, 0.06);
+    }
+
+    .form-check-label {
+      cursor: pointer;
+    }
+  }
+}
+
+// ─── Tax Configuration Table — fix custom-select inside <td> ────────────────
+:host ::ng-deep .tax-config-table {
+  // Each row must not create a new stacking context that clips overlays
+  tr {
+    position: relative;
+  }
+
+  td {
+    overflow: visible !important;
+    position: relative;
+  }
+
+  // Strip the Bootstrap col/margin wrapper that custom-select adds
+  custom-select {
+    display: block;
+
+    > div#custom-select {
+      margin-bottom: 0 !important;
+      padding: 0 !important;
+      flex: unset !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    // Hide the empty label row when label=""
+    .add-newplus {
+      display: none !important;
+    }
+
+    // Ensure the panel opens above other rows
+    .p-select-overlay,
+    .p-select-panel {
+      z-index: 99999 !important;
+    }
+  }
+}
+
+// ─── Validation Styling for p-select ────────────────────────────────────────
+:host ::ng-deep {
+  .is-invalid-select {
+    .p-select {
+      border-color: #dc3545 !important;
+      
+      &:focus, &.p-focus {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+      }
+    }
+  }
+
+  .invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #dc3545;
+  }
+}

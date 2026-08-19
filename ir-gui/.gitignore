@@ -1,0 +1,63 @@
+# ##############################################################################
+# Angular & Node.js Git Ignore File
+# ##############################################################################
+
+# Dependency Directories
+node_modules/
+/node_modules
+jspm_packages/
+web_modules/
+
+# Angular Build & Cache Outputs
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out/
+/.angular/
+.angular/
+
+# Testing & Coverage
+/coverage/
+/.nyc_output/
+.nyc_output/
+*.log
+
+# Package Manager Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDEs, Editors & Workspaces
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+.project
+.classpath
+.cproject
+.settings/
+.factorypath
+*.launch
+.history/
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+ehthumbs.db
+Thumbs.db
+
+# Local Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+src/environments/environment.local.ts

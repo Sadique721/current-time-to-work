@@ -1,0 +1,22 @@
+# Backup git folders (Bitbucket repos)
+ir-server/.git_backup/
+ir-gui/.git_backup/
+
+# Build outputs
+ir-server/build/
+ir-server/.gradle/
+
+# Node modules
+ir-gui/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

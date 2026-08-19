@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <include file="db/changelog/db.changelog-initial.xml" />
+    <include file="db/changelog/db.changelog-add-deleted-at.xml" />
+    <include file="db/changelog/db.changelog-settlement-update.xml" />
+    <include file="db/changelog/db.changelog-priority-fallback.xml" />
+
+    <changeSet id="2" author="system">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM countries</sqlCheck>
+        </preConditions>
+        <loadData tableName="countries"
+                  file="classpath:db/data/countries.csv"
+                  separator=","
+                  encoding="UTF-8"
+                  relativeToChangelogFile="false">
+            <column name="name" type="STRING"/>
+            <column name="country_code" type="STRING"/>
+        </loadData>
+    </changeSet>
+
+    <include file="db/changelog/db.changelog-roaming.xml" />
+    <include file="db/changelog/db.changelog-lob.xml" />
+    <include file="db/changelog/db.changelog-zone.xml" />
+    <include file="db/changelog/db.changelog-roaming-cdr-redesign.xml" />
+    <include file="db/changelog/db.changelog-tap-out-sequence.xml" />
+    <include file="db/changelog/db.changelog-roaming-features.xml" />
+    <include file="db/changelog/db.changelog-missing-columns.xml" />
+    <include file="db/changelog/add_roaming_support_liquibase.xml" />
+    <include file="db/changelog/db.changelog-roaming-calltype-hplmn.xml" />
+    <include file="db/changelog/db.changelog-multi-country-tax.xml" />
+    <include file="db/changelog/db.changelog-tax-enhancements.xml" />
+    <include file="db/changelog/db.changelog-rated-cdr-tap-out-columns.xml" />
+    <include file="db/changelog/db.changelog-rpg-selection-type.xml" />
+    <include file="db/changelog/db.changelog-exchange-rate-scheduler.xml" />
+    <include file="db/changelog/db.changelog-add-iso-code.xml" />
+    <include file="db/changelog/db.changelog-tap-sftp-routing.xml" />
+    <include file="db/changelog/db.changelog-partner-sftp-columns.xml" />
+
+    <!-- Dynamic TAP Profile Field Mapping schemas -->
+    <include file="db/changelog/db.changelog-tap-profiles.xml" />
+
+    <!-- Add tap_profile_id FK to partners — required for ROAMING line of business -->
+    <include file="db/changelog/db.changelog-partner-tap-profile.xml" />
+
+    <!-- TAP profile groups — replaces direct tap_profile_id on partners -->
+    <include file="db/changelog/db.changelog-tap-profile-groups.xml" />
+
+
+    <!-- Add service_type to source_configuration and message_count to rated_cdr for SMS support -->
+    <include file="db/changelog/db.changelog-sms-support.xml" />
+    <include file="db/changelog/db.changelog-rename-rated-cdr.xml" />
+    <include file="db/changelog/db.changelog-sms-rated-cdr.xml" />
+    <include file="db/changelog/db.changelog-usage-rated-cdr.xml" />
+    <include file="db/changelog/db.changelog-remove-lob-calltype.xml" />
+    <include file="db/changelog/db.changelog-usage-updates.xml" />
+    <include file="db/changelog/db.changelog-calltype-migration.xml" />
+    <include file="db/changelog/db.changelog-rated-summary-total-data-volume.xml" />
+    <include file="db/changelog/db.changelog-rated-cdr-roaming-fields.xml" />
+    <include file="db/changelog/db.changelog-duration-seconds.xml" />
+
+    <!-- Fix roaming_cdrs / roaming_rated_summary / roaming_iot_rates service_type ENUM to include USAGE -->
+    <include file="db/changelog/db.changelog-roaming-cdr-service-type-fix.xml" />
+    <include file="db/changelog/db.changelog-template-config-lob.xml" />
+    <include file="db/changelog/db.changelog-create_tap_out_rated_summary.xml" />
+    <include file="db/changelog/db.changelog-roaming-summary-unification.xml" />
+    <include file="db/changelog/db.changelog-remove-agreement-plmn.xml" />
+
+    <!-- Rating status refactor: start_time/end_time → DATETIME; drop sms duration_seconds;
+         rated_summary: split total_calls/total_sms/total_sessions, add zone_name, rating_type;
+         usage_rated_cdr: add upload_usage, download_usage, imsi, msisdn, imei, tap_file_record_id, is_tap_out_generated -->
+    <include file="db/changelog/db.changelog-rating-status-refactor.xml" />
+
+    <!-- Zone prefix input mode: add prefix_type to prefixes, prefix_input_mode to zones -->
+    <include file="db/changelog/db.changelog-zone-prefix-input.xml" />
+    <include file="db/changelog/db.changelog-error-and-rerate.xml" />
+    <include file="db/changelog/db.changelog-cdr-query-config.xml" />
+</databaseChangeLog>

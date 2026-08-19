@@ -1,0 +1,11 @@
+.mr-16 {
+  margin-right: 16px;
+}
+
+.disable-point {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: grayscale(100%);
+  background-color: #f8f9fa;
+}

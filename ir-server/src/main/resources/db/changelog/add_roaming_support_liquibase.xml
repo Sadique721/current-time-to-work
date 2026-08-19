@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <!-- Add line_of_business to source_configuration table (consistent with existing VARCHAR(20) implementation) -->
+    <changeSet id="add-source-config-lob" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="source_configuration" columnName="line_of_business"/>
+            </not>
+        </preConditions>
+
+        <comment>Add line_of_business column to source_configuration table (consistent with existing implementation)</comment>
+
+        <addColumn tableName="source_configuration">
+            <column name="line_of_business" type="ENUM('INTERCONNECT', 'ROAMING')" defaultValue="INTERCONNECT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <rollback>
+            <dropColumn tableName="source_configuration" columnName="line_of_business"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add index on source_configuration.line_of_business for fast filtering -->
+    <changeSet id="add-source-config-lob-index" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="source_configuration" indexName="idx_source_config_lob"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="source_configuration" indexName="idx_source_config_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Add home_plmn and visited_plmn to rated_cdr for ROAMING support -->
+    <changeSet id="add-rated-cdr-plmn-columns" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rated_cdr" columnName="home_plmn"/>
+            </not>
+        </preConditions>
+        <comment>Add PLMN columns to rated_cdr table for ROAMING support</comment>
+        <addColumn tableName="rated_cdr">
+            <column name="home_plmn" type="VARCHAR(10)" remarks="Home PLMN code for ROAMING CDRs">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visited_plmn" type="VARCHAR(10)" remarks="Visited PLMN code for ROAMING CDRs">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <rollback>
+            <dropColumn tableName="rated_cdr" columnName="home_plmn"/>
+            <dropColumn tableName="rated_cdr" columnName="visited_plmn"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

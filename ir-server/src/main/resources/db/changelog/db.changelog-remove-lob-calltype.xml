@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="remove-line-of-business-rate-packages" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="rate_packages" columnName="line_of_business"/>
+        </preConditions>
+        <dropColumn tableName="rate_packages" columnName="line_of_business"/>
+    </changeSet>
+
+    <changeSet id="remove-line-of-business-rate-package-groups" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="rate_package_groups" columnName="line_of_business"/>
+        </preConditions>
+        <dropColumn tableName="rate_package_groups" columnName="line_of_business"/>
+    </changeSet>
+
+    <changeSet id="remove-call-type-rate-package-groups" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="rate_package_groups" columnName="call_type"/>
+        </preConditions>
+        <dropColumn tableName="rate_package_groups" columnName="call_type"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,45 @@
+<div class="mb-3 col">
+  <mat-label class="col-form-label col-lg-2">
+    {{ label }}
+    <span
+      *ngIf="showRequiredStar && formControlRef.hasValidator(isControlRequired)"
+      class="text-danger"
+      >*</span
+    >
+  </mat-label>
+
+  <div class="input-group input-group-sm">
+    <p-datepicker
+      [showIcon]="showIcon"
+      [iconDisplay]="'input'"
+      [minDate]="minDate"
+      [maxDate]="maxDate"
+      [disabledDays]="disabledDays"
+      [selectionMode]="selectionMode"
+      [showButtonBar]="showButtonBar"
+      [hourFormat]="hourFormat"
+      [timeOnly]="timeOnly"
+      [view]="view"
+      [showOnFocus]="!showIcon"
+      [showTime]="showTime"
+      [placeholder]="placeholder"
+      [size]="'small'"
+      [ngClass]="{ 'is-invalid-date': showError }"
+      (onTodayClick)="onNowClick()"
+      [dateFormat]="dateFormat"
+      [formControl]="formControlRef"
+    >
+      <ng-template
+        *ngIf="timeOnly"
+        #inputicon
+        let-clickCallBack="clickCallBack"
+      >
+        <i class="pi pi-clock" (click)="clickCallBack($event)"></i>
+      </ng-template>
+    </p-datepicker>
+  </div>
+
+  <div *ngIf="showError" class="invalid-feedback-msg">
+    {{ errorMessage || (label + ' is required') }}
+  </div>
+</div>

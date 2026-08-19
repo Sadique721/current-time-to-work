@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="rename-rated-cdr-to-voice-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="rated_cdr"/>
+            <not>
+                <tableExists tableName="voice_rated_cdr"/>
+            </not>
+        </preConditions>
+        <renameTable oldTableName="rated_cdr" newTableName="voice_rated_cdr"/>
+    </changeSet>
+
+</databaseChangeLog>

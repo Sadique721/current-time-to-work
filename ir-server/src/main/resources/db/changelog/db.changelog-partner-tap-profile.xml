@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Contexts:
+          efresh  – empty/fresh schema (first-time install, no tables exist)
+          partial – schema exists but this column is missing
+          full    – full re-run guard (idempotent via preConditions)
+
+        All changeSets use onFail="MARK_RAN" so they are safe to run in any context.
+        Column types use Liquibase database-independent aliases.
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         1. Add tap_profile_id FK column to partners table.
+            Nullable — only ROAMING partners will have this set.
+            Precondition: partners table exists, tap_profiles table exists,
+                          column does not already exist.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="partner-tap-profile-01-add-column"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <tableExists tableName="tap_profiles"/>
+                <not><columnExists tableName="partners" columnName="tap_profile_id"/></not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="partners">
+            <column name="tap_profile_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         2. Add FK constraint from partners.tap_profile_id → tap_profiles.id.
+            ON DELETE SET NULL — if a profile is deleted, partner loses the
+            reference but is not deleted.
+            Precondition: column exists, constraint does not already exist.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="partner-tap-profile-02-add-fk"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="partners" columnName="tap_profile_id"/>
+                <not><foreignKeyConstraintExists foreignKeyName="fk_partner_tap_profile"/></not>
+            </and>
+        </preConditions>
+
+        <addForeignKeyConstraint
+                constraintName="fk_partner_tap_profile"
+                baseTableName="partners"        baseColumnNames="tap_profile_id"
+                referencedTableName="tap_profiles" referencedColumnNames="id"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         3. Add index on partners.tap_profile_id for join performance.
+            Precondition: column exists, index does not already exist.
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="partner-tap-profile-03-add-index"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="partners" columnName="tap_profile_id"/>
+                <not><indexExists indexName="idx_partner_tap_profile_id"/></not>
+            </and>
+        </preConditions>
+
+        <createIndex indexName="idx_partner_tap_profile_id" tableName="partners">
+            <column name="tap_profile_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+        1. Drop FK from tap_out_config.tap_profile_id → tap_profiles.id
+           (added by db.changelog-tap-profiles.xml changeset tap-profiles-04)
+           Must drop FK before dropping the table.
+        ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="drop-tap-out-config-01-drop-fk-profile"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_config"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_tap_out_config_profile"/>
+            </and>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="tap_out_config"
+                                  constraintName="fk_tap_out_config_profile"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         2. Drop FK from tap_out_config.partner_id → partners.partner_id
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="drop-tap-out-config-02-drop-fk-partner"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_config"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_tap_out_config_partner"/>
+            </and>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="tap_out_config"
+                                  constraintName="fk_tap_out_config_partner"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         3. Drop FK from tap_out_config.clearing_house_id → clearing_houses.id
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="drop-tap-out-config-03-drop-fk-ch"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_config"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_tap_out_config_ch"/>
+            </and>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="tap_out_config"
+                                  constraintName="fk_tap_out_config_ch"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         4. Drop index on tap_out_config.tap_profile_id if it exists
+            (added by db.changelog-tap-profiles.xml changeset tap-profiles-06)
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="drop-tap-out-config-04-drop-index"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_config"/>
+                <indexExists indexName="idx_tap_out_config_profile_id"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="tap_out_config" indexName="idx_tap_out_config_profile_id"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         5. Drop the tap_out_config table
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="drop-tap-out-config-05-drop-table"
+               author="system"
+               context="efresh, partial, full">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tap_out_config"/>
+        </preConditions>
+        <dropTable tableName="tap_out_config"/>
+    </changeSet>
+
+</databaseChangeLog>

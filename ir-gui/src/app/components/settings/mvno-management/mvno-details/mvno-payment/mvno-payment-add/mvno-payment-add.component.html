@@ -1,0 +1,362 @@
+Record Payment Modal
+<div
+  class="modal fade"
+  [class.show]="showModal"
+  [style.display]="showModal ? 'block' : 'none'"
+  *ngIf="showModal"
+>
+  <div
+    *ngIf="showModal"
+    style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(128, 128, 128, 0.3);
+    "
+  ></div>
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Record Payment</h5>
+        <button type="button" class="close" (click)="closeModal()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="paymentFormGroup">
+          <div class="row">
+            <div class="col-lg-3 col-md-4 mb-3">
+              <div class="d-flex align-items-end gap-2">
+                <div class="flex-grow-1">
+                  <custom-select
+                    label="Invoice"
+                    [options]="invoiceList"
+                    optionLabel="docnumber"
+                    optionValue="id"
+                    [formControlRef]="
+                      paymentFormGroup | getControl: 'invoiceId'
+                    "
+                    placeholder="Select Invoice"
+                  ></custom-select>
+                </div>
+                <button
+                  type="button"
+                  class="btn me-2 btn-primary fs-13 fw-medium p-2 px-3 mb-3"
+                  (click)="modalOpenInvoice()"
+                >
+                  <i class="feather icon-plus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-select
+                label="Payment Mode"
+                [options]="paymentMode"
+                optionLabel="text"
+                optionValue="value"
+                [formControlRef]="paymentFormGroup | getControl: 'paymode'"
+                [filter]="true"
+                filterBy="text"
+                placeholder="Select Payment Mode"
+              ></custom-select>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-select
+                label="Source"
+                [options]="onlineSourceData"
+                optionLabel="text"
+                optionValue="value"
+                [formControlRef]="paymentFormGroup | getControl: 'onlinesource'"
+                [filter]="true"
+                filterBy="text"
+                placeholder="Select a Payment Mode"
+              ></custom-select>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-number-input
+                label="Amount"
+                [formControlRef]="paymentFormGroup | getControl: 'amount'"
+                placeholder="Enter Amount"
+                [min]="1"
+              ></custom-number-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <div class="mb-3">
+                <mat-label class="col-form-label col-lg-2"
+                  >Select Document
+                  <span class="text-danger">*</span>
+                </mat-label>
+                <div class="input-group input-group-sm">
+                  <input
+                    type="file"
+                    (change)="onFileChange($event)"
+                    class="form-control"
+                    autocomplete="off"
+                  />
+                </div>
+                <small class="text-muted" *ngIf="fileName">{{
+                  fileName
+                }}</small>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-input
+                label="Cheque No."
+                [formControlRef]="paymentFormGroup | getControl: 'chequeno'"
+                placeholder="Enter Cheque No."
+              ></custom-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-date
+                [label]="chequeDateName"
+                [formControlRef]="paymentFormGroup | getControl: 'chequedate'"
+              ></custom-date>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-select
+                label="Source Bank"
+                [options]="bankDataList"
+                optionLabel="bankDisplayName"
+                optionValue="id"
+                [formControlRef]="
+                  paymentFormGroup | getControl: 'bankManagement'
+                "
+                [filter]="true"
+                filterBy="bankDisplayName"
+                placeholder="Select Source Bank"
+              ></custom-select>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3" *ngIf="destinationbank">
+              <custom-select
+                label="Destination Bank"
+                [options]="bankDestination"
+                optionLabel="bankDisplayName"
+                optionValue="id"
+                [formControlRef]="
+                  paymentFormGroup | getControl: 'destinationBank'
+                "
+                [filter]="true"
+                filterBy="bankDisplayName"
+                placeholder="Select Destination Bank"
+              ></custom-select>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-input
+                label="Branch"
+                [formControlRef]="paymentFormGroup | getControl: 'branch'"
+                placeholder="Enter Branch"
+                type="text"
+              ></custom-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-input
+                [label]="
+                  'Reference No.' +
+                  (paymentFormGroup.value.paymode?.toLowerCase() === 'online'
+                    ? '*'
+                    : '')
+                "
+                [formControlRef]="paymentFormGroup | getControl: 'referenceno'"
+                placeholder="Enter Reference No."
+                type="text"
+              ></custom-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-input
+                label="Receipt No"
+                [formControlRef]="paymentFormGroup | getControl: 'reciptNo'"
+                placeholder="Enter Receipt No."
+                type="text"
+              ></custom-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-number-input
+                label="TDS"
+                [formControlRef]="paymentFormGroup | getControl: 'tdsAmount'"
+                placeholder="Enter TDS amount"
+              ></custom-number-input>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-3">
+              <custom-number-input
+                label="ABBS"
+                [formControlRef]="paymentFormGroup | getControl: 'abbsAmount'"
+                placeholder="Enter ABBS amount"
+              ></custom-number-input>
+            </div>
+            <div class="col-lg-6 col-md-8 mb-3">
+              <custom-textarea
+                label="Remark"
+                [formControlRef]="paymentFormGroup | getControl: 'remark'"
+                placeholder="Enter Remark"
+                [rows]="3"
+              ></custom-textarea>
+            </div>
+          </div>
+        </form>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary ms-2"
+            (click)="closeModal()"
+          >
+            close
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary ms-2"
+            (click)="addPayment()"
+            [disabled]="!paymentFormGroup.valid"
+          >
+            Add Payment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="displaySelectInvoiceDialog"
+  style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(128, 128, 128, 0.3);
+    z-index: 1055;
+  "
+></div>
+<div
+  class="modal fade"
+  [class.show]="displaySelectInvoiceDialog"
+  [style.display]="displaySelectInvoiceDialog ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+  *ngIf="displaySelectInvoiceDialog"
+>
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Invoice</h5>
+        <button type="button" class="close" (click)="modalCloseInvoiceList()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="masterSelected"
+                    (change)="checkUncheckAllInvoice()"
+                  />
+                </th>
+                <th>Doc Number</th>
+                <th>Created By</th>
+                <th>Tax Amount</th>
+                <th>Total Invoice</th>
+                <th>Pending Amount</th>
+                <th>Refundable Amount</th>
+                <th>Amount</th>
+                <th>TDS</th>
+                <th>ABBS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let invoice of invoiceList; let i = index">
+                <td>
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="invoice.isSelected"
+                    (change)="isAllSelectedInvoice()"
+                  />
+                </td>
+                <td>{{ invoice.docnumber }}</td>
+                <td>{{ invoice.createdByName }}</td>
+                <td>{{ invoice.tax }}</td>
+                <td>{{ invoice.totalamount | number: "1.2-2" }}</td>
+                <td>{{ getPendingAmount(invoice) | number: "1.2-2" }}</td>
+                <td>{{ invoice.refundAbleAmount | number: "1.2-2" }}</td>
+                <td>
+                  <custom-input
+                    [formControlRef]="invoice.formGroup.get('testamount')"
+                    type="number"
+                    class="form-control form-control-sm"
+                    placeholder="Amount"
+                    (input)="
+                      onSelectedInvoice(
+                        $event,
+                        invoice,
+                        invoice.includeTds,
+                        invoice.includeAbbs
+                      )
+                    "
+                  ></custom-input>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <input
+                      type="checkbox"
+                      [disabled]="!invoice.testamount"
+                      (change)="onChangeOFTDSTest($event, invoice)"
+                    />
+                    &nbsp;
+                    <custom-input
+                      [formControlRef]="invoice.formGroup.get('tdsCheck')"
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="TDS"
+                    ></custom-input>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <input
+                      type="checkbox"
+                      [disabled]="!invoice.testamount"
+                      (change)="onChangeOFABBSTest($event, invoice)"
+                    />
+                    &nbsp;
+                    <custom-input
+                      [formControlRef]="invoice.formGroup.get('abbsCheck')"
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="ABBS"
+                    ></custom-input>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn me-2 btn-primary fs-13 fw-medium p-2 px-3"
+          (click)="bindInvoice()"
+        >
+          <i class="fa fa-check-circle"></i> Save
+        </button>
+        <button
+          type="button"
+          class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3"
+          (click)="modalCloseInvoiceList()"
+        >
+          <i class="feather icon-x me-2"></i>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal-backdrop fade"
+  [class.show]="displaySelectInvoiceDialog"
+  *ngIf="displaySelectInvoiceDialog"
+></div>

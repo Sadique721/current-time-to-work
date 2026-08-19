@@ -1,0 +1,66 @@
+<div class="dataTables_length" id="DataTables_Table_0_length">
+  <label>
+    Row Per Page
+    <select
+      [(ngModel)]="pageSize"
+      class="form-select form-select-sm pagination-style"
+      name="page"
+      (ngModelChange)="changePageSize(pageSize)"
+    >
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </label>
+</div>
+
+<div class="dataTables_paginate paging_simple_numbers">
+  <ul class="pagination">
+    <li class="paginate_button page-item" [class.disabled]="currentPage === 1">
+      <a
+        (click)="getMoreData('previous')"
+        class="page-link"
+        href="javascript:void(0);"
+      >
+        <i class="fa fa-angle-left"></i>
+      </a>
+    </li>
+
+    @for (page of getVisiblePages(); track $index) {
+      @if (page !== -1) {
+        <li
+          class="paginate_button page-item"
+          [class.active]="page === currentPage"
+        >
+          <a
+            (click)="moveToPage(page)"
+            class="page-link"
+            href="javascript:void(0);"
+          >
+            {{ page }}
+          </a>
+        </li>
+      }
+
+      @if (page === -1) {
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+      }
+    }
+
+    <li
+      class="paginate_button page-item"
+      [class.disabled]="currentPage === totalPages || tableData.length === 0"
+    >
+      <a
+        (click)="getMoreData('next')"
+        class="page-link"
+        href="javascript:void(0);"
+      >
+        <i class="fa fa-angle-right"></i>
+      </a>
+    </li>
+  </ul>
+</div>

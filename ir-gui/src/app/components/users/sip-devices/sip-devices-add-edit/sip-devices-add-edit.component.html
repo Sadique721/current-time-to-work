@@ -1,0 +1,269 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ selectedDevice?.id ? "Update " : "Create " }} SIP Devices</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          <i class="feather icon-arrow-left me-2"></i>Back to SIP Devices List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div *ngIf="isLoading" class="card">
+  <div class="card-body text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Loading device data...</p>
+  </div>
+</div>
+
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <h4>Device Information</h4>
+  </div>
+  <div class="card-body profile-body">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Device Name"
+              [formControlRef]="form | getControl: 'deviceName'"
+              type="text"
+              placeholder="Enter device name"
+              required="true"
+            ></custom-input>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('deviceName')?.errors?.['required']"
+            >
+              Device Name is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <div class="input-with-icon">
+              <custom-input
+                label="Username"
+                [formControlRef]="form | getControl: 'username'"
+                type="text"
+                placeholder="Enter Username"
+                required="true"
+                icon="'ti ti-user'"
+              ></custom-input>
+            </div>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('username')?.errors?.['required']"
+            >
+              Username is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <mat-label class="col-form-label">
+              Password <span class="text-danger">*</span>
+            </mat-label>
+            <div class="pass-group input-group input-group-sm">
+              <input
+                [type]="passwordVisible ? 'text' : 'password'"
+                class="pass-input form-control"
+                placeholder="Enter Password"
+                formControlName="password"
+                [ngClass]="{
+                  'is-invalid':
+                    form.get('password')?.invalid &&
+                    form.get('password')?.touched,
+                }"
+              />
+              <span
+                class="ti toggle-password"
+                [ngClass]="passwordVisible ? 'ti-eye' : 'ti-eye-off'"
+                (click)="togglePasswordVisibility()"
+              ></span>
+            </div>
+            <div
+              *ngIf="
+                form.get('password')?.invalid && form.get('password')?.touched
+              "
+              class="invalid-feedback-msg"
+            >
+              Password is required
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary mt-2"
+              (click)="generatePassword()"
+            >
+              <i class="ti ti-refresh me-1"></i>Generate Password
+            </button>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Caller ID Name"
+              [formControlRef]="form | getControl: 'callerIdName'"
+              type="text"
+              placeholder="Enter caller id name"
+            ></custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <div class="input-with-icon">
+              <custom-select
+                label="Caller ID Number"
+                [options]="callerIdNumberOptions"
+                optionValue="value"
+                optionLabel="label"
+                [formControlRef]="form | getControl: 'callerIdNumber'"
+                [filter]="true"
+                [showClear]="true"
+                placeholder="Select Caller ID Number"
+                icon="'ti ti-phone'"
+              ></custom-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="User"
+              [options]="userOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="form | getControl: 'userId'"
+              [filter]="true"
+              [showClear]="true"
+              placeholder="Select user"
+              required="true"
+            ></custom-select>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('userId')?.errors?.['required']"
+            >
+              User is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusEnable"
+                  value="1"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusEnable">
+                  Enable
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusDisable"
+                  value="0"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusDisable">
+                  Disable
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-3" *ngIf="!isLoading">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center">
+      <button
+        class="btn btn-info"
+        type="button"
+        *ngIf="selectedDevice?.id"
+        (click)="openOtherFeatures()"
+        [disabled]="isLoading"
+      >
+        <i class="ti ti-settings me-2"></i>Other Features
+      </button>
+      <div class="d-flex gap-2">
+        <button
+          class="btn btn-secondary"
+          type="button"
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn-warning"
+          type="button"
+          *ngIf="selectedDevice?.id"
+          (click)="clearForm()"
+          [disabled]="isLoading"
+        >
+          Clear
+        </button>
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="isLoading || form.invalid"
+        >
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            *ngIf="isLoading"
+          ></span>
+          {{ selectedDevice?.id ? "Update" : "Save" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

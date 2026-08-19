@@ -1,0 +1,212 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a (click)="onCancel()" class="back-arrow me-2" style="cursor: pointer">
+          <i class="ti ti-arrow-left"></i>
+        </a>
+        {{ selectedCallScript?.id ? "Update" : "Create" }} Call Script
+      </h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          <i class="feather icon-arrow-left me-2"></i>Back to Call Script List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div *ngIf="isLoading" class="card">
+  <div class="card-body text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Loading call script data...</p>
+  </div>
+</div>
+
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <h4>Call Script Information</h4>
+  </div>
+  <div class="card-body profile-body">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Call Script Name"
+              [formControlRef]="form | getControl: 'callScriptName'"
+              type="text"
+              placeholder="Enter Call Script Name"
+              required="true"
+            ></custom-input>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('callScriptName')?.errors?.['required']"
+            >
+              Call Script Name is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Description"
+              [formControlRef]="form | getControl: 'description'"
+              type="text"
+              placeholder="Enter Description"
+              required="true"
+            ></custom-input>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('description')?.errors?.['required']"
+            >
+              Description is required
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusEnable"
+                  [value]="true"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusEnable">
+                  Enable
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusDisable"
+                  [value]="false"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusDisable">
+                  Disable
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="row">
+            <div class="col-lg-6 col-md-12">
+              <div class="mb-3">
+                <label class="form-label">
+                  Script
+                  <span class="text-danger">*</span>
+                  <i
+                    class="ti ti-info-circle ms-1"
+                    matTooltip="Enter your call script. Use variables from the right panel."
+                  ></i>
+                </label>
+                <textarea
+                  class="form-control script-textarea"
+                  formControlName="script"
+                  rows="12"
+                ></textarea>
+                <div
+                  class="text-danger small mt-1"
+                  *ngIf="submitted && form.get('script')?.errors?.['required']"
+                >
+                  Script is required
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+              <div class="mb-3">
+                <label class="form-label">Script Variables</label>
+                <div class="script-variables-panel">
+                  <button
+                    *ngFor="let variable of scriptVariables"
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm variable-btn"
+                    (click)="insertVariable(variable)"
+                  >
+                    {{ variable.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-3" *ngIf="!isLoading">
+  <div class="card-body">
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+      <button
+        class="btn btn-warning"
+        type="button"
+        *ngIf="selectedCallScript?.id"
+        (click)="clearForm()"
+        [disabled]="isLoading"
+      >
+        Clear
+      </button>
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="isLoading || form.invalid"
+      >
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          *ngIf="isLoading"
+        ></span>
+        {{ selectedCallScript?.id ? "Update" : "Save" }}
+      </button>
+    </div>
+  </div>
+</div>

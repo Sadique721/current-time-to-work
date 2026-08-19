@@ -1,0 +1,33 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   Scheduler Audit Logs — component-scoped styles
+   All colours stay in sync with the global theme; only structural/badge tweaks
+   are defined here so this component looks native to the Rating Engine.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* Event-type badge base */
+.audit-event-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.28em 0.65em;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* Semantic colour variants — mirror the app's existing badge palette */
+.audit-event-badge.badge-info      { background-color: var(--bs-info,    #0dcaf0); color: #fff; }
+.audit-event-badge.badge-success   { background-color: var(--bs-success,  #198754); color: #fff; }
+.audit-event-badge.badge-danger    { background-color: var(--bs-danger,   #dc3545); color: #fff; }
+.audit-event-badge.badge-warning   { background-color: var(--bs-warning,  #ffc107); color: #212529; }
+.audit-event-badge.badge-primary   { background-color: var(--bs-primary,  #0d6efd); color: #fff; }
+.audit-event-badge.badge-secondary { background-color: var(--bs-secondary,#6c757d); color: #fff; }
+
+/* Keep the message column readable without letting it stretch the row too far */
+.audit-msg-cell {
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.85rem;
+  color: #555;
+}

@@ -1,0 +1,115 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Agreement Management</h4>
+      <h6>Manage your billing agreements</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a (click)="toggleCollapse()" [class.active]="isCollapsed" data-bs-toggle="tooltip" data-bs-placement="top"
+        matTooltip="Collapse" matTooltipPosition="above" id="collapse-header">
+        @if (!isCollapsed) {
+        <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+        <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn">
+    <a class="btn btn-primary" *ngIf="permission.create" (click)="openAgreementAddEdit()">
+      <i class="ti ti-circle-plus me-2"></i>Add Agreement
+    </a>
+  </div>
+</div>
+
+
+<div class="card table-list-card">
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+    <div class="search-set d-flex align-items-center">
+      <div class="search-input">
+        <input [formControl]="searchDataValue" type="search" class="form-control" placeholder="Search by Agreement Code"
+          (keydown.enter)="searchData()" />
+      </div>
+      <button class="btn btn-primary ms-2" (click)="searchData()">
+        Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Agreement Code</th>
+            <th>LOB</th>
+            <th>Billing Cycle</th>
+            <th>Tax Info</th>
+            <th class="text-center">Accounts</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of tableData; track data.agreementId; let index = $index) {
+          <tr>
+            <td>{{ paginationSkip + index + 1 }}</td>
+            <td>
+              <a class="nav-link" [routerLink]="[
+                    routes.ratingagreement,
+                    'agreement',
+                    data.agreementId,
+                  ]">
+                {{ data.agreementCode }}</a>
+            </td>
+            <td>
+              <span *ngIf="data.lineOfBusiness">
+                {{ data.lineOfBusiness }}
+              </span>
+              <span class="text-muted" *ngIf="!data.lineOfBusiness">N/A</span>
+            </td>
+            <td>
+              <div class="fs-12 fw-medium">{{ data.billingCycleStartDate | date: "yyyy-MM-dd" }}</div>
+              <div class="text-muted fs-11">{{ data.billingCyclePeriod }} Days Period</div>
+            </td>
+            <td>
+              <div class="fs-12 fw-medium text-dark">{{ data.isTaxExempt ? 'Tax Exempt' : (data.taxConfigs.length || 0)
+                + ' Tax(es) Applied' }}</div>
+            </td>
+            <td class="text-center">
+              {{ data.accountAgreements.length || 0 }}
+            </td>
+            <td class="action-table-data">
+              <div class="edit-delete-action">
+                <a class="me-2 p-2" *ngIf="permission.edit" matTooltip="Edit" matTooltipPosition="above"
+                  (click)="openAgreementAddEdit(data)">
+                  <i class="feather icon-edit feather-edit"></i>
+                </a>
+                <a class="confirm-text p-2" *ngIf="permission.delete" matTooltip="Delete" matTooltipPosition="above"
+                  (click)="confirmDelete(data.agreementId)">
+                  <i data-feather="trash-2" class="feather icon-trash-2"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          }
+          @if (tableData.length === 0) {
+          <tr>
+            <td colspan="6">
+              <h5 class="no-record">No matching records found</h5>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- pagination -->
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

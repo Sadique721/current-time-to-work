@@ -1,0 +1,161 @@
+<div class="modal-content">
+  <div class="page-wrapper-new p-0">
+    <div class="content p-0">
+      <div class="modal-header">
+        <div class="page-title">
+          <h4>{{ selectedProfile?.id ? "Update" : "Create" }} TAP Profile</h4>
+        </div>
+        <button type="button" class="close" (click)="onClose()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+        <form [formGroup]="profileForm">
+          <div class="row">
+            <!-- Profile Details -->
+            <div class="col-lg-12">
+              <h6 class="mb-3 fw-semibold text-primary">Profile Configuration</h6>
+            </div>
+
+            <div class="col-lg-6">
+              <custom-input
+                label="Profile Name"
+                [formControlRef]="profileForm | getControl: 'profileName'"
+                type="text"
+                placeholder="e.g. EU_Standard_Profile"
+              ></custom-input>
+            </div>
+            <div class="col-lg-6">
+              <custom-input
+                label="Description"
+                [formControlRef]="profileForm | getControl: 'description'"
+                type="text"
+                placeholder="Brief description of profile scope"
+              ></custom-input>
+            </div>
+
+            <div class="col-lg-6 mt-3">
+              <custom-select
+                label="Service Type"
+                [options]="serviceTypeOptions"
+                optionValue="value"
+                optionLabel="label"
+                [formControlRef]="profileForm | getControl: 'serviceType'"
+                [filter]="true"
+                placeholder="Select Service Type"
+              ></custom-select>
+            </div>
+
+            <div class="col-lg-6 mt-3">
+              <div class="mb-3">
+                <label class="form-label d-block fw-medium">Status</label>
+                <div class="form-check form-switch mt-2">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    formControlName="isActive"
+                    id="profileIsActive"
+                  />
+                  <label class="form-check-label" for="profileIsActive">
+                    {{ profileForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Field Override Table -->
+            <div class="col-lg-12 mt-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-semibold text-primary mb-0">Field Overrides & Mappings</h6>
+                <button type="button" class="btn btn-sm btn-primary" (click)="addFieldRow()">
+                  <i class="ti ti-plus me-1"></i>Add Override Field
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle fs-13">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 50px">#</th>
+                      <th style="width: 250px">Field Name</th>
+                      <th>Spec (ASN Path & Call Type)</th>
+                      <th style="width: 200px">Custom Default</th>
+                      <th style="width: 200px">Mandatory Override</th>
+                      <th style="width: 60px" class="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of profileMappings; let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td>
+                        <select 
+                          class="form-select form-select-sm" 
+                          [(ngModel)]="row.tapFieldMappingId" 
+                          [ngModelOptions]="{standalone: true}"
+                          (change)="onFieldChange(i, row.tapFieldMappingId)"
+                        >
+                          <option *ngFor="let opt of getAvailableFieldsForSelect(i)" [value]="opt.id">
+                            {{ opt.fieldName }}
+                          </option>
+                        </select>
+                      </td>
+                      <td>
+                        <div class="fs-12">
+                          <strong>Path:</strong> {{ row.asnPath || '-' }} <br/>
+                          <strong>Type:</strong> {{ row.callType || 'GLOBAL' }} | 
+                          <strong>Data:</strong> <span class="text-muted">{{ row.dataType || '-' }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <input 
+                          type="text" 
+                          class="form-control form-control-sm" 
+                          [(ngModel)]="row.customDefaultValue" 
+                          [ngModelOptions]="{standalone: true}"
+                          placeholder="No override"
+                        />
+                      </td>
+                      <td>
+                        <select 
+                          class="form-select form-select-sm" 
+                          [(ngModel)]="row.isMandatoryOverride" 
+                          [ngModelOptions]="{standalone: true}"
+                        >
+                          <option value="null">Use Master Value</option>
+                          <option value="true">Force Mandatory</option>
+                          <option value="false">Force Optional</option>
+                        </select>
+                      </td>
+                      <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger p-1" (click)="removeFieldRow(i)">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr *ngIf="profileMappings.length === 0">
+                      <td colspan="6" class="text-center text-muted py-3">
+                        No field overrides configured. Click <strong>Add Override Field</strong> to select fields.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3" (click)="onClose()">
+          Cancel
+        </button>
+        <button class="btn btn-primary fs-13 fw-medium p-2 px-3" (click)="submit()">
+          {{ selectedProfile?.id ? "Update" : "Save" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

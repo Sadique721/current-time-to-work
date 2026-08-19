@@ -1,0 +1,931 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="add-deleted-at-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="organizations"/>
+                <not>
+                    <columnExists tableName="organizations" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="organizations">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE organizations SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to organizations table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="partners"/>
+                <not>
+                    <columnExists tableName="partners" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE partners SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to partners table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-3" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="countries"/>
+                <not>
+                    <columnExists tableName="countries" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="countries">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE countries SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to countries table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-4" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="prefixes"/>
+                <not>
+                    <columnExists tableName="prefixes" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="prefixes">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE prefixes SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to prefixes table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-5" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="accounts"/>
+                <not>
+                    <columnExists tableName="accounts" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="accounts">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE accounts SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to accounts table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-6" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_packages"/>
+                <not>
+                    <columnExists tableName="rate_packages" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_packages">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE rate_packages SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to rate_packages table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-7" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <not>
+                    <columnExists tableName="rate_package_groups" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_package_groups">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE rate_package_groups SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to rate_package_groups table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-8" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plans"/>
+                <not>
+                    <columnExists tableName="product_plans" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="product_plans">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE product_plans SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to product_plans table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-9" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="pulse_config"/>
+                <not>
+                    <columnExists tableName="pulse_config" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="pulse_config">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE pulse_config SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to pulse_config table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-10" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rated_cdr"/>
+                <not>
+                    <columnExists tableName="rated_cdr" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_cdr">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE rated_cdr SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to rated_cdr table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-11" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="source_configuration"/>
+                <not>
+                    <columnExists tableName="source_configuration" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="source_configuration">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE source_configuration SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to source_configuration table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-12" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="source_cdr_configuration"/>
+                <not>
+                    <columnExists tableName="source_cdr_configuration" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="source_cdr_configuration">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE source_cdr_configuration SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to source_cdr_configuration table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-13" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <not>
+                    <columnExists tableName="rate_package_associations" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_package_associations">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE rate_package_associations SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to rate_package_associations table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-14" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <not>
+                    <columnExists tableName="product_plan_associations" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="product_plan_associations">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE product_plan_associations SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to product_plan_associations table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-15" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_configuration"/>
+                <not>
+                    <columnExists tableName="scheduler_configuration" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="scheduler_configuration">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE scheduler_configuration SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to scheduler_configuration table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-16" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_audit_log"/>
+                <not>
+                    <columnExists tableName="scheduler_audit_log" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="scheduler_audit_log">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE scheduler_audit_log SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to scheduler_audit_log table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-17" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="scheduler_status"/>
+                <not>
+                    <columnExists tableName="scheduler_status" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="scheduler_status">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <sql>UPDATE scheduler_status SET deleted_at = NOW() WHERE is_deleted = true AND deleted_at IS NULL</sql>
+        <comment>Phase 1: Add deleted_at to scheduler_status table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-18" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="is_deleted"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <comment>Phase 2: Add is_deleted column to rated_summary table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-18a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rated_summary"/>
+                <not>
+                    <columnExists tableName="rated_summary" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rated_summary">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <comment>Phase 2: Add deleted_at column to rated_summary table</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-19" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="agreements"/>
+                <not>
+                    <columnExists tableName="agreements" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <comment>Phase 2: Add deleted_at to agreements table (is_deleted already exists)</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-20" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="account_agreements"/>
+                <not>
+                    <columnExists tableName="account_agreements" columnName="deleted_at"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="account_agreements">
+            <column name="deleted_at" type="datetime"/>
+        </addColumn>
+        <comment>Phase 2: Add deleted_at to account_agreements table (is_deleted already exists)</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-21" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="organizations"/>
+                <indexExists tableName="organizations" indexName="uk_organization_name"/>
+            </and>
+        </preConditions>
+        <dropUniqueConstraint tableName="organizations" constraintName="uk_organization_name"/>
+        <createIndex tableName="organizations" unique="true" indexName="uk_organization_name">
+            <column name="name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Update organizations unique constraint to include deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-22" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="partners"/>
+                <indexExists tableName="partners" indexName="UK5clmv3y5q6kv5m8tqh21g8d1i"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="partners" indexName="UK5clmv3y5q6kv5m8tqh21g8d1i"/>
+        <comment>Phase 3: Drop old partners unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-22a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="partners"/>
+                <not>
+                    <indexExists tableName="partners" indexName="uk_partners_partner_code"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="partners" unique="true" indexName="uk_partners_partner_code">
+            <column name="partner_code"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new partners unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-23" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="countries"/>
+                <indexExists tableName="countries" indexName="UKCountriesName"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="countries" indexName="UKCountriesName"/>
+        <comment>Phase 3: Drop old countries unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-23a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="countries"/>
+                <not>
+                    <indexExists tableName="countries" indexName="uk_countries_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="countries" unique="true" indexName="uk_countries_name">
+            <column name="name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new countries unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-24" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="prefixes"/>
+                <indexExists tableName="prefixes" indexName="uk_country_prefix"/>
+            </and>
+        </preConditions>
+        <dropUniqueConstraint tableName="prefixes" constraintName="uk_country_prefix"/>
+        <createIndex tableName="prefixes" unique="true" indexName="uk_country_prefix">
+            <column name="country_id"/>
+            <column name="prefix"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Update prefixes unique constraint to include deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-25" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="accounts"/>
+                <indexExists tableName="accounts" indexName="UKAccountsAccountCode"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="accounts" indexName="UKAccountsAccountCode"/>
+        <comment>Phase 3: Drop old accounts unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-25a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="accounts"/>
+                <not>
+                    <indexExists tableName="accounts" indexName="uk_accounts_account_code"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="accounts" unique="true" indexName="uk_accounts_account_code">
+            <column name="account_code"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new accounts unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-26" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_packages"/>
+                <indexExists tableName="rate_packages" indexName="UKRatePackagesPackageName"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="rate_packages" indexName="UKRatePackagesPackageName"/>
+        <comment>Phase 3: Drop old rate_packages unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-26a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_packages"/>
+                <not>
+                    <indexExists tableName="rate_packages" indexName="uk_rate_packages_package_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="rate_packages" unique="true" indexName="uk_rate_packages_package_name">
+            <column name="package_name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new rate_packages unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-27" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <indexExists tableName="rate_package_groups" indexName="UKRatePackageGroupsName"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="rate_package_groups" indexName="UKRatePackageGroupsName"/>
+        <comment>Phase 3: Drop old rate_package_groups unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-27a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_groups"/>
+                <not>
+                    <indexExists tableName="rate_package_groups" indexName="uk_rate_package_groups_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="rate_package_groups" unique="true" indexName="uk_rate_package_groups_name">
+            <column name="name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new rate_package_groups unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-28" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plans"/>
+                <indexExists tableName="product_plans" indexName="UKProductPlansName"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="product_plans" indexName="UKProductPlansName"/>
+        <comment>Phase 3: Drop old product_plans unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-28a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plans"/>
+                <not>
+                    <indexExists tableName="product_plans" indexName="uk_product_plans_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="product_plans" unique="true" indexName="uk_product_plans_name">
+            <column name="name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new product_plans unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-29" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="agreements"/>
+                <indexExists tableName="agreements" indexName="UKAgreementsAgreementCode"/>
+            </and>
+        </preConditions>
+        <dropIndex tableName="agreements" indexName="UKAgreementsAgreementCode"/>
+        <comment>Phase 3: Drop old agreements unique constraint</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-29a" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="agreements"/>
+                <not>
+                    <indexExists tableName="agreements" indexName="uk_agreements_agreement_code"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="agreements" unique="true" indexName="uk_agreements_agreement_code">
+            <column name="agreement_code"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create new agreements unique constraint with deleted_at</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-30" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT 0</sqlCheck>
+        </preConditions>
+        <sql>ALTER TABLE source_cdr_configuration DROP INDEX UK5j467qc3gn4he5gej9l8g64v7</sql>
+        <createIndex tableName="source_cdr_configuration" unique="true" indexName="uk_source_cdr_config">
+            <column name="source_id"/>
+            <column name="field_name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: SKIPPED - source_cdr_configuration has FK constraints. Manual intervention required.</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-31" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="pulse_config"/>
+                <not>
+                    <indexExists tableName="pulse_config" indexName="uk_pulse_config_pulse_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="pulse_config" unique="true" indexName="uk_pulse_config_pulse_name">
+            <column name="pulse_name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create pulse_config unique constraint with deleted_at (new index)</comment>
+    </changeSet>
+
+    <changeSet id="add-deleted-at-32" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="source_configuration"/>
+                <not>
+                    <indexExists tableName="source_configuration" indexName="uk_source_configuration_topic_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="source_configuration" unique="true" indexName="uk_source_configuration_topic_name">
+            <column name="topic_name"/>
+            <column name="deleted_at"/>
+        </createIndex>
+        <comment>Phase 3: Create source_configuration unique constraint with deleted_at (new index)</comment>
+    </changeSet>
+
+    <changeSet id="fix-all-soft-delete-indexes" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="organizations"/>
+        </preConditions>
+        <sql>
+            -- ================================================
+            -- PARTNERS: Drop partner_code, Create uk_partners_partner_code
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'partners' AND index_name = 'partner_code' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'partners' AND index_name = 'partner_code') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `partner_code` ON partners', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'partners' AND index_name = 'uk_partners_partner_code');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_partners_partner_code ON partners (partner_code, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- COUNTRIES: Drop name, Create uk_countries_name
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'countries' AND index_name = 'name' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'countries' AND index_name = 'name') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `name` ON countries', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'countries' AND index_name = 'uk_countries_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_countries_name ON countries (name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- ACCOUNTS: Drop account_code, Create uk_accounts_account_code
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'accounts' AND index_name = 'account_code' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'accounts' AND index_name = 'account_code') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `account_code` ON accounts', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'accounts' AND index_name = 'uk_accounts_account_code');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_accounts_account_code ON accounts (account_code, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- RATE_PACKAGES: Drop package_name, Create uk_rate_packages_package_name
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_packages' AND index_name = 'package_name' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_packages' AND index_name = 'package_name') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `package_name` ON rate_packages', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_packages' AND index_name = 'uk_rate_packages_package_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_rate_packages_package_name ON rate_packages (package_name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- RATE_PACKAGE_GROUPS: Drop name, Create uk_rate_package_groups_name
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_package_groups' AND index_name = 'name' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_package_groups' AND index_name = 'name') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `name` ON rate_package_groups', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'rate_package_groups' AND index_name = 'uk_rate_package_groups_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_rate_package_groups_name ON rate_package_groups (name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- PRODUCT_PLANS: Drop name, Create uk_product_plans_name
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'product_plans' AND index_name = 'name' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'product_plans' AND index_name = 'name') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `name` ON product_plans', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'product_plans' AND index_name = 'uk_product_plans_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_product_plans_name ON product_plans (name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- AGREEMENTS: Drop agreement_code, Create uk_agreements_agreement_code
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'agreements' AND index_name = 'agreement_code' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'agreements' AND index_name = 'agreement_code') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `agreement_code` ON agreements', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'agreements' AND index_name = 'uk_agreements_agreement_code');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_agreements_agreement_code ON agreements (agreement_code, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- ORGANIZATIONS: Drop name, Create uk_organization_name
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'organizations' AND index_name = 'name' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'organizations' AND index_name = 'name') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `name` ON organizations', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'organizations' AND index_name = 'uk_organization_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_organization_name ON organizations (name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- PREFIXES: Drop prefix, Create uk_country_prefix
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'prefixes' AND index_name = 'prefix' AND seq_in_index = 1 AND (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'prefixes' AND index_name = 'prefix') = 1);
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `prefix` ON prefixes', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'prefixes' AND index_name = 'uk_country_prefix');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_country_prefix ON prefixes (country_id, prefix, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            -- ================================================
+            -- SOURCE_CDR_CONFIGURATION: Drop FK, Drop old index, Create uk_source_cdr_config
+            -- ================================================
+            SET @exist := (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'source_cdr_configuration' AND CONSTRAINT_NAME = 'FKfhn99ay80s4gr28eokhd9loml');
+            SET @sqlstmt := IF(@exist > 0, 'ALTER TABLE source_cdr_configuration DROP FOREIGN KEY FKfhn99ay80s4gr28eokhd9loml', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'source_cdr_configuration' AND index_name = 'UK5j467qc3gn4he5gej9l8g64v7');
+            SET @sqlstmt := IF(@exist > 0, 'DROP INDEX `UK5j467qc3gn4he5gej9l8g64v7` ON source_cdr_configuration', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'source_cdr_configuration' AND index_name = 'uk_source_cdr_config');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_source_cdr_config ON source_cdr_configuration (source_id, field_name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Fix: Drop all old single-column unique indexes and create composite indexes with deleted_at for soft delete support</comment>
+    </changeSet>
+
+    <changeSet id="add-prefix-name-unique-index" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="prefixes"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'prefixes' AND index_name = 'uk_country_prefix_name');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE UNIQUE INDEX uk_country_prefix_name ON prefixes (country_id, prefix_name, deleted_at)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Add unique index for prefix_name per country with soft delete support</comment>
+    </changeSet>
+
+    <changeSet id="add-partner-name-index" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="partners"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'partners' 
+                AND index_name = 'uk_partners_partner_name');
+            SET @sqlstmt := IF(@exist = 0, 
+                'CREATE UNIQUE INDEX uk_partners_partner_name ON partners (partner_name, deleted_at)', 
+                'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Add unique composite index on partner_name and deleted_at for soft delete support</comment>
+    </changeSet>
+
+    <changeSet id="add-next-billing-cycle-start-date-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="agreements" columnName="next_billing_cycle_start_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="next_billing_cycle_start_date" type="date"/>
+        </addColumn>
+        <sql>UPDATE agreements SET next_billing_cycle_start_date = billing_cycle_start_date WHERE next_billing_cycle_start_date IS NULL</sql>
+        <comment>Add next_billing_cycle_start_date column to agreements table for calculation purposes</comment>
+    </changeSet>
+
+    <!-- Create billing_scheduler_status table -->
+    <changeSet id="billing-scheduler-status-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="billing_scheduler_status"/>
+            </not>
+        </preConditions>
+        <createTable tableName="billing_scheduler_status">
+            <column name="scheduler_status_id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="status" type="ENUM('PENDING', 'RUNNING', 'SUCCESS', 'FAILED')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_billing_run_time" type="datetime"/>
+            <column name="next_billing_start_date" type="datetime"/>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="datetime"/>
+        </createTable>
+        <comment>Create billing_scheduler_status table for tracking billing scheduler execution status</comment>
+    </changeSet>
+
+    <!-- Create billing_scheduler_audit_log table -->
+    <changeSet id="billing-scheduler-audit-log-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="billing_scheduler_audit_log"/>
+            </not>
+        </preConditions>
+        <createTable tableName="billing_scheduler_audit_log">
+            <column name="audit_id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="scheduler_status_id" type="BIGINT"/>
+            <column name="event_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_message" type="TEXT"/>
+            <column name="no_of_agreements_processed" type="BIGINT"/>
+            <column name="execution_time_ms" type="BIGINT"/>
+            <column name="error_details" type="TEXT"/>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="datetime"/>
+        </createTable>
+        <comment>Create billing_scheduler_audit_log table for tracking billing scheduler events</comment>
+    </changeSet>
+
+    <!-- Create index on billing_scheduler_audit_log for faster lookups -->
+    <changeSet id="billing-scheduler-audit-log-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="billing_scheduler_audit_log"/>
+                <not>
+                    <indexExists tableName="billing_scheduler_audit_log" indexName="idx_billing_audit_status_id"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="billing_scheduler_audit_log" indexName="idx_billing_audit_status_id">
+            <column name="scheduler_status_id"/>
+        </createIndex>
+        <createIndex tableName="billing_scheduler_audit_log" indexName="idx_billing_audit_created_date">
+            <column name="created_date"/>
+        </createIndex>
+        <comment>Create indexes on billing_scheduler_audit_log for faster queries</comment>
+    </changeSet>
+
+    <!-- Add foreign key constraint from billing_scheduler_audit_log to billing_scheduler_status -->
+    <changeSet id="billing-scheduler-audit-log-3" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="billing_scheduler_audit_log"/>
+                <not>
+                    <foreignKeyConstraintExists foreignKeyName="fk_billing_audit_scheduler_status"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="billing_scheduler_audit_log"
+                                 baseColumnNames="scheduler_status_id"
+                                 referencedTableName="billing_scheduler_status"
+                                 referencedColumnNames="scheduler_status_id"
+                                 constraintName="fk_billing_audit_scheduler_status"
+                                 onDelete="SET NULL"
+                                 onUpdate="RESTRICT"/>
+        <comment>Add foreign key constraint from billing_scheduler_audit_log to billing_scheduler_status</comment>
+    </changeSet>
+
+    <!-- Add noOfFailedInvoices column to billing_scheduler_audit_log -->
+    <changeSet id="billing-scheduler-audit-log-4" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="billing_scheduler_audit_log"/>
+                <not>
+                    <columnExists tableName="billing_scheduler_audit_log" columnName="no_of_failed_invoices"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="billing_scheduler_audit_log">
+            <column name="no_of_failed_invoices" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>UPDATE billing_scheduler_audit_log SET no_of_failed_invoices = 0 WHERE no_of_failed_invoices IS NULL</sql>
+        <comment>Add noOfFailedInvoices column to billing_scheduler_audit_log for tracking failed invoices per scheduler run</comment>
+    </changeSet>
+
+    <!-- Add failed_invoices table -->
+    <changeSet id="failed-invoices-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="failed_invoices"/>
+            </not>
+        </preConditions>
+        <createTable tableName="failed_invoices">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="agreement_id" type="BIGINT"/>
+            <column name="billing_start_date" type="date"/>
+            <column name="billing_end_date" type="date"/>
+            <column name="error_message" type="TEXT"/>
+            <column name="billing_date" type="date"/>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted_at" type="datetime"/>
+        </createTable>
+        <sql>ALTER TABLE failed_invoices ALTER COLUMN is_deleted SET DEFAULT 0</sql>
+        <comment>Create failed_invoices table for tracking failed invoice generations</comment>
+    </changeSet>
+
+    <!-- Add foreign key constraint from failed_invoices to agreements -->
+    <changeSet id="failed-invoices-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="failed_invoices"/>
+                <not>
+                    <foreignKeyConstraintExists foreignKeyName="fk_failed_invoices_agreement"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="failed_invoices"
+                                 baseColumnNames="agreement_id"
+                                 referencedTableName="agreements"
+                                 referencedColumnNames="agreement_id"
+                                 constraintName="fk_failed_invoices_agreement"
+                                 onDelete="SET NULL"
+                                 onUpdate="RESTRICT"/>
+        <comment>Add foreign key constraint from failed_invoices to agreements</comment>
+    </changeSet>
+
+</databaseChangeLog>

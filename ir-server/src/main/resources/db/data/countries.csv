@@ -1,0 +1,241 @@
+name,country_code,currency_code,currency_symbol,is_deleted
+Afghanistan,93,AFN,؋,0
+Albania,355,ALL,L,0
+Algeria,213,DZD,د.ج,0
+American Samoa,1-684,USD,$,0
+Andorra,376,EUR,€,0
+Angola,244,AOA,Kz,0
+Anguilla,1-264,XCD,$,0
+Antarctica,672,AUD,$,0
+Antigua and Barbuda,1-268,XCD,$,0
+Argentina,54,ARS,$,0
+Armenia,374,AMD,֏,0
+Aruba,297,AWG,ƒ,0
+Australia,61,AUD,$,0
+Austria,43,EUR,€,0
+Azerbaijan,994,AZN,₼,0
+Bahamas,1-242,BSD,$,0
+Bahrain,973,BHD,.د.ب,0
+Bangladesh,880,BDT,৳,0
+Barbados,1-246,BBD,$,0
+Belarus,375,BYN,Br,0
+Belgium,32,EUR,€,0
+Belize,501,BZD,$,0
+Benin,229,XOF,Fr,0
+Bermuda,1-441,BMD,$,0
+Bhutan,975,BTN,Nu.,0
+Bolivia,591,BOB,Bs.,0
+Bosnia and Herzegovina,387,BAM,KM,0
+Botswana,267,BWP,P,0
+Brazil,55,BRL,R$,0
+British Indian Ocean Territory,246,USD,$,0
+British Virgin Islands,1-284,USD,$,0
+Brunei,673,BND,$,0
+Bulgaria,359,BGN,лв,0
+Burkina Faso,226,XOF,Fr,0
+Burundi,257,BIF,Fr,0
+Cambodia,855,KHR,៛,0
+Cameroon,237,XAF,Fr,0
+Canada,1,CAD,$,0
+Cape Verde,238,CVE,$,0
+Cayman Islands,1-345,KYD,$,0
+Central African Republic,236,XAF,Fr,0
+Chad,235,XAF,Fr,0
+Chile,56,CLP,$,0
+China,86,CNY,¥,0
+Christmas Island,61,AUD,$,0
+Cocos Islands,61,AUD,$,0
+Colombia,57,COP,$,0
+Comoros,269,KMF,Fr,0
+Cook Islands,682,NZD,$,0
+Costa Rica,506,CRC,₡,0
+Croatia,385,EUR,€,0
+Cuba,53,CUP,$,0
+Curacao,599,ANG,ƒ,0
+Cyprus,357,EUR,€,0
+Czech Republic,420,CZK,Kč,0
+Democratic Republic of the Congo,243,CDF,Fr,0
+Denmark,45,DKK,kr,0
+Djibouti,253,DJF,Fr,0
+Dominica,1-767,XCD,$,0
+Dominican Republic,1-809,DOP,$,0
+East Timor,670,USD,$,0
+Ecuador,593,USD,$,0
+Egypt,20,EGP,£,0
+El Salvador,503,USD,$,0
+Equatorial Guinea,240,XAF,Fr,0
+Eritrea,291,ERN,Nfk,0
+Estonia,372,EUR,€,0
+Ethiopia,251,ETB,Br,0
+Falkland Islands,500,FKP,£,0
+Faroe Islands,298,DKK,kr,0
+Fiji,679,FJD,$,0
+Finland,358,EUR,€,0
+France,33,EUR,€,0
+French Polynesia,689,XPF,Fr,0
+Gabon,241,XAF,Fr,0
+Gambia,220,GMD,D,0
+Georgia,995,GEL,₾,0
+Germany,49,EUR,€,0
+Ghana,233,GHS,₵,0
+Gibraltar,350,GIP,£,0
+Greece,30,EUR,€,0
+Greenland,299,DKK,kr,0
+Grenada,1-473,XCD,$,0
+Guam,1-671,USD,$,0
+Guatemala,502,GTQ,Q,0
+Guernsey,44-1481,GBP,£,0
+Guinea,224,GNF,Fr,0
+Guinea-Bissau,245,XOF,Fr,0
+Guyana,592,GYD,$,0
+Haiti,509,HTG,G,0
+Honduras,504,HNL,L,0
+Hong Kong,852,HKD,$,0
+Hungary,36,HUF,Ft,0
+Iceland,354,ISK,kr,0
+India,91,INR,₹,0
+Indonesia,62,IDR,Rp,0
+Iran,98,IRR,﷼,0
+Iraq,964,IQD,ع.د,0
+Ireland,353,EUR,€,0
+Isle of Man,44-1624,GBP,£,0
+Israel,972,ILS,₪,0
+Italy,39,EUR,€,0
+Ivory Coast,225,XOF,Fr,0
+Jamaica,1-876,JMD,$,0
+Japan,81,JPY,¥,0
+Jersey,44-1534,GBP,£,0
+Jordan,962,JOD,د.ا,0
+Kazakhstan,7,KZT,₸,0
+Kenya,254,KES,Sh,0
+Kiribati,686,AUD,$,0
+Kosovo,383,EUR,€,0
+Kuwait,965,KWD,د.ك,0
+Kyrgyzstan,996,KGS,с,0
+Laos,856,LAK,₭,0
+Latvia,371,EUR,€,0
+Lebanon,961,LBP,ل.ل,0
+Lesotho,266,LSL,L,0
+Liberia,231,LRD,$,0
+Libya,218,LYD,ل.د,0
+Liechtenstein,423,CHF,Fr,0
+Lithuania,370,EUR,€,0
+Luxembourg,352,EUR,€,0
+Macau,853,MOP,P,0
+Macedonia,389,MKD,ден,0
+Madagascar,261,MGA,Ar,0
+Malawi,265,MWK,MK,0
+Malaysia,60,MYR,RM,0
+Maldives,960,MVR,.ރ,0
+Mali,223,XOF,Fr,0
+Malta,356,EUR,€,0
+Marshall Islands,692,USD,$,0
+Mauritania,222,MRU,UM,0
+Mauritius,230,MUR,₨,0
+Mayotte,262,EUR,€,0
+Mexico,52,MXN,$,0
+Micronesia,691,USD,$,0
+Moldova,373,MDL,L,0
+Monaco,377,EUR,€,0
+Mongolia,976,MNT,₮,0
+Montenegro,382,EUR,€,0
+Montserrat,1-664,XCD,$,0
+Morocco,212,MAD,د.م.,0
+Mozambique,258,MZN,MT,0
+Myanmar,95,MMK,Ks,0
+Namibia,264,NAD,$,0
+Nauru,674,AUD,$,0
+Nepal,977,NPR,₨,0
+Netherlands,31,EUR,€,0
+Netherlands Antilles,599,ANG,ƒ,0
+New Caledonia,687,XPF,Fr,0
+New Zealand,64,NZD,$,0
+Nicaragua,505,NIO,C$,0
+Niger,227,XOF,Fr,0
+Nigeria,234,NGN,₦,0
+Niue,683,NZD,$,0
+North Korea,850,KPW,₩,0
+Northern Mariana Islands,1-670,USD,$,0
+Norway,47,NOK,kr,0
+Oman,968,OMR,ر.ع.,0
+Pakistan,92,PKR,₨,0
+Palau,680,USD,$,0
+Palestine,970,ILS,₪,0
+Panama,507,PAB,B/.,0
+Papua New Guinea,675,PGK,K,0
+Paraguay,595,PYG,₲,0
+Peru,51,PEN,S/,0
+Philippines,63,PHP,₱,0
+Pitcairn,64,NZD,$,0
+Poland,48,PLN,zł,0
+Portugal,351,EUR,€,0
+Puerto Rico,1-787,USD,$,0
+Qatar,974,QAR,ر.ق,0
+Republic of the Congo,242,XAF,Fr,0
+Reunion,262,EUR,€,0
+Romania,40,RON,lei,0
+Russia,7,RUB,₽,0
+Rwanda,250,RWF,Fr,0
+Saint Barthelemy,590,EUR,€,0
+Saint Helena,290,SHP,£,0
+Saint Kitts and Nevis,1-869,XCD,$,0
+Saint Lucia,1-758,XCD,$,0
+Saint Martin,590,EUR,€,0
+Saint Pierre and Miquelon,508,EUR,€,0
+Saint Vincent and the Grenadines,1-784,XCD,$,0
+Samoa,685,WST,T,0
+San Marino,378,EUR,€,0
+Sao Tome and Principe,239,STN,Db,0
+Saudi Arabia,966,SAR,ر.س,0
+Senegal,221,XOF,Fr,0
+Serbia,381,RSD,дин,0
+Seychelles,248,SCR,₨,0
+Sierra Leone,232,SLL,Le,0
+Singapore,65,SGD,$,0
+Sint Maarten,1-721,ANG,ƒ,0
+Slovakia,421,EUR,€,0
+Slovenia,386,EUR,€,0
+Solomon Islands,677,SBD,$,0
+Somalia,252,SOS,Sh,0
+South Africa,27,ZAR,R,0
+South Korea,82,KRW,₩,0
+South Sudan,211,SSP,£,0
+Spain,34,EUR,€,0
+Sri Lanka,94,LKR,Rs,0
+Sudan,249,SDG,ج.س.,0
+Suriname,597,SRD,$,0
+Svalbard and Jan Mayen,47,NOK,kr,0
+Swaziland,268,SZL,L,0
+Sweden,46,SEK,kr,0
+Switzerland,41,CHF,Fr,0
+Syria,963,SYP,£,0
+Taiwan,886,TWD,$,0
+Tajikistan,992,TJS,ЅМ,0
+Tanzania,255,TZS,Sh,0
+Thailand,66,THB,฿,0
+Togo,228,XOF,Fr,0
+Tokelau,690,NZD,$,0
+Tonga,676,TOP,T$,0
+Trinidad and Tobago,1-868,TTD,$,0
+Tunisia,216,TND,د.ت,0
+Turkey,90,TRY,₺,0
+Turkmenistan,993,TMT,m,0
+Turks and Caicos Islands,1-649,USD,$,0
+Tuvalu,688,AUD,$,0
+U.S. Virgin Islands,1-340,USD,$,0
+Uganda,256,UGX,Sh,0
+Ukraine,380,UAH,₴,0
+United Arab Emirates,971,AED,د.إ,0
+United Kingdom,44,GBP,£,0
+United States,1,USD,$,0
+Uruguay,598,UYU,$,0
+Uzbekistan,998,UZS,so'm,0
+Vanuatu,678,VUV,Vt,0
+Vatican,379,EUR,€,0
+Venezuela,58,VES,Bs.,0
+Vietnam,84,VND,₫,0
+Wallis and Futuna,681,XPF,Fr,0
+Western Sahara,212,MAD,د.م.,0
+Yemen,967,YER,﷼,0
+Zambia,260,ZMW,ZK,0
+Zimbabwe,263,ZWL,$,0

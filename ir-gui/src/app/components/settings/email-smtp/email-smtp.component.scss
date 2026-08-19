@@ -1,0 +1,300 @@
+
+.smtp-config-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .card-header {
+    background-color: #ff9800;
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+    border-bottom: none;
+
+    h4 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: white;
+    }
+  }
+
+  .card-body {
+    padding: 2rem 1.5rem;
+    background-color: #fff;
+  }
+
+  .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+
+  i {
+    font-size: 0.875rem;
+    color: #999;
+    cursor: help;
+  }
+}
+
+
+.password-input-wrapper {
+  position: relative;
+
+  .input-group {
+    .input-group-text {
+      background-color: #f8f9fa;
+      border-right: none;
+      color: #6c757d;
+      padding: 0.5rem 0.75rem;
+
+      i {
+        font-size: 1.125rem;
+      }
+    }
+
+    .form-control {
+      border-left: none;
+      padding-left: 0;
+
+      &:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+      }
+
+      &.is-invalid {
+        border-color: #dc3545;
+      }
+    }
+
+    .btn-outline-secondary {
+      border-left: none;
+      background-color: transparent;
+      color: #6c757d;
+      border-color: #dee2e6;
+      padding: 0.5rem 0.75rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #f8f9fa;
+        color: #495057;
+        border-color: #dee2e6;
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      i {
+        font-size: 1.125rem;
+      }
+    }
+  }
+}
+
+
+.form-control {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #ff9800;
+    box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.25);
+  }
+
+  &::placeholder {
+    color: #adb5bd;
+  }
+
+  &.is-invalid {
+    border-color: #dc3545;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+  }
+}
+
+
+.text-danger {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+
+.btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: #ff9800;
+  border-color: #ff9800;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background-color: #f57c00;
+    border-color: #f57c00;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.5);
+  }
+}
+
+.btn-outline-primary {
+  border-color: #ff9800;
+  color: #ff9800;
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: #ff9800;
+    border-color: #ff9800;
+    color: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.25);
+  }
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+  background-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+  }
+}
+
+
+.page-header {
+  margin-bottom: 1.5rem;
+
+  .page-title {
+    h4 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    h6 {
+      margin: 0.25rem 0 0 0;
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: #6c757d;
+    }
+  }
+}
+
+
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+  border-width: 0.25em;
+
+  &.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+  }
+}
+
+.text-primary {
+  color: #ff9800 !important;
+}
+
+
+@media (max-width: 768px) {
+  .smtp-config-card {
+    .card-body {
+      padding: 1.5rem 1rem;
+    }
+
+    .card-footer {
+      padding: 1rem;
+
+      .d-flex {
+        flex-direction: column;
+
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-header {
+    .page-title {
+      h4 {
+        font-size: 1.25rem;
+      }
+    }
+  }
+
+  .smtp-config-card {
+    .card-header {
+      padding: 1rem;
+
+      h4 {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+
+.tooltip {
+  font-size: 0.875rem;
+}
+
+
+.ti-info-circle {
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #ff9800 !important;
+  }
+}

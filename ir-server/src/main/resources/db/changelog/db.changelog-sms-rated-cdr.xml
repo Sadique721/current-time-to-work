@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="create-sms-rated-cdr-table" author="system">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="sms_rated_cdr"/>
+            </not>
+        </preConditions>
+        <createTable tableName="sms_rated_cdr">
+            <column autoIncrement="true" name="sms_rated_cdr_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+
+            <column name="called_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="calling_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Time fields made nullable as per requirement -->
+            <column name="start_time" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="end_time" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="duration_minutes" type="DECIMAL(10, 2)">
+                <constraints nullable="true"/>
+            </column>
+            
+            <!-- SMS specific field -->
+            <column name="event_nos" type="INT"/>
+
+            <column name="incoming_account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="incoming_is_source_destination_match" type="BIT(1)"/>
+            <column name="incoming_matched_destination_prefix" type="VARCHAR(255)"/>
+            <column name="incoming_matched_source_prefix" type="VARCHAR(255)"/>
+            <column name="incoming_rate_detail_id" type="BIGINT"/>
+            <column name="incoming_rate_package_id" type="BIGINT"/>
+            <column name="incoming_rate_package_name" type="VARCHAR(255)"/>
+            <column name="incoming_rating_failure_reason" type="VARCHAR(255)"/>
+            <column name="incoming_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="incoming_total_cost" type="DECIMAL(10, 4)"/>
+            
+            <column name="is_summarized" type="BIT(1)" defaultValueBoolean="false"/>
+            <column name="is_tap_out_generated" type="BIT(1)" defaultValueBoolean="false"/>
+
+            <column name="outgoing_account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="outgoing_applied_rate" type="DECIMAL(10, 4)"/>
+            <column name="outgoing_is_source_destination_match" type="BIT(1)"/>
+            <column name="outgoing_matched_destination_prefix" type="VARCHAR(255)"/>
+            <column name="outgoing_matched_source_prefix" type="VARCHAR(255)"/>
+            <column name="outgoing_rate_detail_id" type="BIGINT"/>
+            <column name="outgoing_rate_package_id" type="BIGINT"/>
+            <column name="outgoing_rate_package_name" type="VARCHAR(255)"/>
+            <column name="outgoing_rating_failure_reason" type="VARCHAR(255)"/>
+            <column name="outgoing_rating_status" type="ENUM('RATED', 'UNRATED', 'FAILED', 'PENDING')"/>
+            <column name="outgoing_total_cost" type="DECIMAL(10, 4)"/>
+
+            <column name="rated_at" type="datetime"/>
+            <column name="source_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="line_of_business" type="ENUM('INTERCONNECT', 'ROAMING')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="home_plmn" type="VARCHAR(255)"/>
+            <column name="visited_plmn" type="VARCHAR(255)"/>
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')"/>
+            <column name="call_type" type="ENUM('MOC','MTC','GPRS','SMS','SUPPL','CONTENT','MO_VOICE','MT_VOICE','MO_SMS','MT_SMS')"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

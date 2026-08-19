@@ -1,0 +1,105 @@
+<div class="card table-list-card-xl">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <h5 class="card-title">Ledger Details</h5>
+  </div>
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-6 d-flex align-items-end gap-2">
+        <custom-date
+          [formControlRef]="startDate"
+          placeholder="Start Date"
+        ></custom-date>
+        <custom-date
+          [formControlRef]="endDate"
+          placeholder="End Date"
+          [minDate]="startDate.value"
+        ></custom-date>
+
+        <button
+          type="button"
+          class="btn btn-primary ms-2 mb-3"
+          (click)="onSearch()"
+        >
+          Search
+        </button>
+        <button class="btn btn-outline-secondary mb-3" (click)="clearSearch()">
+          Clear
+        </button>
+      </div>
+      <div
+        class="col-md-4 d-flex flex-column align-items-end justify-content-end mb-2"
+      >
+        <div class="dataGroup mb-2">
+          <span class="datalbl d-inline-block fw-bold">Opening Amount :</span>
+          <span class="fw-bold">
+            {{
+              customerLedgerData.customerLedgerInfoPojo?.openingAmount
+                | currency: currency
+            }}
+          </span>
+        </div>
+        <div class="dataGroup">
+          <span class="datalbl d-inline-block fw-bold">Closing Balance :</span>
+          <span class="fw-bold">
+            {{
+              customerLedgerData.customerLedgerInfoPojo?.closingBalance
+                | currency: currency
+            }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Create Date</th>
+            <th>Receipt No./Credit No.</th>
+            <th>Invoice No.</th>
+            <th>Category</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Bal Amount</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of ledgerData; track data.id; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ data.create_DATE }}</td>
+              <td>{{ data.paymentRefNo }}</td>
+              <td class="myclass">
+                <span *ngFor="let invoice of data.invoiceNo"
+                  >{{ invoice }} </span
+                ><br />
+              </td>
+              <td>{{ data.transcategory }}</td>
+              <td>
+                {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+              </td>
+              <td>
+                {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+              </td>
+              <td>
+                {{ data.balAmount | currency: currency : "symbol" : "1.2-2" }}
+              </td>
+              <td>{{ data.remarks }}</td>
+            </tr>
+          }
+          @if (ledgerData.length == 0) {
+            <tr>
+              <td colspan="8">
+                <h5 class="no-record">No ledger records available</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

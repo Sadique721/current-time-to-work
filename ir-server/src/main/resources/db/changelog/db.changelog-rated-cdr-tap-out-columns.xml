@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Add line_of_business and is_tap_out_generated columns to rated_cdr table.
+        
+        Purpose:
+          line_of_business — distinguishes INTERCONNECT vs ROAMING CDRs in rated_cdr table
+          is_tap_out_generated — prevents duplicate TAP OUT file generation for same CDR
+    -->
+
+    <!-- 1. Add line_of_business column to rated_cdr -->
+    <changeSet id="rated-cdr-tap-out-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'rated_cdr'
+                AND COLUMN_NAME = 'line_of_business'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE rated_cdr
+            ADD COLUMN line_of_business ENUM('INTERCONNECT', 'ROAMING') NOT NULL DEFAULT 'INTERCONNECT'
+            COMMENT 'Line of business: INTERCONNECT (carrier) or ROAMING (TAP)';
+        </sql>
+    </changeSet>
+
+    <!-- 2. Add index on rated_cdr.line_of_business -->
+    <changeSet id="rated-cdr-tap-out-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="rated_cdr" indexName="idx_rated_cdr_lob"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="rated_cdr" indexName="idx_rated_cdr_lob">
+            <column name="line_of_business"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 3. Add is_tap_out_generated column to rated_cdr -->
+    <changeSet id="rated-cdr-tap-out-3" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'rated_cdr'
+                AND COLUMN_NAME = 'is_tap_out_generated'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="rated_cdr">
+            <column name="is_tap_out_generated" type="BIT(1)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 4. Add index on rated_cdr.is_tap_out_generated for TAP OUT query performance -->
+    <changeSet id="rated-cdr-tap-out-4" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="rated_cdr" indexName="idx_rated_cdr_tap_out_generated"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="rated_cdr" indexName="idx_rated_cdr_tap_out_generated">
+            <column name="is_tap_out_generated"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 5. Composite index for the TAP OUT query (most selective first) -->
+    <changeSet id="rated-cdr-tap-out-5" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="rated_cdr" indexName="idx_rated_cdr_tap_out_query"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="rated_cdr" indexName="idx_rated_cdr_tap_out_query">
+            <column name="outgoing_account_id"/>
+            <column name="outgoing_rating_status"/>
+            <column name="is_tap_out_generated"/>
+            <column name="line_of_business"/>
+            <column name="rated_at"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

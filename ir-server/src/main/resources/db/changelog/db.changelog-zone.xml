@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Zone infrastructure for ROAMING line of business rating.
+
+        Two new tables:
+
+        1. zones
+           Stores billing zones. Each zone groups one or more PLMN prefixes
+           (visitedPlmn from RoamingCdr) under a single named zone.
+           Prefixes are stored as comma-separated values in prefix_pattern.
+           At startup, ZoneLookupService loads all zones into ZonePrefixTrie (in-memory).
+
+        2. zone_rate_mappings
+           Links a RatePackageGroup + Zone to a specific RatePackage[ZONE, ROAMING].
+           This is the bridge that connects the zone lookup result to a rate.
+
+        Rating flow:
+           RoamingCdr.visitedPlmn
+               → ZonePrefixTrie.search(visitedPlmn)         → zoneName
+               → zones.zone_name = zoneName                 → zone_id
+               → zone_rate_mappings(group_id, zone_id)      → rate_package_id
+               → rate_packages[line_of_business=ROAMING]    → calculateTotalCost()
+    -->
+
+    <!-- 1. Create zones table -->
+    <changeSet id="zone-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="zones"/></not>
+        </preConditions>
+        <createTable tableName="zones">
+            <column autoIncrement="true" name="zone_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <!-- Zone name used as lookup key after trie search e.g. "ZONE_EU", "ZONE_AFRICA" -->
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <!-- Comma-separated PLMN prefixes e.g. "23801,23802,26201,26202"
+                 Each prefix is inserted into ZonePrefixTrie at startup -->
+            <column name="prefix_pattern" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_desc" type="VARCHAR(255)"/>
+            <!-- Minimum valid PLMN string length for this zone (typically 5) -->
+            <column name="min_length" type="INT"/>
+            <!-- Maximum valid PLMN string length for this zone (typically 6) -->
+            <column name="max_length" type="INT"/>
+            <column name="created_date" type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 2. Index on zones.zone_name for fast lookup after trie returns zone name -->
+    <changeSet id="zone-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="zones" indexName="idx_zone_name"/></not>
+        </preConditions>
+        <createIndex tableName="zones" indexName="idx_zone_name">
+            <column name="zone_name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 3. Create zone_rate_mappings table -->
+    <changeSet id="zone-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="zone_rate_mappings"/></not>
+        </preConditions>
+        <createTable tableName="zone_rate_mappings">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <!-- FK to rate_package_groups — from roaming partner's account chain -->
+            <column name="rate_package_group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <!-- FK to zones — resolved from visitedPlmn via ZonePrefixTrie -->
+            <column name="zone_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <!-- FK to rate_packages — must have line_of_business=ROAMING, rate_package_type=ZONE -->
+            <column name="rate_package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <!-- Validity window for this mapping -->
+            <column name="effective_from" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_to" type="DATETIME"/>
+            <column name="created_date" type="DATETIME"/>
+            <column name="modified_date" type="DATETIME"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 4. Composite index for the primary rating lookup: group + zone + time -->
+    <changeSet id="zone-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="zone_rate_mappings" indexName="idx_zone_rate_mapping_group"/></not>
+        </preConditions>
+        <createIndex tableName="zone_rate_mappings" indexName="idx_zone_rate_mapping_group">
+            <column name="rate_package_group_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="zone-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="zone_rate_mappings" indexName="idx_zone_rate_mapping_zone"/></not>
+        </preConditions>
+        <createIndex tableName="zone_rate_mappings" indexName="idx_zone_rate_mapping_zone">
+            <column name="zone_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 5. Foreign keys -->
+    <changeSet id="zone-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_zone_rate_mapping_group"/></not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="zone_rate_mappings" baseColumnNames="rate_package_group_id"
+                referencedTableName="rate_package_groups" referencedColumnNames="rate_package_group_id"
+                constraintName="fk_zone_rate_mapping_group"/>
+    </changeSet>
+
+    <changeSet id="zone-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_zone_rate_mapping_zone"/></not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="zone_rate_mappings" baseColumnNames="zone_id"
+                referencedTableName="zones" referencedColumnNames="zone_id"
+                constraintName="fk_zone_rate_mapping_zone"/>
+    </changeSet>
+
+    <changeSet id="zone-8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_zone_rate_mapping_package"/></not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="zone_rate_mappings" baseColumnNames="rate_package_id"
+                referencedTableName="rate_packages" referencedColumnNames="rate_package_id"
+                constraintName="fk_zone_rate_mapping_package"/>
+    </changeSet>
+
+    <!-- Align rate_package_type enum with Java RatePackageType (ZONE_DESTINATION_BASED) -->
+    <changeSet id="zone-9" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="rate_packages"/>
+            <columnExists tableName="rate_packages" columnName="rate_package_type"/>
+        </preConditions>
+
+        <!-- Step 0: Clean up invalid/truncated values in rate_package_type first -->
+        <update tableName="rate_packages">
+            <column name="rate_package_type" value="DESTINATION_BASED"/>
+            <where>rate_package_type NOT IN ('DESTINATION_BASED', 'SOURCE_DESTINATION_BASED', 'ZONE')</where>
+        </update>
+
+        <!-- Step 1: Add ZONE_DESTINATION_BASED to existing ENUM to allow valid updates -->
+        <modifyDataType
+            tableName="rate_packages"
+            columnName="rate_package_type"
+            newDataType="ENUM('DESTINATION_BASED', 'SOURCE_DESTINATION_BASED', 'ZONE', 'ZONE_DESTINATION_BASED') NOT NULL"/>
+
+        <!-- Step 2: Migrate all existing ZONE values to ZONE_DESTINATION_BASED -->
+        <update tableName="rate_packages">
+            <column name="rate_package_type" value="ZONE_DESTINATION_BASED"/>
+            <where>rate_package_type = 'ZONE'</where>
+        </update>
+
+        <!-- Step 3: Remove ZONE from ENUM (no rows reference it anymore) -->
+        <modifyDataType
+            tableName="rate_packages"
+            columnName="rate_package_type"
+            newDataType="ENUM('DESTINATION_BASED', 'SOURCE_DESTINATION_BASED', 'ZONE_DESTINATION_BASED') NOT NULL"/>
+    </changeSet>
+
+</databaseChangeLog>

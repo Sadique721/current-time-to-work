@@ -1,0 +1,133 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Pulse rating</h4>
+      <h6>Manage your pulse rating</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn">
+    <a
+      class="btn btn-primary"
+      *ngIf="permission.create"
+      (click)="openPulseRatingAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Add Pulse Rating
+    </a>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="add-pulse-rating"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <app-pulse-rating-add-edit
+      *ngIf="selectedPulseRating"
+      [selectedPulseRating]="selectedPulseRating"
+      (close)="onCloseAddEdit($event)"
+    ></app-pulse-rating-add-edit>
+  </div>
+</div>
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center">
+      <div class="search-input">
+        <input
+          [formControl]="searchDataValue"
+          type="search"
+          class="form-control"
+          placeholder="Search by Pulse Name"
+          (keydown.enter)="searchData()"
+        />
+      </div>
+      <button class="btn btn-primary ms-2" (click)="searchData()">
+        Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Pulse Name</th>
+            <th>Service Type</th>
+            <th>Unit</th>
+            <th>No.of Units</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of tableData; track data.pulseId; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ data.pulseName }}</td>
+              <td>{{ data.serviceType }}</td>
+              <td>{{ data.unit }}</td>
+              <td>{{ data.noOfUnits }}</td>
+
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="me-2 p-2"
+                    *ngIf="permission.edit"
+                    matTooltip="Edit"
+                    matTooltipPosition="above"
+                    (click)="openPulseRatingAddEdit(data)"
+                  >
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    class="confirm-text p-2"
+                    *ngIf="permission.delete"
+                    matTooltip="Delete"
+                    matTooltipPosition="above"
+                    (click)="confirmDelete(data.pulseId)"
+                  >
+                    <i data-feather="trash-2" class="feather icon-trash-2"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (tableData.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

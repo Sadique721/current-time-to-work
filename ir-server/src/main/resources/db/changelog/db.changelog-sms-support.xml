@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Add service_type to source_configuration to differentiate VOICE vs SMS sources -->
+    <changeSet id="sms-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'source_configuration'
+                AND COLUMN_NAME = 'service_type'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE source_configuration
+            ADD COLUMN service_type ENUM('VOICE','SMS','USAGE','DATA') NOT NULL DEFAULT 'VOICE'
+            COMMENT 'Service type for this source: VOICE uses duration-based cost, SMS uses message-count-based cost';
+        </sql>
+    </changeSet>
+
+    <!-- Add message_count to rated_cdr for SMS billing -->
+    <changeSet id="sms-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'rated_cdr'
+                AND COLUMN_NAME = 'message_count'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE rated_cdr
+            ADD COLUMN message_count INT NULL
+            COMMENT 'Number of SMS messages — populated for SMS CDRs, null for VOICE/USAGE';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

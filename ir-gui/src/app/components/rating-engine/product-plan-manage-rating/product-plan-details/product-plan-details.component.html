@@ -1,0 +1,92 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ selectedProductPlan.name }} — Details</h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingproductplan">
+      <i class="feather icon-arrow-left me-2"></i>Back to Product Plan List
+    </a>
+  </div>
+</div>
+
+<!-- Basic Details -->
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Basic Details</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Product Plan Name</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ selectedProductPlan.name || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Description</p>
+              <span class="text-gray-900 fs-13">{{ selectedProductPlan.description || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Package Type</p>
+              <span class="text-gray-900 fs-13">{{ selectedProductPlan.packageType || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rate Package Groups (Reorderable) -->
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">Rate Package Groups</h6>
+      </div>
+      <div class="card-body">
+        <p class="text-muted fs-13 mb-3">
+          <i class="ti ti-info-circle me-1"></i>
+          List of rate package groups included in this product plan.
+        </p>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th style="width:60px;" class="text-center">#</th>
+                <th>Rate Package Group Name</th>
+                <th>Service Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let row of groupRows; let i = index"
+              >
+                <td class="text-center fw-bold text-muted">{{ i + 1 }}</td>
+                <td>
+                  <span class="fw-medium">{{ row.groupName }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-info-transparent text-info">{{ row.serviceType }}</span>
+                </td>
+              </tr>
+              <tr *ngIf="groupRows.length === 0">
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="ti ti-inbox fs-2 d-block mb-2"></i>
+                  No groups in this plan.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<div class="mb-3 col" id="custom-select">
+  <div class="add-newplus row">
+    <mat-label class="pt-0 pb-0 col-lg-9">
+      {{ label }}
+      <span
+        *ngIf="formControlRef.hasValidator(isControlRequired)"
+        class="text-danger"
+        >*</span
+      >
+    </mat-label>
+
+    <div class="col-lg-3">
+      <a
+        *ngIf="isAddAllow"
+        href="javascript:void(0);"
+        data-bs-toggle="modal"
+        [attr.data-bs-target]="dataBsTarget"
+        ><i data-feather="plus-circle" class="plus-down-add"></i
+        ><span>Add New</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="input-group input-group-sm">
+    <p-select
+      *ngIf="!isMultiSelect"
+      class="custom-serchable-dropdown"
+      [options]="options"
+      [optionLabel]="optionLabel"
+      [optionValue]="optionValue"
+      [formControl]="formControlRef"
+      [placeholder]="placeholder"
+      [filter]="filter"
+      [filterBy]="filterBy"
+      [showClear]="shouldShowClear"
+      [virtualScroll]="virtualScroll || options.length > 100"
+      [virtualScrollItemSize]="virtualScrollItemSize || 30"
+      (onFilter)="onSearch.emit($event)"
+      [ngClass]="{
+        'is-invalid-select':
+          formControlRef.hasValidator(isControlRequired) &&
+          formControlRef.invalid &&
+          formControlRef.touched,
+      }"
+    >
+      <ng-template pTemplate="item" let-option>
+        <ng-container
+          *ngIf="itemTemplateRef"
+          [ngTemplateOutlet]="itemTemplateRef"
+          [ngTemplateOutletContext]="{ $implicit: option }"
+        ></ng-container>
+
+        <div *ngIf="!itemTemplateRef" class="custom-dropdown-item">
+          {{ option?.[optionLabel] }}
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="selectedItem" let-selectedOption>
+        <ng-container
+          *ngIf="selectedItemTemplateRef"
+          [ngTemplateOutlet]="selectedItemTemplateRef"
+          [ngTemplateOutletContext]="{ $implicit: selectedOption }"
+        ></ng-container>
+
+        <span *ngIf="!selectedItemTemplateRef" class="selected-item-custom">
+          {{ selectedOption?.[optionLabel] }}
+        </span>
+      </ng-template>
+    </p-select>
+
+    <p-multiSelect
+      *ngIf="isMultiSelect"
+      class="custom-serchable-dropdown"
+      [options]="options"
+      [optionLabel]="optionLabel"
+      [optionValue]="optionValue"
+      [formControl]="formControlRef"
+      [placeholder]="placeholder"
+      [filter]="filter"
+      [filterBy]="filterBy"
+      [showClear]="shouldShowClear"
+      [virtualScroll]="virtualScroll || options.length > 100"
+      [virtualScrollItemSize]="virtualScrollItemSize || 30"
+      (onFilter)="onSearch.emit($event)"
+      (onChange)="onOptionChange.emit($event)"
+      [ngClass]="{
+        'is-invalid-select':
+          formControlRef.hasValidator(isControlRequired) &&
+          formControlRef.invalid &&
+          formControlRef.touched,
+      }"
+    >
+      <ng-template pTemplate="selectedItems" let-selectedItems>
+        <span class="selected-item-custom" *ngIf="selectedItems?.length > 0">
+          {{ getSelectedLabels(selectedItems) }}
+        </span>
+      </ng-template>
+
+      <ng-template let-option pTemplate="item">
+        <div class="custom-dropdown-item">
+          {{ option?.[optionLabel] }}
+        </div>
+      </ng-template>
+    </p-multiSelect>
+  </div>
+
+  <div
+    *ngIf="
+      (formControlRef.hasValidator(isControlRequired) &&
+        formControlRef.invalid &&
+        formControlRef.touched) ||
+      (errorMessage && formControlRef.invalid && formControlRef.touched)
+    "
+    class="invalid-feedback-msg mt-1"
+  >
+    {{ errorMessage || label + " is required" }}
+  </div>
+</div>

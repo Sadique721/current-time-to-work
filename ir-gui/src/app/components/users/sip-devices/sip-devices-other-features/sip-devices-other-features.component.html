@@ -1,0 +1,886 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Other Features</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          <i class="feather icon-arrow-left me-2"></i>Back to SIP Devices List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div *ngIf="isLoading && !selectedDevice" class="card">
+  <div class="card-body text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Loading device features...</p>
+  </div>
+</div>
+
+<div class="card features-tabs-card" *ngIf="!isLoading || selectedDevice">
+  <div class="card-body p-0">
+    <ul class="nav nav-tabs features-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'callForwarding'"
+          (click)="setActiveTab('callForwarding')"
+          type="button"
+        >
+          <i class="ti-share me-2"></i>
+          Call forwarding
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'voiceMail'"
+          (click)="setActiveTab('voiceMail')"
+          type="button"
+        >
+          <i class="ti-mobile me-2"></i>
+          Voice Mail
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'followMe'"
+          (click)="setActiveTab('followMe')"
+          type="button"
+        >
+          <i class="ti ti-user-check me-2"></i>
+          Follow Me
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'dnd'"
+          (click)="setActiveTab('dnd')"
+          type="button"
+        >
+          <i class="ti ti-phone-off me-2"></i>
+          DND
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'callRecording'"
+          (click)="setActiveTab('callRecording')"
+          type="button"
+        >
+          <i class="ti ti-microphone me-2"></i>
+          Call Recording
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          [class.active]="activeTab === 'speedDial'"
+          (click)="setActiveTab('speedDial')"
+          type="button"
+        >
+          <i class="ti ti-phone-plus me-2"></i>
+          Speed dial
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="tab-content" *ngIf="!isLoading || selectedDevice">
+  <div *ngIf="activeTab === 'callForwarding'" class="tab-pane-content">
+    <form [formGroup]="callForwardingForm">
+      <div class="card feature-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <h5 class="mb-0">Always Forward</h5>
+              <label class="switch mb-0" (click)="$event.stopPropagation()">
+                <input type="checkbox" formControlName="alwaysForward" />
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">
+                {{
+                  callForwardingForm.get("alwaysForward")?.value
+                    ? "Enable"
+                    : "Disable"
+                }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-link collapse-btn p-0"
+              (click)="toggleSection('alwaysForward')"
+            >
+              <i
+                [class]="
+                  expandedSections.alwaysForward ? 'ti ti-minus' : 'ti ti-plus'
+                "
+              ></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" *ngIf="expandedSections.alwaysForward">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Routing:</label>
+                <custom-select
+                  [options]="routingOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'alwaysForwardRouting'
+                  "
+                  [filter]="true"
+                  [showClear]="false"
+                  placeholder="Select Routing Type"
+                ></custom-select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">{{
+                  getDestinationLabel(
+                    callForwardingForm.get("alwaysForwardRouting")?.value
+                  )
+                }}</label>
+                <custom-select
+                  [options]="
+                    getDestinationOptions(
+                      callForwardingForm.get('alwaysForwardRouting')?.value
+                    )
+                  "
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'alwaysForwardDestination'
+                  "
+                  [filter]="true"
+                  [showClear]="true"
+                  placeholder="Select"
+                ></custom-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card feature-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <h5 class="mb-0">On Busy</h5>
+              <label class="switch mb-0" (click)="$event.stopPropagation()">
+                <input type="checkbox" formControlName="onBusy" />
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">
+                {{
+                  callForwardingForm.get("onBusy")?.value ? "Enable" : "Disable"
+                }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-link collapse-btn p-0"
+              (click)="toggleSection('onBusy')"
+            >
+              <i
+                [class]="expandedSections.onBusy ? 'ti ti-minus' : 'ti ti-plus'"
+              ></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" *ngIf="expandedSections.onBusy">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Routing:</label>
+                <custom-select
+                  [options]="routingOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'onBusyRouting'
+                  "
+                  [filter]="true"
+                  [showClear]="false"
+                  placeholder="Select Routing Type"
+                ></custom-select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">{{
+                  getDestinationLabel(
+                    callForwardingForm.get("onBusyRouting")?.value
+                  )
+                }}</label>
+                <custom-select
+                  [options]="
+                    getDestinationOptions(
+                      callForwardingForm.get('onBusyRouting')?.value
+                    )
+                  "
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'onBusyDestination'
+                  "
+                  [filter]="true"
+                  [showClear]="true"
+                  placeholder="Select"
+                ></custom-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card feature-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <h5 class="mb-0">No Answer</h5>
+              <label class="switch mb-0" (click)="$event.stopPropagation()">
+                <input type="checkbox" formControlName="noAnswer" />
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">
+                {{
+                  callForwardingForm.get("noAnswer")?.value
+                    ? "Enable"
+                    : "Disable"
+                }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-link collapse-btn p-0"
+              (click)="toggleSection('noAnswer')"
+            >
+              <i
+                [class]="
+                  expandedSections.noAnswer ? 'ti ti-minus' : 'ti ti-plus'
+                "
+              ></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" *ngIf="expandedSections.noAnswer">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Routing:</label>
+                <custom-select
+                  [options]="routingOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'noAnswerRouting'
+                  "
+                  [filter]="true"
+                  [showClear]="false"
+                  placeholder="Select Routing Type"
+                ></custom-select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">{{
+                  getDestinationLabel(
+                    callForwardingForm.get("noAnswerRouting")?.value
+                  )
+                }}</label>
+                <custom-select
+                  [options]="
+                    getDestinationOptions(
+                      callForwardingForm.get('noAnswerRouting')?.value
+                    )
+                  "
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'noAnswerDestination'
+                  "
+                  [filter]="true"
+                  [showClear]="true"
+                  placeholder="Select"
+                ></custom-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card feature-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <h5 class="mb-0">Not Registered</h5>
+              <label class="switch mb-0" (click)="$event.stopPropagation()">
+                <input type="checkbox" formControlName="notRegistered" />
+                <span class="slider round"></span>
+              </label>
+              <span class="toggle-label">
+                {{
+                  callForwardingForm.get("notRegistered")?.value
+                    ? "Enable"
+                    : "Disable"
+                }}
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-link collapse-btn p-0"
+              (click)="toggleSection('notRegistered')"
+            >
+              <i
+                [class]="
+                  expandedSections.notRegistered ? 'ti ti-minus' : 'ti ti-plus'
+                "
+              ></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body" *ngIf="expandedSections.notRegistered">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Routing:</label>
+                <custom-select
+                  [options]="routingOptions"
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'notRegisteredRouting'
+                  "
+                  [filter]="true"
+                  [showClear]="false"
+                  placeholder="Select Routing Type"
+                ></custom-select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">{{
+                  getDestinationLabel(
+                    callForwardingForm.get("notRegisteredRouting")?.value
+                  )
+                }}</label>
+                <custom-select
+                  [options]="
+                    getDestinationOptions(
+                      callForwardingForm.get('notRegisteredRouting')?.value
+                    )
+                  "
+                  optionValue="value"
+                  optionLabel="label"
+                  [formControlRef]="
+                    callForwardingForm | getControl: 'notRegisteredDestination'
+                  "
+                  [filter]="true"
+                  [showClear]="true"
+                  placeholder="Select"
+                ></custom-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="activeTab === 'voiceMail'" class="tab-pane-content">
+    <div class="card feature-card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Voice Mail Settings</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="voiceMailForm">
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Enable:</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <label class="switch mb-0">
+                      <input
+                        type="checkbox"
+                        formControlName="voiceMailEnabled"
+                      />
+                      <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-status-label">
+                      {{
+                        voiceMailForm.get("voiceMailEnabled")?.value
+                          ? "Enable"
+                          : "Disable"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <mat-label class="col-form-label">Password:</mat-label>
+                <div class="pass-group input-group input-group-sm">
+                  <span class="input-group-text">
+                    <i class="ti ti-lock"></i>
+                  </span>
+                  <input
+                    [type]="voiceMailPasswordVisible ? 'text' : 'password'"
+                    class="pass-input form-control"
+                    placeholder="Enter Password"
+                    formControlName="voiceMailPassword"
+                  />
+                  <span
+                    class="ti toggle-password"
+                    [ngClass]="
+                      voiceMailPasswordVisible ? 'ti-eye' : 'ti-eye-off'
+                    "
+                    (click)="toggleVoiceMailPasswordVisibility()"
+                  ></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <mat-label class="col-form-label">Mail to:</mat-label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">
+                    <i class="ti ti-mail"></i>
+                  </span>
+                  <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Enter Email"
+                    formControlName="voiceMailEmail"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Attach file:</label>
+                  <div class="btn-group" role="group">
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="voiceMailAttachFile"
+                      id="attachFileYes"
+                      [value]="true"
+                      formControlName="voiceMailAttachFile"
+                    />
+                    <label
+                      class="btn btn-outline-secondary"
+                      for="attachFileYes"
+                    >
+                      Yes
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="voiceMailAttachFile"
+                      id="attachFileNo"
+                      [value]="false"
+                      formControlName="voiceMailAttachFile"
+                    />
+                    <label class="btn btn-outline-secondary" for="attachFileNo">
+                      No
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'followMe'" class="tab-pane-content">
+    <div class="card feature-card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Follow Me Settings</h5>
+        </div>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="followMeForm">
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Follow me:</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <label class="switch mb-0">
+                      <input type="checkbox" formControlName="followMe" />
+                      <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-status-label">
+                      {{
+                        followMeForm.get("followMe")?.value
+                          ? "Enable"
+                          : "Disable"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="followMeForm.get('followMe')?.value" class="col-12">
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-3">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <label class="form-label mb-0">Destination 1:</label>
+                      <div style="width: 60%">
+                        <custom-select
+                          [options]="sipDeviceOptions"
+                          optionValue="value"
+                          optionLabel="label"
+                          [formControlRef]="
+                            followMeForm | getControl: 'destination1'
+                          "
+                          [filter]="true"
+                          [showClear]="true"
+                          placeholder="Select"
+                        ></custom-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="mb-3">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <label class="form-label mb-0">Destination 2:</label>
+                      <div style="width: 60%">
+                        <custom-select
+                          [options]="sipDeviceOptions"
+                          optionValue="value"
+                          optionLabel="label"
+                          [formControlRef]="
+                            followMeForm | getControl: 'destination2'
+                          "
+                          [filter]="true"
+                          [showClear]="true"
+                          placeholder="Select"
+                        ></custom-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="mb-3">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <label class="form-label mb-0">Destination 3:</label>
+                      <div style="width: 60%">
+                        <custom-select
+                          [options]="sipDeviceOptions"
+                          optionValue="value"
+                          optionLabel="label"
+                          [formControlRef]="
+                            followMeForm | getControl: 'destination3'
+                          "
+                          [filter]="true"
+                          [showClear]="true"
+                          placeholder="Select"
+                        ></custom-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="mb-3">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <label class="form-label mb-0">Destination 4:</label>
+                      <div style="width: 60%">
+                        <custom-select
+                          [options]="sipDeviceOptions"
+                          optionValue="value"
+                          optionLabel="label"
+                          [formControlRef]="
+                            followMeForm | getControl: 'destination4'
+                          "
+                          [filter]="true"
+                          [showClear]="true"
+                          placeholder="Select"
+                        ></custom-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="mb-3">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <label class="form-label mb-0">Destination 5:</label>
+                      <div style="width: 60%">
+                        <custom-select
+                          [options]="sipDeviceOptions"
+                          optionValue="value"
+                          optionLabel="label"
+                          [formControlRef]="
+                            followMeForm | getControl: 'destination5'
+                          "
+                          [filter]="true"
+                          [showClear]="true"
+                          placeholder="Select"
+                        ></custom-select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Ignore busy:</label>
+                  <div class="btn-group" role="group">
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="followMeIgnoreBusy"
+                      id="ignoreBusyYes"
+                      [value]="true"
+                      formControlName="followMeIgnoreBusy"
+                    />
+                    <label
+                      class="btn btn-outline-secondary"
+                      for="ignoreBusyYes"
+                    >
+                      Yes
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="followMeIgnoreBusy"
+                      id="ignoreBusyNo"
+                      [value]="false"
+                      formControlName="followMeIgnoreBusy"
+                    />
+                    <label class="btn btn-outline-secondary" for="ignoreBusyNo">
+                      No
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'dnd'" class="tab-pane-content">
+    <div class="card feature-card">
+      <div class="card-header">
+        <h5 class="mb-0">Do Not Disturb Settings</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="dndForm">
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Do not disturb:</label>
+                  <label class="switch mb-0">
+                    <input type="checkbox" formControlName="doNotDisturb" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'callRecording'" class="tab-pane-content">
+    <div class="card feature-card">
+      <div class="card-header">
+        <h5 class="mb-0">Call Recording Settings</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="callRecordingForm">
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">Recording:</label>
+                  <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="callRecording"
+                        id="recordingYes"
+                        [value]="true"
+                        formControlName="callRecording"
+                      />
+                      <label class="form-check-label" for="recordingYes">
+                        Yes
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="callRecording"
+                        id="recordingNo"
+                        [value]="false"
+                        formControlName="callRecording"
+                      />
+                      <label class="form-check-label" for="recordingNo">
+                        No
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'speedDial'" class="tab-pane-content">
+    <div class="card feature-card">
+      <div class="card-header">
+        <h5 class="mb-0">Speed Dial Configuration</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="speedDialForm">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th style="width: 10%">Digit</th>
+                  <th style="width: 40%">Routes</th>
+                  <th style="width: 50%">Destination</th>
+                </tr>
+              </thead>
+              <tbody formArrayName="speedDialEntries">
+                <tr
+                  *ngFor="let entry of speedDialEntries.controls; let i = index"
+                  [formGroupName]="i"
+                >
+                  <td>
+                    <div class="digit-badge">{{ i }}</div>
+                  </td>
+                  <td>
+                    <custom-select
+                      [options]="routingOptions"
+                      optionValue="value"
+                      optionLabel="label"
+                      [formControlRef]="getSpeedDialControl(i, 'routing')"
+                      [filter]="false"
+                      [showClear]="false"
+                      placeholder="SIP Device"
+                    ></custom-select>
+                  </td>
+                  <td>
+                    <custom-select
+                      [options]="sipDeviceOptions"
+                      optionValue="value"
+                      optionLabel="label"
+                      [formControlRef]="getSpeedDialControl(i, 'destination')"
+                      [filter]="true"
+                      [showClear]="true"
+                      placeholder="Select"
+                    ></custom-select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3" *ngIf="!isLoading || selectedDevice">
+  <div class="card-body">
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isSaving"
+      >
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="onSave()"
+        [disabled]="isSaving"
+      >
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          *ngIf="isSaving"
+        ></span>
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>

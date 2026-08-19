@@ -1,0 +1,65 @@
+<div class="sidebar sidebar-horizontal" id="horizontal-menu">
+  <div id="sidebar-menu-3" class="sidebar-menu">
+    <div class="main-menu">
+      <ul class="nav-menu">
+        @for (menu of sidebarData; track menu.name) {
+          <li class="submenu" routerLinkActive="active">
+            <a
+              (click)="showMenu(menu)"
+              [class.active]="currentUrl[0] === menu.routeKey"
+              [class.subdrop]="currentUrl[0] === menu.routeKey"
+            >
+              <i class="ti" [class]="'ti-' + menu.icon || ''"></i>
+              <span> {{ menu.name }}</span>
+              <span *ngIf="menu.subMenus.length > 0" class="menu-arrow"></span
+            ></a>
+
+            <ul class="submenus-two">
+              @for (childMenu of menu.subMenus; track childMenu.name) {
+                @if (childMenu.hasSubRoute === false) {
+                  <li>
+                    <a
+                      routerLinkActive="active"
+                      [routerLink]="childMenu.route"
+                      [class.active]="childMenu.route === '/' + currentUrl[1]"
+                      ><span>
+                        {{ childMenu.name }}
+                      </span>
+                    </a>
+                  </li>
+                }
+                @if (childMenu.hasSubRoute === true) {
+                  <li class="submenu submenu-two">
+                    <a
+                      (click)="showMenu(childMenu)"
+                      [class.active]="childMenu.routeKey == currentUrl[1]"
+                      [class.subdrop]="childMenu.routeKey == currentUrl[1]"
+                    >
+                      <span> {{ childMenu.name }} </span>
+                      <span class="menu-arrow inside-submenu"></span>
+                    </a>
+                    <ul
+                      [ngClass]="
+                        childMenu.showSubRoute === true ? 'd-block' : 'd-none'
+                      "
+                    >
+                      @for (subMenu of childMenu.subMenus; track subMenu.name) {
+                        <li>
+                          <a
+                            routerLinkActive="active"
+                            [routerLink]="subMenu.route"
+                            >{{ subMenu.name }}</a
+                          >
+                        </li>
+                      }
+                    </ul>
+                  </li>
+                }
+              }
+            </ul>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+<div class="mb-3 col" id="custom-radio">
+  <mat-label class="col-form-label col-lg-2"
+    >{{ label }}
+    <span
+      *ngIf="formControlRef.hasValidator(isControlRequired)"
+      class="text-danger"
+      >*</span
+    >
+  </mat-label>
+
+  <div class="d-sm-flex align-items-start">
+    <div class="form-check form-check-md mx-2" *ngFor="let option of options">
+      <input
+        class="form-check-input"
+        type="radio"
+        [required]="formControlRef.hasValidator(isControlRequired)"
+        [formControl]="formControlRef"
+        [name]="label"
+        [value]="option[optionValue]"
+        [ngClass]="{
+          'is-invalid':
+            formControlRef.hasValidator(isControlRequired) &&
+            formControlRef.invalid &&
+            formControlRef.touched,
+        }"
+      />
+      <mat-label class="form-check-label">
+        {{ option[optionLabel] }}
+      </mat-label>
+    </div>
+  </div>
+</div>

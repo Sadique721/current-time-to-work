@@ -1,0 +1,121 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingtax">Tax Configuration Details</a>
+        <span class="text-muted fs-14 ms-2" *ngIf="selectedTax?.taxConfigId">
+          (ID: {{ selectedTax.taxConfigId }})
+        </span>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingtax">
+      <i class="feather icon-arrow-left me-2"></i>Back to Tax List
+    </a>
+  </div>
+</div>
+
+<div class="row" *ngIf="selectedTax">
+  <!-- Basic Configuration -->
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Basic Configuration</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Tax Type</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ selectedTax.taxType || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Tax Name</p>
+              <span class="text-gray-900 fs-13">{{ selectedTax.taxName || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tax Calculation Logic -->
+  <div class="col-xl-12 mt-3">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Tax Calculation Logic</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Standard Rate</p>
+              <span class="text-gray-900 fs-13 fw-semibold">{{ selectedTax.standardRate }}%</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Apply On</p>
+              <span class="text-gray-900 fs-13">{{ selectedTax.applyOn || "-" }}</span>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Allows Input Credit</p>
+              <span class="badge" [ngClass]="selectedTax.allowsInputCredit ? 'bg-success' : 'bg-secondary'">
+                {{ selectedTax.allowsInputCredit ? 'YES' : 'NO' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Compliance & Status -->
+  <div class="col-xl-12 mt-3">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Compliance & Status</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Effective From</p>
+              <span class="text-gray-900 fs-13">{{ selectedTax.effectiveFrom || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Effective To</p>
+              <span class="text-gray-900 fs-13">{{ selectedTax.effectiveTo || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Current Status</p>
+              <span class="badge table-badge" [ngClass]="selectedTax.isActive ? 'bg-success' : 'bg-danger'">
+                {{ selectedTax.isActive ? 'ACTIVE' : 'INACTIVE' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!selectedTax" class="p-5 text-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-2">Loading tax configuration details...</p>
+</div>

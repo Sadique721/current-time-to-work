@@ -1,0 +1,25 @@
+<div class="mb-3" id="custom-checkbox">
+  <div class="form-check-md">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      [required]="formControlRef.hasValidator(isControlRequired)"
+      [formControl]="formControlRef"
+      [ngClass]="{
+        'is-invalid':
+          formControlRef.hasValidator(isControlRequired) &&
+          formControlRef.invalid &&
+          formControlRef.touched,
+      }"
+      (change)="change($event)"
+    />
+    <mat-label class="form-check-label">
+      {{ label }}
+      <span
+        *ngIf="formControlRef.hasValidator(isControlRequired)"
+        class="text-danger"
+        >*</span
+      >
+    </mat-label>
+  </div>
+</div>

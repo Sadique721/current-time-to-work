@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Add priority and is_fallback columns to product_plan_associations -->
+    <changeSet id="add-priority-fallback-ppa-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <not>
+                    <columnExists tableName="product_plan_associations" columnName="priority"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="product_plan_associations">
+            <column name="priority" type="INT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <comment>Add priority column to product_plan_associations table</comment>
+    </changeSet>
+
+    <changeSet id="add-priority-fallback-ppa-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <not>
+                    <columnExists tableName="product_plan_associations" columnName="is_fallback"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="product_plan_associations">
+            <column name="is_fallback" type="TINYINT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <comment>Add is_fallback column to product_plan_associations table</comment>
+    </changeSet>
+
+    <!-- Add priority and is_fallback columns to rate_package_associations -->
+    <changeSet id="add-priority-fallback-rpa-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <not>
+                    <columnExists tableName="rate_package_associations" columnName="priority"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_package_associations">
+            <column name="priority" type="INT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <comment>Add priority column to rate_package_associations table</comment>
+    </changeSet>
+
+    <changeSet id="add-priority-fallback-rpa-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <not>
+                    <columnExists tableName="rate_package_associations" columnName="is_fallback"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_package_associations">
+            <column name="is_fallback" type="TINYINT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <comment>Add is_fallback column to rate_package_associations table</comment>
+    </changeSet>
+
+    <!-- Set priority=0 for deleted records first (to allow unique constraint to work) -->
+    <changeSet id="set-deleted-priority-ppa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="product_plan_associations"/>
+        </preConditions>
+        <sql>UPDATE product_plan_associations SET priority = 0 WHERE is_deleted = true</sql>
+        <comment>Set priority=0 for deleted records (soft delete support)</comment>
+    </changeSet>
+
+    <changeSet id="set-deleted-priority-rpa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="rate_package_associations"/>
+        </preConditions>
+        <sql>UPDATE rate_package_associations SET priority = 0 WHERE is_deleted = true</sql>
+        <comment>Set priority=0 for deleted records (soft delete support)</comment>
+    </changeSet>
+
+    <!-- Set initial priority values for non-deleted records based on ID order -->
+    <changeSet id="set-initial-priority-ppa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="product_plan_associations"/>
+        </preConditions>
+        <sql>
+            SET @rn := 0;
+            UPDATE product_plan_associations 
+            SET priority = (@rn := @rn + 1)
+            WHERE is_deleted = false
+            ORDER BY id;
+        </sql>
+        <comment>Set initial priority values for non-deleted product_plan_associations records</comment>
+    </changeSet>
+
+    <changeSet id="set-initial-priority-rpa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="rate_package_associations"/>
+        </preConditions>
+        <sql>
+            SET @rn := 0;
+            UPDATE rate_package_associations 
+            SET priority = (@rn := @rn + 1)
+            WHERE is_deleted = false
+            ORDER BY id;
+        </sql>
+        <comment>Set initial priority values for non-deleted rate_package_associations records</comment>
+    </changeSet>
+
+    <changeSet id="migrate-priority-fallback-ppa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <columnExists tableName="product_plan_associations" columnName="priority"/>
+                <columnExists tableName="product_plan_associations" columnName="is_fallback"/>
+            </and>
+        </preConditions>
+        <sql>
+            UPDATE product_plan_associations
+            SET priority = 0, is_fallback = false
+            WHERE is_deleted = true;
+
+            UPDATE product_plan_associations ppa
+            INNER JOIN (
+                SELECT id, ROW_NUMBER() OVER (PARTITION BY product_plan_id ORDER BY id) AS rn
+                FROM product_plan_associations
+                WHERE is_deleted = false
+            ) AS sub ON ppa.id = sub.id
+            SET ppa.priority = sub.rn;
+
+            UPDATE product_plan_associations
+            SET is_fallback = true
+            WHERE priority = 1 AND is_deleted = false;
+        </sql>
+        <comment>Migrate priority (per product_plan) and is_fallback (true for priority 1)</comment>
+    </changeSet>
+
+    <changeSet id="migrate-priority-fallback-rpa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <columnExists tableName="rate_package_associations" columnName="priority"/>
+                <columnExists tableName="rate_package_associations" columnName="is_fallback"/>
+            </and>
+        </preConditions>
+        <sql>
+            UPDATE rate_package_associations
+            SET priority = 0, is_fallback = false
+            WHERE is_deleted = true;
+
+            UPDATE rate_package_associations rpa
+            INNER JOIN (
+                SELECT id, ROW_NUMBER() OVER (PARTITION BY rate_package_group_id ORDER BY id) AS rn
+                FROM rate_package_associations
+                WHERE is_deleted = false
+            ) AS sub ON rpa.id = sub.id
+            SET rpa.priority = sub.rn;
+
+            UPDATE rate_package_associations
+            SET is_fallback = true
+            WHERE priority = 1 AND is_deleted = false;
+        </sql>
+        <comment>Migrate priority (per rate_package_group) and is_fallback (true for priority 1)</comment>
+    </changeSet>
+
+    <!-- Create unique index for priority per product_plan -->
+    <changeSet id="add-priority-index-ppa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <not>
+                    <indexExists tableName="product_plan_associations" indexName="idx_ppa_product_plan_priority"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="product_plan_associations" indexName="idx_ppa_product_plan_priority">
+            <column name="product_plan_id"/>
+            <column name="priority"/>
+        </createIndex>
+        <comment>Create unique index for priority per product_plan (soft delete aware)</comment>
+    </changeSet>
+
+    <!-- Create unique index for priority per rate_package_group -->
+    <changeSet id="add-priority-index-rpa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <not>
+                    <indexExists tableName="rate_package_associations" indexName="idx_rpa_group_priority"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="rate_package_associations" indexName="idx_rpa_group_priority">
+            <column name="rate_package_group_id"/>
+            <column name="priority"/>
+        </createIndex>
+        <comment>Create unique index for priority per rate_package_group (soft delete aware)</comment>
+    </changeSet>
+
+    <!-- Create unique index for fallback per product_plan -->
+    <changeSet id="add-fallback-index-ppa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="product_plan_associations"/>
+                <not>
+                    <indexExists tableName="product_plan_associations" indexName="idx_ppa_product_plan_fallback"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="product_plan_associations" indexName="idx_ppa_product_plan_fallback">
+            <column name="product_plan_id"/>
+            <column name="is_fallback"/>
+        </createIndex>
+        <comment>Create unique index for fallback per product_plan</comment>
+    </changeSet>
+
+    <!-- Create unique index for fallback per rate_package_group -->
+    <changeSet id="add-fallback-index-rpa" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="rate_package_associations"/>
+                <not>
+                    <indexExists tableName="rate_package_associations" indexName="idx_rpa_group_fallback"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="rate_package_associations" indexName="idx_rpa_group_fallback">
+            <column name="rate_package_group_id"/>
+            <column name="is_fallback"/>
+        </createIndex>
+        <comment>Create unique index for fallback per rate_package_group</comment>
+    </changeSet>
+
+</databaseChangeLog>

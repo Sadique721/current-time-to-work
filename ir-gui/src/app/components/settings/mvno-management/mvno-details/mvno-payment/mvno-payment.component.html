@@ -1,0 +1,178 @@
+<div class="card table-list-card-xl">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <h5 class="card-title">Payment Details</h5>
+    <div class="d-flex gap-2">
+      <button
+        type="button"
+        class="btn btn-secondary ms-2"
+        (click)="refreshPaymentData()"
+        title="Refresh"
+      >
+        <i class="feather icon-refresh-cw me-2"></i>Refresh
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary ms-2"
+        *ngIf="recordPaymentAccess"
+        [disabled]="
+          customerLedgerDetailData?.status === 'Terminate' || isDisable
+        "
+        (click)="recordPaymentClicked()"
+      >
+        <i class="feather icon-plus me-2"></i>Record Payment
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Payment By</th>
+            <th>Receipt No</th>
+            <th>Invoice Number</th>
+            <th>Pay Mode</th>
+            <th>Pay Amount</th>
+            <th>TDS</th>
+            <th>ABBS</th>
+            <th>Source</th>
+            <th>Unsettled Amount</th>
+            <th>Bank Name</th>
+            <th>Cheque No.</th>
+            <th>Payment Date</th>
+            <th>File</th>
+            <th>Status</th>
+            <th>Remark</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (
+            data of viewcustomerPaymentData;
+            track data.id;
+            let index = $index
+          ) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ data.paymentBy || "-" }}</td>
+              <td>{{ data.creditdocumentno || "-" }}</td>
+              <td>{{ data.invoiceNumber || "-" }}</td>
+              <td>
+                @if (data.paymode === "Cheque") {
+                  <a
+                    href="javascript:void(0)"
+                    class="text-primary cursor-pointer"
+                    title="Payment Details"
+                    (click)="openPaymentModal(data.id)"
+                  >
+                    {{ data.paymode }}
+                  </a>
+                } @else {
+                  <span>{{ data.paymode || "-" }}</span>
+                }
+              </td>
+              <td>
+                <a
+                  href="javascript:void(0)"
+                  class="text-primary cursor-pointer"
+                  (click)="openPaymentInvoiceModal(data.id)"
+                >
+                  {{ data.amount | currency: "USD" : "symbol" : "1.2-2" }}
+                </a>
+              </td>
+              <td>
+                {{ data.tdsamount | currency: "USD" : "symbol" : "1.2-2" }}
+              </td>
+              <td>
+                {{ data.abbsAmount | currency: "USD" : "symbol" : "1.2-2" }}
+              </td>
+              <td>{{ data.onlinesource || "-" }}</td>
+              <td>
+                {{
+                  data.unsettledAmount | currency: "USD" : "symbol" : "1.2-2"
+                }}
+              </td>
+              <td>{{ data.bankName || "-" }}</td>
+              <td>{{ data.paydetails2 || "-" }}</td>
+              <td>{{ data.paymentdate | date: "dd-MM-yyyy" }}</td>
+              <td>
+                @if (data.filename) {
+                  <a
+                    href="javascript:void(0)"
+                    class="text-success"
+                    title="Download File"
+                    (click)="
+                      downloadInvoice(data.id, data.custId, data.filename)
+                    "
+                  >
+                    <i class="feather icon-download"></i>
+                  </a>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td>
+                @if (
+                  data.status === "Fully Adjusted" ||
+                  data.status === "advance" ||
+                  data.status === "approved" ||
+                  data.status === "Partialy Adjusted"
+                ) {
+                  <span class="badge bg-success">Verified</span>
+                } @else if (
+                  data.status === "pending" && !data.nextTeamHierarchyMappingId
+                ) {
+                  <span class="badge bg-info">Collected</span>
+                } @else if (
+                  data.status === "pending" && data.nextTeamHierarchyMappingId
+                ) {
+                  <span class="badge bg-info">Submitted</span>
+                } @else if (data.status === "rejected") {
+                  <span class="badge bg-danger">{{
+                    data.status | titlecase
+                  }}</span>
+                } @else {
+                  <span class="badge bg-secondary">{{
+                    data.status | titlecase
+                  }}</span>
+                }
+              </td>
+              <td>{{ data.remarks || "-" }}</td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="me-2 p-2"
+                    title="Approve"
+                    [class.disabled]="data.status !== 'pending'"
+                    (click)="statusApproved(data)"
+                  >
+                    <i class="feather icon-check text-success"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (viewcustomerPaymentData.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No payment details available</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>
+<app-mvno-payment-add
+  [mvnoId]="mvnoId"
+  [mvnoData]="mvnoData"
+  [showModal]="showRecordPaymentModal"
+  (close)="closeRecordPaymentModal()"
+  (paymentAdded)="onPaymentAdded()"
+></app-mvno-payment-add>

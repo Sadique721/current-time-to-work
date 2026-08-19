@@ -1,0 +1,113 @@
+<div class="modal-content">
+  <div class="page-wrapper-new p-0">
+    <div class="content p-0">
+      <div class="modal-header">
+        <div class="page-title">
+          <h4>
+            {{ selectedSourceConfiguration?.sourceId ? "Update " : "Create " }}
+            Source Configuration
+          </h4>
+        </div>
+        <button
+          type="button"
+          class="close"
+          (click)="onClose()"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="souceConfigurationRatingForm">
+          <div class="row">
+            <!-- Line of Business Selection -->
+            <div class="col-lg-12">
+              <custom-select
+                label="Line of Business"
+                [options]="lineOfBusinessOptions"
+                optionValue="value"
+                optionLabel="label"
+                [formControlRef]="souceConfigurationRatingForm | getControl: 'lineOfBusiness'"
+                [filter]="false"
+                [showClear]="false"
+              ></custom-select>
+            </div>
+
+            <!-- Source Name (Standard) -->
+            <div class="col-lg-12">
+              <custom-input
+                label="Source Name"
+                [formControlRef]="souceConfigurationRatingForm | getControl: 'sourceName'"
+                type="text"
+              ></custom-input>
+            </div>
+
+            <!-- Topic Name with Prefix UI -->
+            <div class="col-lg-12">
+              <div class="mb-3">
+                <label class="form-label">Topic Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span
+                    class="input-group-text fw-semibold"
+                    style="background: #e9ecef; min-width: 100px;"
+                  >
+                    {{ souceConfigurationRatingForm.get('lineOfBusiness')?.value || '—' }}
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Topic Name"
+                    formControlName="topicName"
+                  />
+                </div>
+                <small class="text-muted d-block mt-1" *ngIf="souceConfigurationRatingForm.get('topicName')?.value">
+                  Final Topic: <strong>{{ souceConfigurationRatingForm.get('lineOfBusiness')?.value }}-{{ souceConfigurationRatingForm.get('topicName')?.value }}</strong>
+                </small>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <custom-select
+                label="Status"
+                [options]="statusOptions"
+                optionValue="label"
+                optionLabel="label"
+                [formControlRef]="
+                  souceConfigurationRatingForm | getControl: 'status'
+                "
+                [filter]="false"
+                [showClear]="false"
+              ></custom-select>
+            </div>
+            <div class="col-lg-12">
+              <custom-select
+                label="Service Type"
+                [options]="serviceTypeOptions"
+                optionValue="value"
+                optionLabel="label"
+                [formControlRef]="
+                  souceConfigurationRatingForm | getControl: 'serviceType'
+                "
+                [filter]="true"
+              ></custom-select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3"
+          (click)="onClose()"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary fs-13 fw-medium p-2 px-3"
+          (click)="submit()"
+        >
+          {{ selectedSourceConfiguration?.sourceId ? "Update" : "Save" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,189 @@
+<div class="card table-list-card">
+  <div class="card-header">
+    <div
+      class="add-item d-flex d-flex align-items-center justify-content-between flex-wrap row-gap-3 mb-3"
+    >
+      <div class="page-title">
+        <h5>Wallet</h5>
+      </div>
+      <div class="page-title">
+        <h5>Wallet Balance: {{ WalletAmount }}</h5>
+      </div>
+    </div>
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-4 col-lg-3">
+        <p-floatlabel variant="on">
+          <p-select
+            [options]="searchOption"
+            [formControl]="selectSearchOption"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [showClear]="true"
+            styleClass="w-100"
+            inputId="on_label"
+          >
+            <ng-template pTemplate="selectedItem" let-selectedOption>
+              <div class="flex align-items-center gap-2">
+                <div>{{ selectedOption.value }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-searchOption pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                <div>{{ searchOption.value }}</div>
+              </div>
+            </ng-template>
+          </p-select>
+          <label for="on_label">Select Search Option</label>
+        </p-floatlabel>
+      </div>
+
+      <div
+        class="col-12 col-md-4 col-lg-3"
+        *ngIf="selectSearchOption.value === 'Mode'"
+      >
+        <p-floatlabel variant="on">
+          <p-select
+            [options]="paymentModes"
+            [formControl]="paymentModeControl"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [showClear]="true"
+            styleClass="w-100"
+            inputId="on_label"
+          >
+            <ng-template pTemplate="selectedItem" let-selectedOption>
+              <div class="flex align-items-center gap-2">
+                <div>{{ selectedOption.value }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-searchOption pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                <div>{{ searchOption.value }}</div>
+              </div>
+            </ng-template>
+          </p-select>
+          <label for="on_label">Select Payment Mode</label>
+        </p-floatlabel>
+      </div>
+
+      <div
+        class="col-12 col-md-4 col-lg-3"
+        *ngIf="selectSearchOption.value == 'Status'"
+      >
+        <input
+          [formControl]="statusControl"
+          type="text"
+          class="form-control"
+          placeholder="Enter Status"
+        />
+      </div>
+
+      <div class="col-auto">
+        <button class="btn btn-primary w-100" (click)="search()">Search</button>
+      </div>
+
+      <div class="col-auto">
+        <button class="btn btn-outline-secondary w-100" (click)="clearSearch()">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Mode</th>
+            <th>Collection</th>
+            <th>Withdraw</th>
+            <th>Pending</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of additionalDetails; track data) {
+            <tr>
+              <td class="myclass">{{ data.mode }}</td>
+              <td class="myclass">{{ data.credit }}</td>
+              <td class="myclass">{{ data.withdraw }}</td>
+              <td class="myclass">{{ data.credit - data.withdraw }}</td>
+            </tr>
+          }
+          @if (additionalDetails.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="add-item d-flex">
+      <div class="page-title">
+        <h5>Ledger</h5>
+      </div>
+    </div>
+    <div class="page-btn">
+      <a *ngIf="WalletAmount > 0" class="btn btn-primary">
+        <i class="ti ti-cash me-2"></i>Withdrawal Amount
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th class="myclass">Action</th>
+            <th class="myclass">Payment Mode</th>
+            <th class="myclass">Debit</th>
+            <th class="myclass">Credit</th>
+            <th class="myclass">Bank Name</th>
+            <th class="myclass">Date</th>
+            <th class="myclass">Status</th>
+            <th class="myclass">Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of additionalDetails; track data) {
+            <tr>
+              <td>{{ data.action }}</td>
+              <td>{{ data.paymentMode }}</td>
+              <td *ngIf="data.transactionType == 'DR'">
+                {{ data.amount }} {{ this.currency }}
+              </td>
+              <td *ngIf="data.transactionType == 'CR'">
+                {{ data.amount }} {{ this.currency }}
+              </td>
+              <td>{{ data.bankName }}</td>
+              <td>{{ data.date }}</td>
+              <td>{{ data.status }}</td>
+              <td>{{ data.remarks }}</td>
+            </tr>
+          }
+          @if (additionalDetails.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

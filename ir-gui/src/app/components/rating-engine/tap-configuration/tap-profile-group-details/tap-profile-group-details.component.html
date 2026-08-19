@@ -1,0 +1,116 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingtapconfiguration" [queryParams]="{ tab: 'profile-groups' }">TAP Configuration</a>
+        <span class="text-muted fs-14 ms-2"> / TAP Profile Group Details</span>
+        <span class="text-muted fs-14 ms-2" *ngIf="selectedGroup?.id">
+          (ID: {{ selectedGroup.id }})
+        </span>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingtapconfiguration" [queryParams]="{ tab: 'profile-groups' }">
+      <i class="feather icon-arrow-left me-2"></i>Back to TAP Profile Group List
+    </a>
+  </div>
+</div>
+
+<div class="row" *ngIf="selectedGroup">
+  <!-- Group Configuration -->
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Profile Group Configuration</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Group Name</p>
+              <span class="text-gray-900 fs-13 fw-semibold">{{ selectedGroup.name || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Description</p>
+              <span class="text-gray-900 fs-13">{{ selectedGroup.description || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Status</p>
+              <span class="badge" [ngClass]="(selectedGroup.active ?? selectedGroup.isActive) ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'">
+                {{ (selectedGroup.active ?? selectedGroup.isActive) ? 'ACTIVE' : 'INACTIVE' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Associated Profiles Table -->
+  <div class="col-xl-12 mt-3">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Associated TAP Profiles</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="table-responsive brand-table mb-3">
+          <table class="table datatable" style="min-width: 900px;">
+            <thead class="thead-light">
+              <tr>
+                <th>Sr.No</th>
+                <th>Profile Name</th>
+                <th>Service Type</th>
+                <th>Description</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of selectedGroup.tapProfiles; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>
+                  <a [routerLink]="[routes.ratingtapconfiguration, 'details', 'profile', p.id]" class="nav-link fw-semibold">
+                    {{ p.profileName }}
+                  </a>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-info-transparent text-info': p.serviceType === 'VOICE' || !p.serviceType,
+                    'bg-warning-transparent text-warning': p.serviceType === 'SMS',
+                    'bg-secondary-transparent text-secondary': p.serviceType === 'USAGE'
+                  }">
+                    {{ p.serviceType || 'VOICE' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="text-truncate d-inline-block" style="max-width: 250px;" [matTooltip]="p.description || ''">
+                    {{ p.description || '-' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="p.active ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'">
+                    {{ p.active ? 'ACTIVE' : 'INACTIVE' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!selectedGroup.tapProfiles?.length">
+                <td colspan="5" class="text-center text-muted">No associated profiles mapped in this group</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!selectedGroup" class="p-5 text-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-2">Loading profile group details...</p>
+</div>

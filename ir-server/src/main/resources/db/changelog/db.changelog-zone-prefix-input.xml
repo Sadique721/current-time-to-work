@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Zone prefix input mode feature:
+        1. Add prefix_type to prefixes table  (INTERCONNECT | ROAMING)
+        2. Add prefix_input_mode to zones table (MANUAL | DROPDOWN)
+    -->
+
+    <!-- 1. Add prefix_type column to prefixes table -->
+    <changeSet id="zone-prefix-input-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="prefixes" columnName="prefix_type"/>
+            </not>
+        </preConditions>
+        <comment>
+            Add prefix_type to prefixes table to distinguish INTERCONNECT area/mobile codes
+            from ROAMING PLMN prefixes. Existing rows default to INTERCONNECT.
+        </comment>
+        <addColumn tableName="prefixes">
+            <column name="prefix_type" type="VARCHAR(20)" defaultValue="INTERCONNECT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="prefixes" columnName="prefix_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 2. Index on prefixes.prefix_type for fast dropdown filtering -->
+    <changeSet id="zone-prefix-input-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="prefixes" indexName="idx_prefixes_prefix_type"/>
+            </not>
+        </preConditions>
+        <createIndex tableName="prefixes" indexName="idx_prefixes_prefix_type">
+            <column name="prefix_type"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="prefixes" indexName="idx_prefixes_prefix_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 3. Add prefix_input_mode column to zones table -->
+    <changeSet id="zone-prefix-input-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="zones" columnName="prefix_input_mode"/>
+            </not>
+        </preConditions>
+        <comment>
+            Add prefix_input_mode to zones table to track whether the admin entered
+            prefixes manually (MANUAL) or selected from the prefix/country dropdown (DROPDOWN).
+            Existing zones default to MANUAL since their prefixPattern was typed directly.
+        </comment>
+        <addColumn tableName="zones">
+            <column name="prefix_input_mode" type="VARCHAR(20)" defaultValue="MANUAL">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="zones" columnName="prefix_input_mode"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 4. Add deleted_at column to zones table if missing (required for soft delete) -->
+    <changeSet id="zone-prefix-input-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="zones" columnName="deleted_at"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="zones">
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="zones" columnName="deleted_at"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 5. Add priority column to zones table if missing -->
+    <changeSet id="zone-prefix-input-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="zones" columnName="priority"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="zones">
+            <column name="priority" type="INT" defaultValueNumeric="100">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="zones" columnName="priority"/>
+        </rollback>
+    </changeSet>
+
+    <!--
+        Fix: zones.zone_name had a simple UNIQUE(zone_name) constraint.
+        Soft-deleted zones were blocking re-creation of a zone with the same name
+        because the deleted row still exists in the table with is_deleted=1.
+
+        Solution: drop UNIQUE(zone_name) and replace with UNIQUE(zone_name, deleted_at)
+        so that an active row (deleted_at=NULL) and a soft-deleted row (deleted_at=timestamp)
+        with the same zone_name are treated as distinct entries.
+
+        This matches the pattern already used in prefixes (uk_country_prefix) and
+        countries (uk_countries_name) tables.
+    -->
+
+    <!-- 1. Drop the existing simple unique constraint on zone_name -->
+    <changeSet id="zone-unique-fix-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <indexExists tableName="zones" indexName="zone_name"/>
+        </preConditions>
+        <dropUniqueConstraint tableName="zones" constraintName="zone_name"/>
+        <rollback>
+            <addUniqueConstraint tableName="zones" columnNames="zone_name" constraintName="zone_name"/>
+        </rollback>
+    </changeSet>
+
+    <!-- 2. Add new unique constraint on (zone_name, deleted_at) -->
+    <changeSet id="zone-unique-fix-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="zones" indexName="uk_zones_name_deleted_at"/>
+            </not>
+        </preConditions>
+        <addUniqueConstraint
+                tableName="zones"
+                columnNames="zone_name, deleted_at"
+                constraintName="uk_zones_name_deleted_at"/>
+        <rollback>
+            <dropUniqueConstraint tableName="zones" constraintName="uk_zones_name_deleted_at"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

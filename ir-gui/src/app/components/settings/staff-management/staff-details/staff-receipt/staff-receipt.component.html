@@ -1,0 +1,67 @@
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="add-item d-flex">
+      <div class="page-title">
+        <h4>{{ selectedStaff.firstname }} Receipt</h4>
+      </div>
+    </div>
+    <div class="page-btn">
+      <a
+        *ngIf="createReceiptAccess"
+        class="btn btn-primary"
+        (click)="addReceipt()"
+      >
+        <i class="ti ti-file-invoice me-2"></i>Add New Receipt
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Prefix</th>
+            <th>From Receipt Number</th>
+            <th>To Receipt Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (
+            data of staffreciptMappingList;
+            track data.id;
+            let index = $index
+          ) {
+            <tr>
+              <td>{{ data.prefix }}</td>
+              <td>{{ data.fromreceiptnumber }}</td>
+              <td>{{ data.toreceiptnumber }}</td>
+            </tr>
+          }
+          @if (staffreciptMappingList.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="add-receipt"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <app-add-receipt [selectedStaff]="selectedStaff"></app-add-receipt>
+  </div>
+</div>

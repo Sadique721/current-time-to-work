@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ocs
+  config:
+    import:
+      - classpath:query-config.yml
+
+server:
+  port: 8060
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://164.52.199.222:8761/eureka
+  instance:
+    instanceId: ${spring.application.name}-${server.port}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  endpoint:
+    shutdown:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ocs
+    description: "Online Charging System - OCS for CPaaS"
+    version: 1.0.0
+  java:
+    version: ${java.version}
+    vendor: ${java.vendor}
+    vm:
+      name: ${java.vm.name}
+      version: ${java.vm.version}
+  os:
+    name: ${os.name}
+    version: ${os.version}
+    arch: ${os.arch}

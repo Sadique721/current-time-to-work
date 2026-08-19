@@ -1,0 +1,149 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Error Analysis Details</h4>
+      <h6>View detailed configuration check results</h6>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a (click)="goBack()" class="btn btn-primary" style="cursor: pointer;">
+      <i class="ti ti-arrow-left me-2"></i>Back to Error Analysis
+    </a>
+  </div>
+</div>
+
+@if (recordData) {
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <div class="card shadow-sm border-0" [ngClass]="recordData.isConfigReady ? 'border-success bg-success-light' : 'border-danger bg-danger-light'">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="fs-1 me-4">
+          {{ recordData.isConfigReady ? "🎯" : "⚠️" }}
+        </div>
+        <div>
+          <h4 class="mb-1 fw-bold" [ngClass]="recordData.isConfigReady ? 'text-success' : 'text-danger'">
+            {{ recordData.isConfigReady ? "Ready for Re-rating" : "Unable to Re-rate" }}
+          </h4>
+          <p class="mb-0 fs-14 text-muted">
+            {{ recordData.isConfigReady ? "All configuration checks passed. This record is ready for re-rating." : "Please resolve the failed checks below before proceeding." }}
+          </p>
+        </div>
+        <div class="ms-auto text-end">
+          <p class="text-muted mb-1 fs-13">Record ID</p>
+          <h5 class="fw-bold mb-0">{{ recordData.errorRatedRecordId }}</h5>
+          <p class="text-muted mt-2 mb-0 fs-13">Service: <strong>{{ recordData.serviceType }}</strong> | LOB: <strong>{{ recordData.lineOfBusiness }}</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Latest Error Message</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-danger fw-semibold mb-0 fs-15">{{ recordData.errorMessage || 'N/A' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-light border-bottom p-3">
+        <h5 class="card-title mb-0"><i class="ti ti-info-circle me-2 text-info"></i>Record Context Data</h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row">
+          <div class="col-md-3 border-end">
+            <p class="text-muted mb-1 fs-13">Calling Number</p>
+            <h6 class="fw-bold mb-0 text-dark">{{ recordData.callingNumber || 'N/A' }}</h6>
+          </div>
+          <div class="col-md-3 border-end">
+            <p class="text-muted mb-1 fs-13">Called Number (Destination)</p>
+            <h6 class="fw-bold mb-0 text-primary">{{ recordData.calledNumber || 'N/A' }}</h6>
+          </div>
+          <div class="col-md-3 border-end">
+            <p class="text-muted mb-1 fs-13">Incoming Account</p>
+            <h6 class="fw-bold mb-0 text-dark">{{ recordData.incomingAccountId || 'N/A' }}</h6>
+          </div>
+          <div class="col-md-3">
+            <p class="text-muted mb-1 fs-13">Outgoing Account</p>
+            <h6 class="fw-bold mb-0 text-dark">{{ recordData.outgoingAccountId || 'N/A' }}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header bg-white border-bottom p-3">
+        <h5 class="card-title mb-0"><i class="ti ti-arrow-down-right me-2 text-primary"></i>Incoming Context</h5>
+      </div>
+      <div class="card-body p-4">
+        @if (recordData.incomingSuccessData?.length || 0 > 0) {
+          <div class="mb-4">
+            <h6 class="text-success mb-3"><i class="ti ti-check me-2"></i>Successful Checks</h6>
+            @for (success of recordData.incomingSuccessData; track success) {
+              <div class="d-flex align-items-center text-muted fs-14 mb-2">
+                <i class="ti ti-circle-check text-success me-2"></i>
+                <span>{{ success }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (recordData.incomingFailureData?.length || 0 > 0) {
+          <div class="mb-0">
+            <h6 class="text-danger mb-3"><i class="ti ti-x me-2"></i>Failed Checks</h6>
+            @for (failure of recordData.incomingFailureData; track failure) {
+              <div class="d-flex align-items-center text-muted fs-14 mb-2">
+                <i class="ti ti-circle-x text-danger me-2"></i>
+                <span>{{ failure }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (!recordData.incomingSuccessData?.length && !recordData.incomingFailureData?.length) {
+          <div class="text-muted fs-14 text-center py-4 bg-light rounded">No incoming data checks available</div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4">
+    <div class="card h-100">
+      <div class="card-header bg-white border-bottom p-3">
+        <h5 class="card-title mb-0"><i class="ti ti-arrow-up-right me-2 text-warning"></i>Outgoing Context</h5>
+      </div>
+      <div class="card-body p-4">
+        @if (recordData.outgoingSuccessData?.length || 0 > 0) {
+          <div class="mb-4">
+            <h6 class="text-success mb-3"><i class="ti ti-check me-2"></i>Successful Checks</h6>
+            @for (success of recordData.outgoingSuccessData; track success) {
+              <div class="d-flex align-items-center text-muted fs-14 mb-2">
+                <i class="ti ti-circle-check text-success me-2"></i>
+                <span>{{ success }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (recordData.outgoingFailureData?.length || 0 > 0) {
+          <div class="mb-0">
+            <h6 class="text-danger mb-3"><i class="ti ti-x me-2"></i>Failed Checks</h6>
+            @for (failure of recordData.outgoingFailureData; track failure) {
+              <div class="d-flex align-items-center text-muted fs-14 mb-2">
+                <i class="ti ti-circle-x text-danger me-2"></i>
+                <span>{{ failure }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (!recordData.outgoingSuccessData?.length && !recordData.outgoingFailureData?.length) {
+          <div class="text-muted fs-14 text-center py-4 bg-light rounded">No outgoing data checks available</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+}

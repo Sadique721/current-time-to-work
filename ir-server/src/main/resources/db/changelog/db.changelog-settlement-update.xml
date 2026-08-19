@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- ==================== AGREEMENT SETTLEMENT UPDATES ==================== -->
+
+    <!-- Drop old template foreign key constraint if exists -->
+    <changeSet id="settlement-update-1" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'agreements' 
+                AND CONSTRAINT_NAME = 'fk_agreement_template');
+            SET @sqlstmt := IF(@exist > 0, 'ALTER TABLE agreements DROP FOREIGN KEY fk_agreement_template', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Drop old fk_agreement_template foreign key constraint</comment>
+    </changeSet>
+
+    <!-- Drop old template_id column -->
+    <changeSet id="settlement-update-2" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <columnExists tableName="agreements" columnName="template_id"/>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="template_id"/>
+        <comment>Drop old template_id column from agreements table</comment>
+    </changeSet>
+
+    <!-- Drop settlement_type column -->
+    <changeSet id="settlement-update-3" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <columnExists tableName="agreements" columnName="settlement_type"/>
+        </preConditions>
+        <dropColumn tableName="agreements" columnName="settlement_type"/>
+        <comment>Drop settlement_type column from agreements table</comment>
+    </changeSet>
+
+    <!-- Add is_incoming_settlement column -->
+    <changeSet id="settlement-update-4" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <not>
+                <columnExists tableName="agreements" columnName="is_incoming_settlement"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="is_incoming_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>UPDATE agreements SET is_incoming_settlement = 0 WHERE is_incoming_settlement IS NULL</sql>
+        <comment>Add is_incoming_settlement column to agreements table</comment>
+    </changeSet>
+
+    <!-- Add is_outgoing_settlement column -->
+    <changeSet id="settlement-update-5" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <not>
+                <columnExists tableName="agreements" columnName="is_outgoing_settlement"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="is_outgoing_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>UPDATE agreements SET is_outgoing_settlement = 0 WHERE is_outgoing_settlement IS NULL</sql>
+        <comment>Add is_outgoing_settlement column to agreements table</comment>
+    </changeSet>
+
+    <!-- Add is_net_settlement column -->
+    <changeSet id="settlement-update-6" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <not>
+                <columnExists tableName="agreements" columnName="is_net_settlement"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="is_net_settlement" type="BIT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>UPDATE agreements SET is_net_settlement = 0 WHERE is_net_settlement IS NULL</sql>
+        <comment>Add is_net_settlement column to agreements table</comment>
+    </changeSet>
+
+    <!-- Add incoming_settlement_template_id column -->
+    <changeSet id="settlement-update-7" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <tableExists tableName="tblm_template_configuration"/>
+            <not>
+                <columnExists tableName="agreements" columnName="incoming_settlement_template_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="incoming_settlement_template_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="agreements"
+                                 baseColumnNames="incoming_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration"
+                                 referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_incoming_template"
+                                 onDelete="SET NULL"
+                                 onUpdate="RESTRICT"/>
+        <comment>Add incoming_settlement_template_id column and FK to agreements table</comment>
+    </changeSet>
+
+    <!-- Add outgoing_settlement_template_id column -->
+    <changeSet id="settlement-update-8" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <tableExists tableName="tblm_template_configuration"/>
+            <not>
+                <columnExists tableName="agreements" columnName="outgoing_settlement_template_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="outgoing_settlement_template_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="agreements"
+                                 baseColumnNames="outgoing_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration"
+                                 referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_outgoing_template"
+                                 onDelete="SET NULL"
+                                 onUpdate="RESTRICT"/>
+        <comment>Add outgoing_settlement_template_id column and FK to agreements table</comment>
+    </changeSet>
+
+    <!-- Add net_settlement_template_id column -->
+    <changeSet id="settlement-update-9" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+            <tableExists tableName="tblm_template_configuration"/>
+            <not>
+                <columnExists tableName="agreements" columnName="net_settlement_template_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="net_settlement_template_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="agreements"
+                                 baseColumnNames="net_settlement_template_id"
+                                 referencedTableName="tblm_template_configuration"
+                                 referencedColumnNames="template_id"
+                                 constraintName="fk_agreement_net_template"
+                                 onDelete="SET NULL"
+                                 onUpdate="RESTRICT"/>
+        <comment>Add net_settlement_template_id column and FK to agreements table</comment>
+    </changeSet>
+
+    <!-- Create indexes for the new template columns -->
+    <changeSet id="settlement-update-10" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="agreements"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'agreements' 
+                AND index_name = 'idx_incoming_template');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_incoming_template ON agreements (incoming_settlement_template_id)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'agreements' 
+                AND index_name = 'idx_outgoing_template');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_outgoing_template ON agreements (outgoing_settlement_template_id)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'agreements' 
+                AND index_name = 'idx_net_template');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_net_template ON agreements (net_settlement_template_id)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Create indexes for the new template columns</comment>
+    </changeSet>
+
+    <!-- ==================== INVOICE SETTLEMENT UPDATES ==================== -->
+
+    <!-- Add settlement_type column to invoices table -->
+    <changeSet id="settlement-update-11" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="invoices"/>
+                <not>
+                    <columnExists tableName="invoices" columnName="settlement_type"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="invoices">
+            <column name="settlement_type" type="VARCHAR(20)" defaultValue="NET">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <sql>UPDATE invoices SET settlement_type = 'NET' WHERE settlement_type IS NULL</sql>
+        <comment>Add settlement_type column to invoices table with default NET</comment>
+    </changeSet>
+
+    <!-- Create index on settlement_type for invoices -->
+    <changeSet id="settlement-update-12" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="invoices"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'invoices' 
+                AND index_name = 'idx_invoice_settlement_type');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_invoice_settlement_type ON invoices (settlement_type)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Create index on settlement_type for invoices</comment>
+    </changeSet>
+
+    <!-- Add settlement_type column to failed_invoices table -->
+    <changeSet id="settlement-update-13" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="failed_invoices"/>
+                <not>
+                    <columnExists tableName="failed_invoices" columnName="settlement_type"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="failed_invoices">
+            <column name="settlement_type" type="VARCHAR(20)"/>
+        </addColumn>
+        <comment>Add settlement_type column to failed_invoices table</comment>
+    </changeSet>
+
+    <!-- Create index on settlement_type for failed_invoices -->
+    <changeSet id="settlement-update-14" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="failed_invoices"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'failed_invoices' 
+                AND index_name = 'idx_failed_invoice_settlement_type');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_failed_invoice_settlement_type ON failed_invoices (settlement_type)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Create index on settlement_type for failed_invoices</comment>
+    </changeSet>
+
+    <!-- Create composite index for invoice lookup -->
+    <changeSet id="settlement-update-15" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="invoices"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'invoices' 
+                AND index_name = 'idx_agreement_billing_settlement');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_agreement_billing_settlement ON invoices (agreement_id, billing_cycle_start, billing_cycle_end, settlement_type)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Create composite index for invoice lookup</comment>
+    </changeSet>
+
+    <!-- ==================== INVOICE NUMBER UPDATES ==================== -->
+
+    <!-- Add invoice_number column to invoices table -->
+    <changeSet id="settlement-update-16" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="invoices"/>
+            <not>
+                <columnExists tableName="invoices" columnName="invoice_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="invoices">
+            <column name="invoice_number" type="VARCHAR(50)"/>
+        </addColumn>
+        <comment>Add invoice_number column to invoices table for human-readable invoice numbering</comment>
+    </changeSet>
+
+    <!-- Update invoice columns scale to 6 for precision -->
+    <changeSet id="settlement-update-17" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="invoices"/>
+            <columnExists tableName="invoices" columnName="customer_total"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE invoices MODIFY customer_total DECIMAL(19,6);
+            ALTER TABLE invoices MODIFY vendor_total DECIMAL(19,6);
+            ALTER TABLE invoices MODIFY net_amount DECIMAL(19,6);
+        </sql>
+        <comment>Update invoice amount columns to scale 6 for higher precision</comment>
+    </changeSet>
+
+<!-- ==================== PARTNER_TYPE TO ACCOUNT_TYPE RENAME ==================== -->
+
+    <!-- Rename partner_type to account_type in accounts table -->
+    <changeSet id="settlement-update-18" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+            <columnExists tableName="accounts" columnName="partner_type"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE accounts CHANGE COLUMN partner_type account_type VARCHAR(50) NOT NULL
+        </sql>
+        <comment>Rename partner_type column to account_type in accounts table</comment>
+    </changeSet>
+
+    <!-- Create index on account_type -->
+    <changeSet id="settlement-update-19" author="Ajay kumar">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="accounts"/>
+        </preConditions>
+        <sql>
+            SET @exist := (SELECT COUNT(*) FROM information_schema.statistics 
+                WHERE table_schema = DATABASE() 
+                AND table_name = 'accounts' 
+                AND index_name = 'idx_account_type');
+            SET @sqlstmt := IF(@exist = 0, 'CREATE INDEX idx_account_type ON accounts (account_type)', 'SELECT 1');
+            PREPARE stmt FROM @sqlstmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+        </sql>
+        <comment>Create index on account_type column</comment>
+    </changeSet>
+
+</databaseChangeLog>

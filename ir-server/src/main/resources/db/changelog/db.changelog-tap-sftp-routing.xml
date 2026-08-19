@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Migration: TAP SFTP routing support.
+
+        1. clearing_houses  — add SFTP connection fields (host, port, username, password, remote/inbox paths)
+        2. partners         — add tap_version, partner_sftp_config
+    -->
+
+    <!-- 1. SFTP config on clearing_houses -->
+    <changeSet id="tap-sftp-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="clearing_houses" columnName="sftp_host"/></not>
+        </preConditions>
+        <addColumn tableName="clearing_houses">
+            <column name="sftp_host"        type="VARCHAR(255)"/>
+            <column name="sftp_port"        type="INT"/>
+            <column name="sftp_username"    type="VARCHAR(100)"/>
+            <column name="sftp_password"    type="VARCHAR(255)"/>
+            <column name="sftp_remote_path" type="VARCHAR(500)"/>
+            <column name="sftp_inbox_path"  type="VARCHAR(500)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 2. TAP settings on partners -->
+    <changeSet id="tap-sftp-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="partners" columnName="tap_version"/></not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="tap_version"         type="VARCHAR(20)"/>
+            <column name="partner_sftp_config" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="tap-sftp-3" author="Govind Sirsath">
+
+        <!-- Precondition: add column only if it does not already exist -->
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_route_type"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="partners">
+            <column name="sftp_route_type"
+                    type="ENUM('DIRECT','VIA_CLEARING_HOUSE')">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+
+        <!-- Rollback -->
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_route_type"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

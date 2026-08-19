@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- 1. Split total_calls_or_total_sms into total_calls and total_sms for roaming_rated_summary -->
+    <changeSet id="roaming-summary-split-calls-sms" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="roaming_rated_summary" columnName="total_calls_or_total_sms"/>
+        </preConditions>
+        <renameColumn tableName="roaming_rated_summary"
+                      oldColumnName="total_calls_or_total_sms"
+                      newColumnName="total_calls"
+                      columnDataType="INT"/>
+        <dropNotNullConstraint tableName="roaming_rated_summary" columnName="total_calls" columnDataType="INT"/>
+    </changeSet>
+
+    <changeSet id="roaming-summary-add-total-sms" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="roaming_rated_summary" columnName="total_sms"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="roaming_rated_summary">
+            <column name="total_sms" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="roaming-summary-migrate-sms-data" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="roaming_rated_summary" columnName="total_calls"/>
+            <columnExists tableName="roaming_rated_summary" columnName="total_sms"/>
+        </preConditions>
+        
+        <!-- For existing rows, total_calls will hold the value. Let's fix up total_sms for SMS summaries. -->
+        <!-- Copy total_calls to total_sms for SMS service types -->
+        <update tableName="roaming_rated_summary">
+            <column name="total_sms" valueComputed="total_calls"/>
+            <where>service_type = 'SMS'</where>
+        </update>
+        
+        <!-- Zero out total_calls where it's not applicable -->
+        <update tableName="roaming_rated_summary">
+            <column name="total_calls" value="0"/>
+            <where>service_type = 'SMS' OR service_type = 'USAGE'</where>
+        </update>
+        
+        <!-- Zero out total_sms where it's null -->
+        <update tableName="roaming_rated_summary">
+            <column name="total_sms" value="0"/>
+            <where>total_sms IS NULL</where>
+        </update>
+    </changeSet>
+
+    <!-- 2. Add zone_name to voice_rated_cdr -->
+    <changeSet id="add-zone-name-to-voice-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="voice_rated_cdr" columnName="zone_name"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="voice_rated_cdr">
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 3. Add zone_name to sms_rated_cdr -->
+    <changeSet id="add-zone-name-to-sms-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="sms_rated_cdr" columnName="zone_name"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="sms_rated_cdr">
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 4. Add zone_name to usage_rated_cdr -->
+    <changeSet id="add-zone-name-to-usage-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="usage_rated_cdr" columnName="zone_name"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 5. Add service_type and zone_name to tap_out_rated_summary -->
+    <changeSet id="add-grouping-fields-to-tap-out-summary" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tap_out_rated_summary" columnName="service_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="tap_out_rated_summary">
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')">
+                <constraints nullable="true"/>
+            </column>
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!--
+       Add total_usage_bytes to roaming_rated_summary.
+
+       Context:
+         TAP IN CDRs of service_type=USAGE (GPRS/data) carry a raw data volume
+         (RoamingCdr.totalUsage, sourced from the TAP ASN file in octets).
+         This column stores the SUM of that volume per summary group
+         (grouped by tapDirection | serviceType | zoneName).
+
+         This aligns roaming_rated_summary with tap_out_rated_summary which
+         already has total_usage_bytes, enabling a unified tap summary screen.
+   -->
+    <changeSet id="add-total-usage-bytes-to-roaming-rated-summary" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="roaming_rated_summary" columnName="total_usage_bytes"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="roaming_rated_summary">
+            <column name="total_usage_bytes" type="DECIMAL(19,4)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>SUM(RoamingCdr.totalUsage) for USAGE-type CDRs; octets as decoded from TAP ASN file.</comment>
+    </changeSet>
+
+
+    <changeSet id="fix-tap-out-summary-service-type-to-varchar" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tap_out_rated_summary"/>
+                <columnExists tableName="tap_out_rated_summary" columnName="service_type"/>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="tap_out_rated_summary"
+                        columnName="service_type"
+                        newDataType="VARCHAR(20)"/>
+    </changeSet>
+
+
+</databaseChangeLog>

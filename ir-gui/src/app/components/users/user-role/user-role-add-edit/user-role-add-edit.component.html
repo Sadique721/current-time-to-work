@@ -1,0 +1,535 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ selectedUserRole?.id ? "Update " : "Create " }} User Role</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button
+          type="button"
+          class="btn me-2 btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading"
+        >
+          <i class="feather icon-arrow-left me-2"></i>Back to User Role List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div *ngIf="isLoading" class="card">
+  <div class="card-body text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">Loading user role data...</p>
+  </div>
+</div>
+
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <h4>User Role Information</h4>
+  </div>
+  <div class="card-body profile-body">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Name"
+              [formControlRef]="form | getControl: 'name'"
+              type="text"
+              placeholder="Enter Name"
+              required="true"
+            ></custom-input>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('name')?.errors?.['required']"
+            >
+              Name is required
+            </div>
+            <div
+              class="text-danger small mt-1"
+              *ngIf="submitted && form.get('name')?.errors?.['minlength']"
+            >
+              Name must be at least 3 characters
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusEnable"
+                  [value]="true"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusEnable">
+                  Enable
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="status"
+                  id="statusDisable"
+                  [value]="false"
+                  formControlName="status"
+                />
+                <label class="form-check-label" for="statusDisable">
+                  Disable
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-12">
+          <h5 class="mb-3">Permissions</h5>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">PBX Mode</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="pbxMode"
+                  id="pbxModeYes"
+                  [value]="true"
+                  formControlName="pbxMode"
+                />
+                <label class="form-check-label" for="pbxModeYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="pbxMode"
+                  id="pbxModeNo"
+                  [value]="false"
+                  formControlName="pbxMode"
+                />
+                <label class="form-check-label" for="pbxModeNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">CDR Report</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="cdrReport"
+                  id="cdrReportYes"
+                  [value]="true"
+                  formControlName="cdrReport"
+                />
+                <label class="form-check-label" for="cdrReportYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="cdrReport"
+                  id="cdrReportNo"
+                  [value]="false"
+                  formControlName="cdrReport"
+                />
+                <label class="form-check-label" for="cdrReportNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Login/Logout Report</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="loginLogoutReport"
+                  id="loginLogoutReportYes"
+                  [value]="true"
+                  formControlName="loginLogoutReport"
+                />
+                <label class="form-check-label" for="loginLogoutReportYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="loginLogoutReport"
+                  id="loginLogoutReportNo"
+                  [value]="false"
+                  formControlName="loginLogoutReport"
+                />
+                <label class="form-check-label" for="loginLogoutReportNo">
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Call Center Mode</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="callCenterMode"
+                  id="callCenterModeYes"
+                  [value]="true"
+                  formControlName="callCenterMode"
+                />
+                <label class="form-check-label" for="callCenterModeYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="callCenterMode"
+                  id="callCenterModeNo"
+                  [value]="false"
+                  formControlName="callCenterMode"
+                />
+                <label class="form-check-label" for="callCenterModeNo">
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Recording</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="recording"
+                  id="recordingYes"
+                  [value]="true"
+                  formControlName="recording"
+                />
+                <label class="form-check-label" for="recordingYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="recording"
+                  id="recordingNo"
+                  [value]="false"
+                  formControlName="recording"
+                />
+                <label class="form-check-label" for="recordingNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Follow Up</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="followUp"
+                  id="followUpYes"
+                  [value]="true"
+                  formControlName="followUp"
+                />
+                <label class="form-check-label" for="followUpYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="followUp"
+                  id="followUpNo"
+                  [value]="false"
+                  formControlName="followUp"
+                />
+                <label class="form-check-label" for="followUpNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Sticky Agent</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="stickyAgent"
+                  id="stickyAgentYes"
+                  [value]="true"
+                  formControlName="stickyAgent"
+                />
+                <label class="form-check-label" for="stickyAgentYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="stickyAgent"
+                  id="stickyAgentNo"
+                  [value]="false"
+                  formControlName="stickyAgent"
+                />
+                <label class="form-check-label" for="stickyAgentNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Number Masking</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="numberMasking"
+                  id="numberMaskingYes"
+                  [value]="true"
+                  formControlName="numberMasking"
+                />
+                <label class="form-check-label" for="numberMaskingYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="numberMasking"
+                  id="numberMaskingNo"
+                  [value]="false"
+                  formControlName="numberMasking"
+                />
+                <label class="form-check-label" for="numberMaskingNo">
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Setting</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="setting"
+                  id="settingYes"
+                  [value]="true"
+                  formControlName="setting"
+                />
+                <label class="form-check-label" for="settingYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="setting"
+                  id="settingNo"
+                  [value]="false"
+                  formControlName="setting"
+                />
+                <label class="form-check-label" for="settingNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Breakcode</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="breakcode"
+                  id="breakcodeYes"
+                  [value]="true"
+                  formControlName="breakcode"
+                />
+                <label class="form-check-label" for="breakcodeYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="breakcode"
+                  id="breakcodeNo"
+                  [value]="false"
+                  formControlName="breakcode"
+                />
+                <label class="form-check-label" for="breakcodeNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">Allow Black List</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="allowBlackList"
+                  id="allowBlackListYes"
+                  [value]="true"
+                  formControlName="allowBlackList"
+                />
+                <label class="form-check-label" for="allowBlackListYes">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="allowBlackList"
+                  id="allowBlackListNo"
+                  [value]="false"
+                  formControlName="allowBlackList"
+                />
+                <label class="form-check-label" for="allowBlackListNo">
+                  No
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <label class="form-label">WhatsApp</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="whatsapp"
+                  id="whatsappYes"
+                  [value]="true"
+                  formControlName="whatsapp"
+                />
+                <label class="form-check-label" for="whatsappYes"> Yes </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="whatsapp"
+                  id="whatsappNo"
+                  [value]="false"
+                  formControlName="whatsapp"
+                />
+                <label class="form-check-label" for="whatsappNo"> No </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-3" *ngIf="!isLoading">
+  <div class="card-body">
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isLoading"
+      >
+        Cancel
+      </button>
+      <button
+        class="btn btn-warning"
+        type="button"
+        *ngIf="selectedUserRole?.id"
+        (click)="clearForm()"
+        [disabled]="isLoading"
+      >
+        Clear
+      </button>
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="onSubmit()"
+        [disabled]="isLoading || form.invalid"
+      >
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          *ngIf="isLoading"
+        ></span>
+        {{ selectedUserRole?.id ? "Update" : "Save" }}
+      </button>
+    </div>
+  </div>
+</div>

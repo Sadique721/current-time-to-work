@@ -1,0 +1,94 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingzone">Zone Rating</a>
+        / {{ selectedZoneRating.zoneName || "Details" }}
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingzone">
+      <i class="feather icon-arrow-left me-2"></i>Back to Zone List
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Zone Information</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Zone Name</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ selectedZoneRating.zoneName || "-" }}</span>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Priority</p>
+              <span class="text-gray-900 fs-13">{{ selectedZoneRating.priority || "-" }}</span>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Prefix Input Mode</p>
+              <span class="text-gray-900 fs-13">{{ selectedZoneRating.prefixInputMode || "-" }}</span>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Description</p>
+              <span class="text-gray-900 fs-13">{{ selectedZoneRating.description || "-" }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">Prefix Pattern Details</h6>
+        <span class="badge bg-secondary">{{ prefixDetails.length || 0 }} prefixes</span>
+      </div>
+      <div class="card-body">
+        <div *ngIf="loadingPrefixes" class="text-muted p-3">Loading prefix details...</div>
+        
+        <div *ngIf="!loadingPrefixes && prefixDetails.length > 0" class="d-flex flex-wrap gap-2">
+          <span *ngFor="let item of prefixDetails"
+            class="badge bg-light text-dark border rounded px-3 py-2 fs-13 fw-normal d-inline-flex align-items-center gap-2">
+            {{ item.label }}
+            <span class="small text-muted border-start ps-2 border-secondary-subtle">
+              {{ item.value }} · {{ item.prefixType || item.sourceType }}
+            </span>
+          </span>
+        </div>
+
+        <div *ngIf="!loadingPrefixes && prefixDetails.length === 0" class="text-muted">
+          <div *ngIf="selectedZoneRating?.prefixPattern">
+            <p class="mb-2">No exact prefix matches found for:</p>
+            <div class="bg-light p-3 rounded" style="word-break: break-all;">
+              {{ selectedZoneRating?.rawPrefixPattern || selectedZoneRating?.prefixPattern }}
+            </div>
+          </div>
+          <div *ngIf="!selectedZoneRating?.prefixPattern">
+            No prefixes assigned to this zone.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

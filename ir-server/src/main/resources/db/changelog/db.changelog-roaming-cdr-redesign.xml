@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Redesign roaming_cdrs table for zone-based ROAMING rating.
+
+        BEFORE (RoamingIotRate-based):
+          iot_rate_id       BIGINT FK → roaming_iot_rates   (simple prefix lookup)
+          iot_applied_rate  DECIMAL                          (rate × duration / 60)
+
+        AFTER (RatePackage/ZONE-based):
+          zone_name         VARCHAR(100)   — zone matched via ZonePrefixTrie on visitedPlmn
+          rate_package_id   BIGINT         — RatePackage[ZONE, ROAMING] used for rating
+          rate_package_name VARCHAR(255)   — denormalized for reporting
+          rate_detail_id    BIGINT         — specific RateDetails row used
+          applied_rate      DECIMAL(15,6)  — rate from RateDetails (replaces iot_applied_rate)
+
+        The our_charge column is kept — it now holds pulse-based billing result
+        instead of the simple rate × duration / 60 calculation.
+
+        The iot_rate_id FK is dropped — RoamingIotRate is no longer used for rating.
+        The roaming_iot_rates table itself is kept for backward compatibility / data history.
+    -->
+
+    <!-- 1. Drop FK constraint on iot_rate_id before dropping the column -->
+    <changeSet id="roaming-cdr-redesign-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_roaming_cdr_iot_rate"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="roaming_cdrs"
+                                  constraintName="fk_roaming_cdr_iot_rate"/>
+    </changeSet>
+
+    <!-- 2. Drop iot_rate_id column — no longer used for rating -->
+    <changeSet id="roaming-cdr-redesign-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'iot_rate_id'
+            </sqlCheck>
+        </preConditions>
+        <dropColumn tableName="roaming_cdrs" columnName="iot_rate_id"/>
+    </changeSet>
+
+    <!-- 3. Drop iot_applied_rate — replaced by applied_rate from RateDetails -->
+    <changeSet id="roaming-cdr-redesign-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'iot_applied_rate'
+            </sqlCheck>
+        </preConditions>
+        <dropColumn tableName="roaming_cdrs" columnName="iot_applied_rate"/>
+    </changeSet>
+
+    <!-- 4. Add zone_name — zone matched via ZonePrefixTrie on visitedPlmn -->
+    <changeSet id="roaming-cdr-redesign-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'zone_name'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="roaming_cdrs">
+            <column name="zone_name" type="VARCHAR(100)"
+                    remarks="Zone name resolved from visitedPlmn via ZonePrefixTrie e.g. ZONE_EU"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 5. Add rate_package_id — RatePackage[ZONE, ROAMING] used for this CDR -->
+    <changeSet id="roaming-cdr-redesign-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'rate_package_id'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="roaming_cdrs">
+            <column name="rate_package_id" type="BIGINT"
+                    remarks="RatePackage ID used for rating — must be ZONE type with lineOfBusiness=ROAMING"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 6. Add rate_package_name — denormalized for reporting without join -->
+    <changeSet id="roaming-cdr-redesign-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'rate_package_name'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="roaming_cdrs">
+            <column name="rate_package_name" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 7. Add rate_detail_id — specific RateDetails row used for this CDR -->
+    <changeSet id="roaming-cdr-redesign-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'rate_detail_id'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="roaming_cdrs">
+            <column name="rate_detail_id" type="BIGINT"
+                    remarks="FK to rate_details — the specific rate row applied"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 8. Add applied_rate — replaces iot_applied_rate, now from RateDetails.rate -->
+    <changeSet id="roaming-cdr-redesign-8" author="system">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'roaming_cdrs'
+                AND COLUMN_NAME = 'applied_rate'
+            </sqlCheck>
+        </preConditions>
+        <addColumn tableName="roaming_cdrs">
+            <column name="applied_rate" type="DECIMAL(15,6)"
+                    remarks="Rate from RateDetails.rate — replaces iot_applied_rate"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 9. Index on zone_name for summary grouping queries -->
+    <changeSet id="roaming-cdr-redesign-9" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="roaming_cdrs" indexName="idx_roaming_cdr_zone"/></not>
+        </preConditions>
+        <createIndex tableName="roaming_cdrs" indexName="idx_roaming_cdr_zone">
+            <column name="zone_name"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 10. Index on rate_package_id for reporting queries -->
+    <changeSet id="roaming-cdr-redesign-10" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="roaming_cdrs" indexName="idx_roaming_cdr_rate_pkg"/></not>
+        </preConditions>
+        <createIndex tableName="roaming_cdrs" indexName="idx_roaming_cdr_rate_pkg">
+            <column name="rate_package_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

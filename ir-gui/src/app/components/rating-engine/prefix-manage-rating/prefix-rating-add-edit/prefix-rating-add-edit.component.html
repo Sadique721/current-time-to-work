@@ -1,0 +1,67 @@
+<div class="modal-content">
+  <div class="page-wrapper-new p-0">
+    <div class="content p-0">
+      <div class="modal-header">
+        <div class="page-title">
+          <h4>
+            {{ selectedPrefixRating?.prefixId ? "Update " : "Create " }}
+            Prefix Rating
+          </h4>
+        </div>
+        <button type="button" class="close" (click)="onClose()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row">
+            <div class="col-lg-12">
+              <custom-input label="Prefix Name" [formControlRef]="prefixRatingForm | getControl: 'prefixName'"
+                type="text"></custom-input>
+            </div>
+            <div class="col-lg-12">
+              <custom-select label="Prefix Type" [options]="prefixTypeOptions" optionValue="value" optionLabel="label"
+                [formControlRef]="prefixRatingForm | getControl: 'prefixType'" [filter]="false"></custom-select>
+            </div>
+            <div class="col-lg-12">
+              <custom-select label="Country Name" [options]="countryList" optionValue="name" optionLabel="name"
+                [formControlRef]="prefixRatingForm | getControl: 'countryName'" [filter]="true"></custom-select>
+            </div>
+            <div class="col-lg-12">
+              <div class="mb-3">
+                <label class="form-label">Prefix <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span *ngIf="isInterconnectType" class="input-group-text fw-semibold"
+                    style="min-width: 60px; background: #e9ecef;"
+                    [title]="selectedCountryCode ? 'Country code for ' + prefixRatingForm.get('countryName')?.value : 'Select a country first'">
+                    {{ selectedCountryCode || '—' }}
+                  </span>
+                  <input type="text" class="form-control"
+                    [placeholder]="isInterconnectType ? 'Enter remaining prefix digits' : 'Enter full prefix'"
+                    [formControl]="prefixSuffixControl" />
+                </div>
+                <small class="text-danger"
+                  *ngIf="prefixRatingForm.get('prefix')?.touched && prefixRatingForm.get('prefix')?.hasError('required')">
+                  Prefix is required.
+                </small>
+                <small class="text-muted d-block mt-1" *ngIf="prefixSuffixControl.value">
+                  {{ isInterconnectType ? 'Final prefix:' : 'Full prefix:' }}
+                  <strong>{{ isInterconnectType ? (selectedCountryCode || '—') + prefixSuffixControl.value :
+                    prefixSuffixControl.value }}</strong>
+                </small>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3" (click)="onClose()">
+          Cancel
+        </button>
+        <button class="btn btn-primary fs-13 fw-medium p-2 px-3" (click)="submit()">
+          {{ selectedPrefixRating?.prefixId ? "Update" : "Save" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

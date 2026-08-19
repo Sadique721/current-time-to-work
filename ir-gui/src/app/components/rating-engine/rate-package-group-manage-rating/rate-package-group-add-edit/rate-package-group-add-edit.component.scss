@@ -1,0 +1,36 @@
+// ─── Package Selection List (Step 2) ─────────────────────────────────────────
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  .account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1.5px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+
+    &:hover {
+      border-color: var(--bs-primary, #4f52ba);
+      background: rgba(79, 82, 186, 0.04);
+    }
+
+    &.selected {
+      border-color: var(--bs-primary, #4f52ba);
+      background: rgba(79, 82, 186, 0.06);
+    }
+
+    .form-check-label {
+      cursor: pointer;
+    }
+  }
+}

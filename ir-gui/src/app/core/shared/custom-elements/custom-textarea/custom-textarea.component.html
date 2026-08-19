@@ -1,0 +1,29 @@
+<div class="mb-3 col">
+  <mat-label class="col-form-label col-lg-2">
+    {{ label }}
+    <span
+      *ngIf="formControlRef.hasValidator(isControlRequired)"
+      class="text-danger"
+      >*</span
+    >
+  </mat-label>
+
+  <div class="input-group input-group-sm">
+    <textarea
+      class="form-control"
+      [ngClass]="{ 'is-invalid-textarea': showError }"
+      style="width: 100%"
+      pTextarea
+      [formControl]="formControlRef"
+      [autoResize]="autoResize"
+      [cols]="cols"
+      [rows]="rows"
+      [placeholder]="placeholder"
+    >
+    </textarea>
+  </div>
+
+  <div *ngIf="showError" class="invalid-feedback-msg">
+    {{ errorMessage || (label + ' is required') }}
+  </div>
+</div>

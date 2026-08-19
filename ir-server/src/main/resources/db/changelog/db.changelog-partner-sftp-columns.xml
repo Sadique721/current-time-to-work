@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: Replace partner_sftp_config JSON blob with individual SFTP columns on partners table.
+
+        The partner_sftp_config TEXT column previously stored SFTP connection details as a JSON string.
+        This migration adds six dedicated columns (matching the clearing_houses SFTP config pattern)
+        and drops the old JSON column.
+
+        Design:
+        - Each new column is added in its own changeset with an independent precondition.
+        - This ensures idempotent execution on fresh, partial, and full databases.
+        - The drop of partner_sftp_config only runs if the column still exists.
+    -->
+
+    <changeSet id="partner-sftp-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_host"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_host" type="VARCHAR(255)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_host"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_port"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_port" type="INT"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_port"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_username"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_username" type="VARCHAR(100)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_username"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-4" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_password"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_password" type="VARCHAR(255)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_password"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-5" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_remote_path"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_remote_path" type="VARCHAR(500)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_remote_path"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-6" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="sftp_inbox_path"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="sftp_inbox_path" type="VARCHAR(500)"/>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="sftp_inbox_path"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="partner-sftp-7" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="partners" columnName="partner_sftp_config"/>
+        </preConditions>
+        <dropColumn tableName="partners" columnName="partner_sftp_config"/>
+        <rollback>
+            <addColumn tableName="partners">
+                <column name="partner_sftp_config" type="TEXT"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="fix-billing-cycle-enum-values" author="system">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="partners"/>
+                <columnExists tableName="partners" columnName="billing_cycle"/>
+            </and>
+        </preConditions>
+        <comment>Fix billing_cycle ENUM to only allow MONTHLY and WEEKLY</comment>
+        <modifyDataType tableName="partners"
+                        columnName="billing_cycle"
+                        newDataType="ENUM('MONTHLY', 'WEEKLY')"/>
+        <addNotNullConstraint tableName="partners"
+                              columnName="billing_cycle"
+                              columnDataType="ENUM('MONTHLY', 'WEEKLY')"
+                              defaultNullValue="MONTHLY"/>
+    </changeSet>
+
+
+</databaseChangeLog>

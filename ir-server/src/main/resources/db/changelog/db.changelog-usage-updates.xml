@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="add-usage-rated-cdr-additional-columns" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <not>
+                    <columnExists tableName="usage_rated_cdr" columnName="upload_usage"/>
+                </not>
+            </and>
+        </preConditions>
+        <!-- Add upload_usage and download_usage -->
+        <addColumn tableName="usage_rated_cdr">
+            <column name="upload_usage" type="DECIMAL(19, 4)"/>
+            <column name="download_usage" type="DECIMAL(19, 4)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="rename-usage-amount-to-total-usage" author="dev">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="usage_rated_cdr"/>
+                <columnExists tableName="usage_rated_cdr" columnName="usage_amount"/>
+            </and>
+        </preConditions>
+        <renameColumn tableName="usage_rated_cdr" oldColumnName="usage_amount" newColumnName="total_usage" columnDataType="DECIMAL(19, 4)"/>
+    </changeSet>
+
+    <changeSet id="add-usage-fields-to-rate-packages" author="Govind Sirsath">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_packages" columnName="start_time"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rate_packages">
+            <column name="start_time" type="DATETIME"/>
+            <column name="end_time" type="DATETIME"/>
+            <column name="rate" type="DOUBLE"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add-is-tap-out-generated-to-usage-rated-cdr" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="usage_rated_cdr" columnName="is_tap_out_generated"/></not>
+        </preConditions>
+        <addColumn tableName="usage_rated_cdr">
+            <column name="is_tap_out_generated" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="drop-not-null-rate-package-type" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="rate_packages" columnName="rate_package_type"/>
+        </preConditions>
+        <dropNotNullConstraint tableName="rate_packages" columnName="rate_package_type" columnDataType="ENUM('DESTINATION_BASED','SOURCE_DESTINATION_BASED','ZONE_DESTINATION_BASED','ZONE')"/>
+    </changeSet>
+
+</databaseChangeLog>

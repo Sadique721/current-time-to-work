@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!--
+        Migration: TAP OUT sequence tracking table.
+
+        Purpose:
+          GSMA TD.57 requires TAP OUT files to be sequentially numbered per
+          sender-recipient TADIG pair. Sequence numbers must never repeat or skip.
+
+          This table tracks the last used sequence number per roaming partner.
+          TapOutFileGenerationService uses SELECT FOR UPDATE (pessimistic lock)
+          to atomically increment the sequence before each file generation.
+
+        Filename format (GSMA TD.57):
+          TD{ourTadig(5)}{partnerTadig(5)}{zeroPad(sequence,5)}
+          e.g. "TDEUR01AUTPT00006"
+    -->
+
+    <!-- 1. Create tap_out_sequence table -->
+    <changeSet id="tap-out-seq-1" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="tap_out_sequence"/></not>
+        </preConditions>
+        <createTable tableName="tap_out_sequence">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <!-- One row per partner — unique constraint prevents duplicate sequence counters -->
+            <column name="partner_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <!-- Last used sequence number. Starts at 0, first file uses sequence 1 -->
+            <column name="last_sequence" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <!-- Timestamp of last TAP OUT file generated for this partner -->
+            <column name="updated_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 2. FK to partners table -->
+    <changeSet id="tap-out-seq-2" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyName="fk_tap_out_seq_partner"/></not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="tap_out_sequence" baseColumnNames="partner_id"
+                referencedTableName="partners" referencedColumnNames="partner_id"
+                constraintName="fk_tap_out_seq_partner"/>
+    </changeSet>
+
+    <!-- 3. Index on partner_id for fast lookup during sequence increment -->
+    <changeSet id="tap-out-seq-3" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="tap_out_sequence" indexName="idx_tap_out_seq_partner"/></not>
+        </preConditions>
+        <createIndex tableName="tap_out_sequence" indexName="idx_tap_out_seq_partner">
+            <column name="partner_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

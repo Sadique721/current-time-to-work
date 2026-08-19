@@ -1,0 +1,178 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" (click)="ratePackageGroupView()">
+          {{ selectedRateGroupPackage.ratePackageGroupName }} — Details
+        </a>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingratepackagegroup">
+      <i class="feather icon-arrow-left me-2"></i>Back to Rate Package Group List
+    </a>
+  </div>
+</div>
+
+<!-- Basic Details Card -->
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Basic Details</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Package Group Name</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ selectedRateGroupPackage.ratePackageGroupName || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Description</p>
+              <span class="text-gray-900 fs-13">{{ selectedRateGroupPackage.description || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Package Type</p>
+              <span class="badge bg-info-transparent fs-12" style="padding: 6px 12px;">
+                <i class="ti ti-package me-1"></i>
+                {{ selectedRateGroupPackage.packageType || "-" }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Service Type</p>
+              <span class="badge bg-primary-transparent fs-12" style="padding: 6px 12px;">
+                <i class="ti ti-settings me-1"></i>
+                {{ selectedRateGroupPackage.serviceType || "-" }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Rate Package Selection Type</p>
+              <span class="text-gray-900 fs-13">
+                {{ selectedRateGroupPackage.ratePackageSelectionType || "-" }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-3" *ngIf="selectedRateGroupPackage.expression">
+            <div class="mb-3">
+              <p class="fs-13 mb-2 text-muted">Expression</p>
+              <span class="text-gray-900 fs-13" style="text-transform: none !important;">{{ selectedRateGroupPackage.expression }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rate Packages Table (Reorderable) -->
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">Rate Packages</h6>
+        <div class="d-flex align-items-center gap-2" *ngIf="isPriority">
+          <span *ngIf="hasOrderChanged" class="badge bg-warning-transparent fs-12">
+            <i class="ti ti-alert-circle me-1"></i>Unsaved order changes
+          </span>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            *ngIf="hasOrderChanged"
+            (click)="resetOrder()"
+          >
+            <i class="ti ti-refresh me-1"></i>Reset
+          </button>
+          <button
+            class="btn btn-sm btn-primary"
+            [disabled]="!hasOrderChanged || isSavingOrder"
+            (click)="saveOrder()"
+          >
+            <span *ngIf="isSavingOrder" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!isSavingOrder" class="ti ti-device-floppy me-1"></i>
+            Save Order
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="text-muted fs-13 mb-3">
+          <i class="ti ti-info-circle me-1"></i>
+          <span *ngIf="isPriority">Drag rows or use the arrows to reorder packages by priority.</span>
+          <span *ngIf="!isPriority">List of packages included in this group.</span>
+        </p>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="thead-light">
+              <tr>
+                <th *ngIf="isPriority" style="width:44px;"></th>
+                <th *ngIf="isPriority" style="width:60px;" class="text-center">Priority</th>
+                <th>Rate Package Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th *ngIf="isCallType">Call Type</th>
+                <th *ngIf="isExpression">Expression</th>
+                <th *ngIf="isPriority" class="text-center" style="width:80px;">Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let row of packageRows; let i = index"
+                [draggable]="isPriority"
+                (dragstart)="isPriority ? onDragStart(i) : null"
+                (dragover)="isPriority ? onDragOver($event) : null"
+                (drop)="isPriority ? onDrop(i) : null"
+                [class.table-active]="draggedIndex === i"
+                [style.cursor]="isPriority ? 'grab' : 'default'"
+              >
+                <td *ngIf="isPriority" class="text-center text-muted">
+                  <i class="ti ti-grip-vertical fs-16"></i>
+                </td>
+                <td *ngIf="isPriority" class="text-center fw-bold text-primary">{{ row.priority }}</td>
+                <td>
+                  <span class="fw-medium">{{ row.packageName }}</span>
+                </td>
+                <td>{{ row.startTime }}</td>
+                <td>{{ row.endTime }}</td>
+                <td *ngIf="isCallType">
+                  <span *ngIf="row.callType !== '-'" class="badge bg-info-transparent text-info">{{ row.callType }}</span>
+                  <span *ngIf="row.callType === '-'">-</span>
+                </td>
+                <td *ngIf="isExpression">
+                  <span *ngIf="row.expression !== '-'" class="badge bg-secondary-transparent text-secondary" style="text-transform: none !important;">{{ row.expression }}</span>
+                  <span *ngIf="row.expression === '-'">-</span>
+                </td>
+                <td *ngIf="isPriority" class="text-center">
+                  <div class="d-flex gap-1 justify-content-center">
+                    <button #upBtn type="button" class="btn btn-sm btn-outline-secondary p-1"
+                      [disabled]="i === 0" (click)="moveRowUp(i, upBtn)" title="Move Up">
+                      <i class="ti ti-chevron-up"></i>
+                    </button>
+                    <button #downBtn type="button" class="btn btn-sm btn-outline-secondary p-1"
+                      [disabled]="i === packageRows.length - 1" (click)="moveRowDown(i, downBtn)" title="Move Down">
+                      <i class="ti ti-chevron-down"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngIf="packageRows.length === 0">
+                <td colspan="8" class="text-center text-muted py-4">
+                  <i class="ti ti-inbox fs-2 d-block mb-2"></i>
+                  No packages in this group.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<div class="col" id="payment-gateway-add-edit-dialog">
+  <div class="modal-header">
+    <div class="page-title">
+      <h4>
+        {{ data?.paymentConfigId ? "Update " : "Create " }} Payment Gateway
+      </h4>
+    </div>
+
+    <div class="page-btn">
+      <button type="button" class="btn me-2 btn-secondary" (click)="onClose()">
+        <i class="feather icon-arrow-left me-2"></i>Back to List
+      </button>
+    </div>
+  </div>
+  <div class="modal-body pt-1">
+    <form class="col-lg-10" [formGroup]="commonFG">
+      <div class="row">
+        <div class="col-lg-5">
+          <custom-select
+            label="Payment Gateway"
+            [options]="listOfPaymentGateway"
+            optionValue="value"
+            optionLabel="displayName"
+            [formControlRef]="commonFG | getControl: 'paymentConfigName'"
+            [filter]="true"
+            [showClear]="true"
+          ></custom-select>
+        </div>
+        <div class="col-lg-5">
+          <custom-input
+            label="Payment Gateway Info"
+            [formControlRef]="commonFG | getControl: 'paymentGatewayInfo'"
+          ></custom-input>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div
+    class="modal-body pt-1"
+    *ngIf="commonFG.get('paymentConfigName')?.value && !isLoading"
+  >
+    <div class="modal-header">
+      <div class="page-title">
+        <h5>Gateway Configuration</h5>
+      </div>
+    </div>
+    <form class="col-lg-10" [formGroup]="gatewayConfiFG">
+      <div class="row">
+        <ng-container *ngFor="let item of paymentConfigMappingList">
+          <ng-container *ngIf="item.paymentParameterFor != 'SYSTEM'">
+            <div class="col-lg-5">
+              <custom-input
+                [label]="item.parameterDisplayName || item.paymentParameterName"
+                [formControlRef]="
+                  gatewayConfiFG | getControl: item.paymentParameterName
+                "
+              ></custom-input>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </form>
+
+    <div class="modal-header">
+      <div class="page-title">
+        <h5>System Configuration</h5>
+      </div>
+    </div>
+    <form class="col-lg-10" [formGroup]="systemConfiFG">
+      <div class="row">
+        <ng-container *ngFor="let item of paymentConfigMappingList">
+          <ng-container *ngIf="item.paymentParameterFor == 'SYSTEM'">
+            <div class="col-lg-5">
+              <custom-input
+                [label]="item.parameterDisplayName || item.paymentParameterName"
+                [formControlRef]="
+                  systemConfiFG | getControl: item.paymentParameterName
+                "
+              ></custom-input>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-md-12 card-body modal-footer row pt-3">
+    <button
+      type="button"
+      class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="onClose()"
+    >
+      Cancel
+    </button>
+    <button
+      *ngIf="commonFG.get('paymentConfigName')?.value"
+      class="btn btn-primary fs-13 fw-medium p-2 px-3 col-lg-1"
+      (click)="submit()"
+    >
+      {{ data && data?.paymentConfigId ? "Update" : "Save" }}
+    </button>
+  </div>
+</div>

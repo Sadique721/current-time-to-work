@@ -1,0 +1,146 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" routerLink="/rating-engine/rerate-requests">ReRate Requests</a>
+        / {{ selectedRequest?.auditName || "Details" }}
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" routerLink="/rating-engine/rerate-requests">
+      <i class="feather icon-arrow-left me-2"></i>Back to ReRate Requests
+    </a>
+  </div>
+</div>
+
+<div class="row" *ngIf="selectedRequest">
+  <div class="col-xl-12">
+    <!-- Basic Details Card -->
+    <div class="card rounded-0 border-0 mb-3">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0 fw-semibold">Request Information</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Audit Name</p>
+            <span class="text-gray-900 fs-13 fw-medium">{{ selectedRequest.auditName || "-" }}</span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Request ID</p>
+            <span class="text-gray-900 fs-13">{{ selectedRequest.requestId || "-" }}</span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Status</p>
+            <span [ngClass]="getStatusClass(selectedRequest.status)">{{ selectedRequest.status || "-" }}</span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Enable</p>
+            <span class="badge" [ngClass]="selectedRequest.enable ? 'badge-success' : 'badge-secondary'">
+              {{ selectedRequest.enable ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Start Date</p>
+            <span class="text-gray-900 fs-13">{{ (selectedRequest.startDate | date: 'dd/MM/yyyy HH:mm') || "-" }}</span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">End Date</p>
+            <span class="text-gray-900 fs-13">{{ (selectedRequest.endDate | date: 'dd/MM/yyyy HH:mm') || "-" }}</span>
+          </div>
+          <div class="col-md-3 mb-3">
+            <p class="fs-12 text-muted mb-1">Requested At</p>
+            <span class="text-gray-900 fs-13">{{ (selectedRequest.requestedAt | date: 'dd/MM/yyyy HH:mm') || "-" }}</span>
+          </div>
+          <div class="col-md-12 mb-3">
+            <p class="fs-12 text-muted mb-1">Remark</p>
+            <span class="text-gray-900 fs-13">{{ selectedRequest.remark || "-" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CDR Query Configurations -->
+    <div class="card rounded-0 border-0 mb-3">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0 fw-semibold">CDR Query Configurations</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle fs-13">
+            <thead class="table-light">
+              <tr>
+                <th>Service Type</th>
+                <th>Line Of Business</th>
+                <th>Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="selectedRequest.voiceQueryConfig">
+                <td class="fw-medium text-primary">VOICE</td>
+                <td>{{ lineOfBusiness }}</td>
+                <td>
+                  <span class="badge" [ngClass]="selectedRequest.voiceQueryConfig.isActive ? 'badge-success' : 'badge-secondary'">
+                    {{ selectedRequest.voiceQueryConfig.isActive ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="selectedRequest.smsQueryConfig">
+                <td class="fw-medium text-primary">SMS</td>
+                <td>{{ lineOfBusiness }}</td>
+                <td>
+                  <span class="badge" [ngClass]="selectedRequest.smsQueryConfig.isActive ? 'badge-success' : 'badge-secondary'">
+                    {{ selectedRequest.smsQueryConfig.isActive ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="selectedRequest.usageQueryConfig">
+                <td class="fw-medium text-primary">USAGE</td>
+                <td>{{ lineOfBusiness }}</td>
+                <td>
+                  <span class="badge" [ngClass]="selectedRequest.usageQueryConfig.isActive ? 'badge-success' : 'badge-secondary'">
+                    {{ selectedRequest.usageQueryConfig.isActive ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!selectedRequest.voiceQueryConfig && !selectedRequest.smsQueryConfig && !selectedRequest.usageQueryConfig">
+                <td colspan="3" class="text-center text-muted py-3">No query configurations found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request Parameters -->
+    <div class="card rounded-0 border-0 mb-3">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0 fw-semibold">Request Parameters</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle fs-13">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 50px" class="text-center">#</th>
+                <th>Field</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of parameters; let i = index">
+                <td class="text-center text-muted">{{ i + 1 }}</td>
+                <td class="fw-medium">{{ p.parameterField }}</td>
+                <td>{{ p.parameterValue }}</td>
+              </tr>
+              <tr *ngIf="parameters.length === 0">
+                <td colspan="3" class="text-center text-muted py-3">No parameters found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

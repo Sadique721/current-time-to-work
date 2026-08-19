@@ -1,0 +1,341 @@
+<!-- Page Header -->
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>{{ isEditMode ? "Update" : "Create" }} Rate Package</h4>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        id="collapse-header"
+      >
+        <i class="ti ti-chevron-up"></i>
+      </a>
+    </li>
+    <li>
+      <div class="page-btn mt-0">
+        <button type="button" class="btn me-2 btn-secondary" (click)="onClose()">
+          <i class="feather icon-arrow-left me-2"></i>Back to Rate Package List
+        </button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<div class="card d-flex flex-column">
+  <div class="card-body">
+    <form [formGroup]="packageForm">
+
+      <!-- ── Section 1: Package Information ── -->
+      <h6 class="mb-3 fw-semibold text-primary">Package Information</h6>
+      <div class="row">
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-input
+              label="Package Name"
+              [formControlRef]="packageForm | getControl: 'packageName'"
+              type="text"
+            ></custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Service Type"
+              [options]="serviceTypeOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="packageForm | getControl: 'serviceType'"
+              [filter]="false"
+            ></custom-select>          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Type"
+              [options]="typeOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="packageForm | getControl: 'type'"
+              [filter]="false"
+            ></custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12" *ngIf="packageForm.get('serviceType')?.value !== 'USAGE'">
+          <div class="mb-3">
+            <custom-select
+              label="Rate Package Type"
+              [options]="ratePackageTypeOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="packageForm | getControl: 'ratePackageType'"
+              [filter]="false"
+            ></custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12" *ngIf="packageForm.get('serviceType')?.value === 'USAGE'">
+          <div class="mb-3">
+            <custom-input
+              label="Rate"
+              [formControlRef]="packageForm | getControl: 'rate'"
+              type="number"
+            ></custom-input>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12" *ngIf="packageForm.get('serviceType')?.value === 'USAGE'">
+          <div class="mb-3">
+            <custom-date
+              label="Start Time"
+              [formControlRef]="packageForm | getControl: 'startTime'"
+              [showTime]="true"
+              hourFormat="24"
+              placeholder="Select Start Time"
+            ></custom-date>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12" *ngIf="packageForm.get('serviceType')?.value === 'USAGE'">
+          <div class="mb-3">
+            <custom-date
+              label="End Time"
+              [formControlRef]="packageForm | getControl: 'endTime'"
+              [showTime]="true"
+              hourFormat="24"
+              placeholder="Select End Time"
+            ></custom-date>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Rounding"
+              [options]="roundingOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="packageForm | getControl: 'rounding'"
+              [filter]="false"
+            ></custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Price Rounding"
+              [options]="priceroundingOptions"
+              optionValue="value"
+              optionLabel="label"
+              [formControlRef]="packageForm | getControl: 'priceRounding'"
+              [filter]="false"
+            ></custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Pulse Name"
+              [options]="pulseListFiltered"
+              optionValue="pulseId"
+              optionLabel="pulseName"
+              [formControlRef]="packageForm | getControl: 'pulseId'"
+              [filter]="true"
+              [placeholder]="packageForm.get('serviceType')?.value ? 'Select Pulse Name' : 'Please select service type first'"
+            ></custom-select>
+          </div>
+        </div>
+
+
+
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="mb-3">
+            <custom-select
+              label="Currency"
+              [options]="currencyList"
+              optionValue="currencyCode"
+              optionLabel="currencyCode"
+              [formControlRef]="packageForm | getControl: 'currency'"
+              [filter]="true"
+              placeholder="Select Currency"
+            ></custom-select>
+          </div>
+        </div>
+
+        <div class="col-lg-8 col-md-12 col-12">
+          <div class="mb-3">
+            <custom-textarea
+              label="Package Description"
+              [formControlRef]="packageForm | getControl: 'packageDesc'"
+              type="text"
+            ></custom-textarea>
+          </div>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- ── Section 2: Rate Details ── -->
+    <ng-container *ngIf="packageForm.get('serviceType')?.value !== 'USAGE'">
+    <hr class="my-4" />
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h6 class="mb-0 fw-semibold text-primary">Rate Details</h6>
+      <button type="button" class="btn btn-primary btn-sm" (click)="addEmptyRow()" id="btn-add-rate-row">
+        <i class="ti ti-plus me-1"></i>Add Rate Row
+      </button>
+    </div>
+
+    <!-- File Upload -->
+    <div class="p-3 mb-3 border rounded" style="background:#f8f9fa;">
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-outline-info btn-sm" (click)="downloadSampleFile('excel')">
+            <i class="ti ti-download me-1"></i>Sample Excel
+          </button>
+          <button type="button" class="btn btn-outline-info btn-sm" (click)="downloadSampleFile('csv')">
+            <i class="ti ti-download me-1"></i>Sample CSV
+          </button>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-grow-1">
+          <label for="rateDetailsFile" class="form-label mb-0 text-nowrap fw-medium">Upload CSV / Excel:</label>
+          <input
+            type="file"
+            id="rateDetailsFile"
+            class="form-control form-control-sm"
+            accept=".csv,.xls,.xlsx"
+            (change)="onFileSelected($event)"
+            style="max-width:320px;"
+          />
+        </div>
+        <div *ngIf="isPreviewLoading" class="d-flex align-items-center gap-2 text-primary">
+          <div class="spinner-border spinner-border-sm" role="status"></div>
+          <small>Parsing file…</small>
+        </div>
+      </div>
+      <small class="text-muted mt-2 d-block">
+        <i class="ti ti-info-circle me-1"></i>
+        Selecting a file will auto-populate rows. You can still edit, add, or remove rows below.
+      </small>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="rateDetailRows.length === 0 && !isPreviewLoading" class="alert alert-warning text-center" role="alert">
+      <i class="ti ti-table-off fs-3 d-block mb-1"></i>
+      <strong>No rate rows yet.</strong>
+      <p class="mb-0 mt-1 fs-13">Upload a file to auto-populate rows, or click <em>Add Rate Row</em> to add manually.</p>
+    </div>
+
+    <!-- Rate rows table -->
+    <div class="table-responsive" *ngIf="rateDetailRows.length > 0">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="thead-light">
+          <tr>
+            <th style="min-width:40px;">#</th>
+            <!-- Show prefixes if NOT zone based -->
+            <ng-container *ngIf="!isZoneBased">
+              <th style="min-width:140px;">Destination Prefix</th>
+              <th style="min-width:180px;">Destination Prefix Name</th>
+              <th *ngIf="isSourceBased" style="min-width:130px;">Source Prefix</th>
+              <th *ngIf="isSourceBased" style="min-width:170px;">Source Prefix Name</th>
+            </ng-container>
+            <!-- Show Zone if zone based -->
+            <th *ngIf="isZoneBased" style="min-width:200px;">Zone</th>
+
+            <th style="min-width:90px;">Rate</th>
+            <th style="min-width:160px;">Start Time</th>
+            <th style="min-width:160px;">End Time</th>
+            <th class="text-center" style="min-width:60px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rateDetailRows; let i = index; trackBy: trackByIndex">
+            <td class="text-center text-muted">{{ i + 1 }}</td>
+            
+            <!-- Standard Prefix columns -->
+            <ng-container *ngIf="!isZoneBased">
+              <td>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="row.destinationPrefix" [ngModelOptions]="{standalone: true}" placeholder="e.g. 91" />
+              </td>
+              <td>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="row.destinationPrefixName" [ngModelOptions]="{standalone: true}" placeholder="e.g. India" />
+              </td>
+              <td *ngIf="isSourceBased">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="row.sourcePrefix" [ngModelOptions]="{standalone: true}" placeholder="e.g. 1" />
+              </td>
+              <td *ngIf="isSourceBased">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="row.sourcePrefixName" [ngModelOptions]="{standalone: true}" placeholder="e.g. USA" />
+              </td>
+            </ng-container>
+
+            <!-- Zone column -->
+            <td *ngIf="isZoneBased">
+              <select
+                class="form-select form-select-sm"
+                [(ngModel)]="row.zoneName"
+                [ngModelOptions]="{standalone: true}"
+                [class.text-danger]="isZoneInvalid(row.zoneName)"
+              >
+                <option value="" disabled class="text-dark" style="color: black;">Select Zone</option>
+                <option *ngFor="let z of zoneList" [value]="z.zoneName" class="text-dark" style="color: black;">{{ z.zoneName }}</option>
+                <option
+                  *ngIf="row.zoneName && isZoneInvalid(row.zoneName)"
+                  [value]="row.zoneName"
+                  class="text-danger"
+                  style="color: red;"
+                >
+                  {{ row.zoneName }} (Not Available)
+                </option>
+              </select>
+            </td>
+
+            <td>
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="row.rate" [ngModelOptions]="{standalone: true}" placeholder="0.00" />
+            </td>
+            <td>
+              <p-datepicker [(ngModel)]="row.startTime" [ngModelOptions]="{standalone: true}" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-100 p-inputtext-sm" placeholder="Select Start Time"></p-datepicker>
+            </td>
+            <td>
+              <p-datepicker [(ngModel)]="row.endTime" [ngModelOptions]="{standalone: true}" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-100 p-inputtext-sm" placeholder="Select End Time"></p-datepicker>
+            </td>
+            <td class="text-center">
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeRow(i)" title="Remove row">
+                <i class="ti ti-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </ng-container>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer d-flex align-items-center justify-content-between">
+    <button type="button" class="btn btn-secondary fs-13 fw-medium p-2 px-3" (click)="onClose()">
+      Cancel
+    </button>
+    <button
+      class="btn btn-success fs-13 fw-medium p-2 px-3"
+      (click)="submitPackage()"
+      id="btn-submit-package"
+      [disabled]="isPreviewLoading"
+    >
+      <i class="ti ti-circle-check me-1"></i>
+      {{ isEditMode ? "Update Rate Package" : "Create Rate Package" }}
+    </button>
+  </div>
+
+</div>

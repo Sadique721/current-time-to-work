@@ -1,0 +1,410 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>TAP Configuration</h4>
+      <h6>Manage master TAP fields dictionary and configuration profiles</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        <i class="ti ti-chevron-up"></i>
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn">
+    <button
+      *ngIf="activeTab === 'fields'"
+      class="btn btn-primary"
+      (click)="openFieldAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Add TAP Field
+    </button>
+    <button
+      *ngIf="activeTab === 'profiles'"
+      class="btn btn-primary"
+      (click)="openProfileAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Add TAP Profile
+    </button>
+    <button
+      *ngIf="activeTab === 'profile-groups'"
+      class="btn btn-primary"
+      (click)="openProfileGroupAddEdit()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Add TAP Profile Group
+    </button>
+  </div>
+</div>
+
+<!-- Modals -->
+<div
+  class="modal fade"
+  id="add-tap-field"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <app-tap-field-add-edit
+      *ngIf="selectedField"
+      [selectedField]="selectedField"
+      (close)="onFieldClose($event)"
+    ></app-tap-field-add-edit>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="add-tap-profile"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <app-tap-profile-add-edit
+      *ngIf="selectedProfile"
+      [selectedProfile]="selectedProfile"
+      (close)="onProfileClose($event)"
+    ></app-tap-profile-add-edit>
+  </div>
+</div>
+
+
+<!-- Main Tabs -->
+<div class="row mb-3">
+  <div class="col-md-12">
+    <ul class="nav nav-tabs nav-tabs-solid">
+      <li class="nav-item">
+        <a 
+          class="nav-link cursor-pointer" 
+          [class.active]="activeTab === 'fields'" 
+          (click)="switchTab('fields')"
+        >
+          <i class="ti ti-settings me-1"></i>TAP Fields (Master Dictionary)
+        </a>
+      </li>
+      <li class="nav-item">
+        <a 
+          class="nav-link cursor-pointer" 
+          [class.active]="activeTab === 'profiles'" 
+          (click)="switchTab('profiles')"
+        >
+          <i class="ti ti-users me-1"></i>TAP Profiles (Partner Rulesets)
+        </a>
+      </li>
+      <li class="nav-item">
+        <a 
+          class="nav-link cursor-pointer" 
+          [class.active]="activeTab === 'profile-groups'" 
+          (click)="switchTab('profile-groups')"
+        >
+          <i class="ti ti-folder me-1"></i>TAP Profile Groups (Combined Rulesets)
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <!-- Search Set -->
+  <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+    <div class="search-set d-flex align-items-center flex-wrap gap-2">
+      <!-- Advanced Filter Inputs inline for Profiles & Profile Groups -->
+      <ng-container *ngIf="activeTab === 'profiles' || activeTab === 'profile-groups'">
+        <!-- Profile Name input -->
+        <div class="search-input">
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="activeTab === 'profiles' ? 'Profile Name' : 'Group Name'"
+            [formControl]="filterProfileName"
+            (keydown.enter)="searchData()"
+          />
+        </div>
+
+        <!-- Description input -->
+        <div class="search-input">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Description"
+            [formControl]="filterProfileDescription"
+            (keydown.enter)="searchData()"
+          />
+        </div>
+
+        <!-- Status Select -->
+        <div style="min-width: 130px;">
+          <select class="form-select" [formControl]="filterProfileActive">
+            <option value="">Select Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- Advanced Filter Inputs inline for Fields (as in tap-summary) -->
+      <ng-container *ngIf="activeTab === 'fields'">
+        <!-- Field Name input -->
+        <div class="search-input">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Field Name"
+            [formControl]="filterFieldName"
+            (keydown.enter)="searchData()"
+          />
+        </div>
+
+        <!-- Call Type Select -->
+        <div style="min-width: 130px;">
+          <select class="form-select" [formControl]="filterCallType">
+            <option value="">Call Type</option>
+            <option value="GPRS">GPRS</option>
+            <option value="MO_VOICE">MO_VOICE</option>
+            <option value="MT_VOICE">MT_VOICE</option>
+            <option value="MO_SMS">MO_SMS</option>
+            <option value="MT_SMS">MT_SMS</option>
+          </select>
+        </div>
+
+        <!-- Data Type Select -->
+        <div style="min-width: 130px;">
+          <select class="form-select" [formControl]="filterDataType">
+            <option value="">Data Type</option>
+            <option value="BCD_STRING">BCD_STRING</option>
+            <option value="ASCII_STRING">ASCII_STRING</option>
+            <option value="INTEGER">INTEGER</option>
+            <option value="DECIMAL">DECIMAL</option>
+            <option value="DATE_TIME">DATE_TIME</option>
+          </select>
+        </div>
+
+        <!-- Mandatory Select -->
+        <div style="min-width: 130px;">
+          <select class="form-select" [formControl]="filterMandatory">
+            <option value="">Mandatory</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- Search and Clear Buttons -->
+      <button class="btn btn-primary" (click)="searchData()">
+        <i class="ti ti-search me-1"></i>Search
+      </button>
+      <button class="btn btn-outline-secondary" (click)="clearSearch()">
+        <i class="ti ti-x me-1"></i>Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <!-- Active Tab: Fields -->
+    <div *ngIf="activeTab === 'fields'" class="table-responsive brand-table">
+      <table class="table datatable" style="min-width: 1000px;">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Field Name</th>
+            <th>Call Type</th>
+            <th>Data Type</th>
+            <th>Out Source (TAP OUT)</th>
+            <th>In Target (TAP IN)</th>
+            <th>Mandatory</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of tableDataFields; let index = index">
+            <td>{{ paginationSkip + index + 1 }}</td>
+            <td>
+              <a [routerLink]="[routes.ratingtapconfiguration, 'details', 'field', data.id]" class="nav-link">
+                {{ data.fieldName }}
+              </a>
+            </td>
+            <td>
+              {{ data.callType || 'GLOBAL' }}
+            </td>
+            <td>{{ data.dataType }}</td>
+            <td>{{ data.outSourceColumn || '-' }}</td>
+            <td>{{ data.inTargetColumn || '-' }}</td>
+            <td>
+              <span 
+                class="badge" 
+                [ngClass]="(data.mandatory ?? data.isMandatory) ? 'bg-danger-transparent text-danger' : 'bg-success-transparent text-success'"
+              >
+                {{ (data.mandatory ?? data.isMandatory) ? 'YES' : 'NO' }}
+              </span>
+            </td>
+            <td class="action-table-data">
+              <div class="edit-delete-action">
+                <a
+                  class="me-2 p-2"
+                  matTooltip="Edit"
+                  (click)="openFieldAddEdit(data)"
+                >
+                  <i class="feather icon-edit feather-edit"></i>
+                </a>
+                <a
+                  class="confirm-text p-2"
+                  matTooltip="Delete"
+                  (click)="confirmDeleteField(data.id)"
+                >
+                  <i class="feather icon-trash-2 feather-trash-2"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="tableDataFields.length === 0">
+            <td colspan="8">
+              <h5 class="no-record">No matching master fields found</h5>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Active Tab: Profiles -->
+    <div *ngIf="activeTab === 'profiles'" class="table-responsive brand-table">
+      <table class="table datatable" style="min-width: 1000px;">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Profile Name</th>
+            <th>Description</th>
+            <th>Fields Mapped</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of tableDataProfiles; let index = index">
+            <td>{{ paginationSkip + index + 1 }}</td>
+            <td>
+              <a [routerLink]="[routes.ratingtapconfiguration, 'details', 'profile', data.id]" class="nav-link">
+                {{ data.profileName }}
+              </a>
+            </td>
+            <td>
+              <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                {{ data.description || '-' }}
+              </span>
+            </td>
+            <td>
+              {{ data.mappingCount ?? data.fieldMappings?.length ?? 0 }} Fields
+            </td>
+            <td>
+              <span
+                class="badge table-badge"
+                [ngClass]="{
+                  'bg-success': data.active,
+                  'bg-danger': !data.active
+                }"
+              >
+                {{ data.active ? "ACTIVE" : "INACTIVE" }}
+              </span>
+            </td>
+            <td class="action-table-data">
+              <div class="edit-delete-action">
+                <a
+                  class="me-2 p-2"
+                  matTooltip="Edit"
+                  (click)="openProfileAddEdit(data)"
+                >
+                  <i class="feather icon-edit feather-edit"></i>
+                </a>
+                <a
+                  class="confirm-text p-2"
+                  matTooltip="Delete"
+                  (click)="confirmDeleteProfile(data.id)"
+                >
+                  <i class="feather icon-trash-2 feather-trash-2"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="tableDataProfiles.length === 0">
+            <td colspan="6">
+              <h5 class="no-record">No matching configuration profiles found</h5>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Active Tab: Profile Groups -->
+    <div *ngIf="activeTab === 'profile-groups'" class="table-responsive brand-table">
+      <table class="table datatable" style="min-width: 1000px;">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Group Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of tableDataProfileGroups; let index = index">
+            <td>{{ paginationSkip + index + 1 }}</td>
+            <td>
+              <a [routerLink]="[routes.ratingtapconfiguration, 'details', 'profile-group', data.id]" class="nav-link">
+                {{ data.name }}
+              </a>
+            </td>
+            <td>
+              <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                {{ data.description || '-' }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="badge table-badge"
+                [ngClass]="{
+                  'bg-success': data.active ?? data.isActive,
+                  'bg-danger': !(data.active ?? data.isActive)
+                }"
+              >
+                {{ (data.active ?? data.isActive) ? "ACTIVE" : "INACTIVE" }}
+              </span>
+            </td>
+            <td class="action-table-data">
+              <div class="edit-delete-action">
+                <a
+                  class="me-2 p-2"
+                  matTooltip="Edit"
+                  (click)="openProfileGroupAddEdit(data)"
+                >
+                  <i class="feather icon-edit feather-edit"></i>
+                </a>
+                <a
+                  class="confirm-text p-2"
+                  matTooltip="Delete"
+                  (click)="confirmDeleteProfileGroup(data.id)"
+                >
+                  <i class="feather icon-trash-2 feather-trash-2"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="tableDataProfileGroups.length === 0">
+            <td colspan="6">
+              <h5 class="no-record">No matching profile groups found</h5>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

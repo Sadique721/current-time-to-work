@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- Add hplmn to partners for roaming partner identification via Kafka CDR homePlmn -->
+    <changeSet id="add-partners-hplmn" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="partners" columnName="hplmn"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="partners">
+            <column name="hplmn" type="VARCHAR(20)" remarks="Home PLMN code for roaming partner identification">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="partners" columnName="hplmn"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add call_type to rate_package_groups for roaming CDR group selection -->
+    <changeSet id="add-rate-package-groups-call-type" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_package_groups" columnName="call_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rate_package_groups">
+            <column name="call_type" type="ENUM('MOC','MTC','GPRS','SMS','SUPPL','CONTENT','MO_VOICE','MT_VOICE','MO_SMS','MT_SMS')" remarks="Roaming call direction (MO_VOICE, MT_VOICE, MO_SMS, MT_SMS); null for INTERCONNECT groups">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_package_groups" columnName="call_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add service_type to rate_package_groups — drives RatePackageGroup selection together with call_type -->
+    <changeSet id="add-rate-package-groups-service-type" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_package_groups" columnName="service_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rate_package_groups">
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')" remarks="Roaming service type (VOICE, SMS, USAGE); null for INTERCONNECT groups">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_package_groups" columnName="service_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add service_type and call_type to rated_cdr for reporting and audit -->
+    <changeSet id="add-rated-cdr-service-call-type" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rated_cdr" columnName="service_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rated_cdr">
+            <column name="service_type" type="ENUM('VOICE','SMS','USAGE')" remarks="Service type from Kafka CDR (VOICE/SMS/USAGE)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="call_type" type="ENUM('MOC','MTC','GPRS','SMS','SUPPL','CONTENT','MO_VOICE','MT_VOICE','MO_SMS','MT_SMS')" remarks="Call direction from Kafka CDR (MO_VOICE, MT_VOICE etc.)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rated_cdr" columnName="service_type"/>
+            <dropColumn tableName="rated_cdr" columnName="call_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add call_type expression to rate_package_associations — maps callType to RatePackage within an RPG -->
+    <changeSet id="add-rate-package-associations-call-type" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_package_associations" columnName="call_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rate_package_associations">
+            <column name="call_type" type="ENUM('MOC','MTC','GPRS','SMS','SUPPL','CONTENT','MO_VOICE','MT_VOICE','MO_SMS','MT_SMS')" remarks="ROAMING expression: callType mapped to this RatePackage within the RPG; null for INTERCONNECT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_package_associations" columnName="call_type"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add zone_name to rate_details — links each rate row to a zone for ROAMING rating -->
+    <changeSet id="add-rate-details-zone-name" author="Ajay Kumar">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="rate_details"/>
+                <not>
+                    <columnExists tableName="rate_details" columnName="zone_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_details">
+            <column name="zone_name" type="VARCHAR(100)" remarks="ROAMING: zone name this rate applies to (e.g. South Asia); null for INTERCONNECT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_details" columnName="zone_name"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add zone_name to rate_details_history — preserves zone data during version migrations -->
+    <changeSet id="add-rate-details-history-zone-name" author="Ajay Kumar">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="rate_details_history"/>
+                <not>
+                    <columnExists tableName="rate_details_history" columnName="zone_name"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="rate_details_history">
+            <column name="zone_name" type="VARCHAR(100)" remarks="ROAMING: zone name for historical rate records">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_details_history" columnName="zone_name"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add ZONE_BASED to rate_package_type ENUM — idempotent for fresh/partial/full databases -->
+    <changeSet id="add-zone-based-to-rate-package-type" author="Ajay Kumar">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="rate_packages"/>
+                <columnExists tableName="rate_packages" columnName="rate_package_type"/>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'rate_packages'
+                    AND COLUMN_NAME = 'rate_package_type'
+                    AND COLUMN_TYPE LIKE '%ZONE_BASED%'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <modifyDataType tableName="rate_packages" columnName="rate_package_type" newDataType="ENUM('DESTINATION_BASED','SOURCE_DESTINATION_BASED','ZONE_BASED')"/>
+        <rollback>
+            <modifyDataType tableName="rate_packages" columnName="rate_package_type" newDataType="ENUM('DESTINATION_BASED','SOURCE_DESTINATION_BASED')"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Add dynamic expression evaluation to rate_package_associations -->
+    <changeSet id="add-rate-package-associations-expression" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="rate_package_associations" columnName="expression"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="rate_package_associations">
+            <column name="expression" type="VARCHAR(255)" remarks="Dynamic expression evaluated via reflection on CDR (e.g. homePlmn=123076)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="rate_package_associations" columnName="expression"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,144 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>
+        <a class="nav-item" [routerLink]="routes.ratingclearinghouse">Clearing House Details</a>
+        <span class="text-muted fs-14 ms-2" *ngIf="item?.id">(ID: {{ item.id }})</span>
+      </h4>
+    </div>
+  </div>
+  <div class="page-btn">
+    <a class="btn btn-secondary" [routerLink]="routes.ratingclearinghouse">
+      <i class="feather icon-arrow-left me-2"></i>Back to List
+    </a>
+  </div>
+</div>
+
+<!-- General Information -->
+<div class="row">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">General Information</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Name</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ item.name || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Type</p>
+              <span class="badge bg-info-transparent text-info">{{ item.type || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Status</p>
+              <span
+                class="badge table-badge"
+                [ngClass]="{
+                  'bg-success': item.status === 'ACTIVE',
+                  'bg-danger': item.status === 'INACTIVE'
+                }"
+              >{{ item.status || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Configuration -->
+<div class="row mt-3">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">Configuration &amp; Protocols</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Default Currency</p>
+              <span class="text-gray-900 fs-13">{{ item.defaultCurrency || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Timezone</p>
+              <span class="text-gray-900 fs-13">{{ item.timezone || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Supported Protocols</p>
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                <span
+                  class="badge bg-light text-dark border"
+                  *ngFor="let proto of item.protocols"
+                >{{ proto }}</span>
+                <span *ngIf="!item.protocols || item.protocols.length === 0">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SFTP Connectivity -->
+<div class="row mt-3" *ngIf="isSFTPEnabled">
+  <div class="col-xl-12">
+    <div class="card rounded-0 border-0">
+      <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">
+        <h6 class="mb-0">SFTP Connectivity</h6>
+      </div>
+      <div class="card-body pb-0">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">SFTP Host</p>
+              <span class="text-gray-900 fs-13">{{ item.sftpHost || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">SFTP Port</p>
+              <span class="text-gray-900 fs-13">{{ item.sftpPort || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">SFTP Username</p>
+              <span class="text-gray-900 fs-13">{{ item.sftpUsername || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">SFTP Password</p>
+              <span class="text-gray-900 fs-13">********</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Remote Path (Outbox)</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ item.sftpRemotePath || "-" }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <p class="fs-13 mb-1 text-muted">Inbox Path</p>
+              <span class="text-gray-900 fs-13 fw-medium">{{ item.sftpInboxPath || "-" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

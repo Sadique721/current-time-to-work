@@ -1,0 +1,204 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Staff</h4>
+      <h6>Manage your staffs</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+
+  <div class="page-btn">
+    <a
+      class="btn btn-primary"
+      *ngIf="permission.create"
+      (click)="openAddEditStaff()"
+    >
+      <i class="ti ti-circle-plus me-2"></i>Add Staff
+    </a>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div class="card-header">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-4 col-lg-3">
+        <p-floatlabel variant="on">
+          <p-select
+            [options]="searchOptionSelect"
+            [formControl]="searchOptionControl"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [showClear]="true"
+            styleClass="w-100"
+            inputId="on_label"
+          >
+            <ng-template pTemplate="selectedItem" let-selectedOption>
+              <div class="flex align-items-center gap-2">
+                <div>{{ selectedOption.label }}</div>
+              </div>
+            </ng-template>
+            <ng-template let-searchOption pTemplate="item">
+              <div class="flex align-items-center gap-2">
+                <div>{{ searchOption.label }}</div>
+              </div>
+            </ng-template>
+          </p-select>
+          <label for="on_label">Select Search Option</label>
+        </p-floatlabel>
+      </div>
+
+      <div class="col-12 col-md-4 col-lg-3" *ngIf="searchOptionControl.value">
+        <input
+          [formControl]="searchDetailControl"
+          type="search"
+          class="form-control"
+          [placeholder]="getSearchPlaceholder()"
+          (keydown.enter)="searchStaffData()"
+        />
+      </div>
+
+      <div class="col-auto" *ngIf="searchOptionControl.value">
+        <button class="btn btn-primary w-100" (click)="searchStaffData()">
+          Search
+        </button>
+      </div>
+
+      <div class="col-auto" *ngIf="searchOptionControl.value">
+        <button class="btn btn-outline-secondary w-100" (click)="clearSearch()">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of tableData; track data.id; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>
+                <a
+                  class="nav-link"
+                  [routerLink]="[routes.staffManagement, 'mystaff', data.id]"
+                  >{{ data.firstname }}</a
+                >
+              </td>
+              <td>{{ data.lastname }}</td>
+              <td>{{ data.username }}</td>
+              <td>{{ data.email }}</td>
+              <td>
+                <span
+                  class="badge table-badge"
+                  [ngClass]="{
+                    'bg-success':
+                      data.status === 'ACTIVE' || data.status === 'Active',
+                    'bg-danger':
+                      data.status === 'INACTIVE' ||
+                      data.status === 'Inactive' ||
+                      data.status === 'TERMINATED' ||
+                      data.status === 'Terminated',
+                  }"
+                >
+                  {{ data.status }}
+                </span>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    class="me-2 p-2"
+                    *ngIf="permission.edit"
+                    matTooltip="Edit"
+                    matTooltipPosition="above"
+                    (click)="openAddEditStaff(data)"
+                  >
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    *ngIf="staffChangePassword"
+                    class="me-2 p-2"
+                    matTooltip="Change Password"
+                    matTooltipPosition="above"
+                    (click)="openChangePasswordDialog(data)"
+                  >
+                    <i class="feather icon-lock feather-lock"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (tableData.length == 0) {
+            <tr>
+              <td colspan="12">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="add-receipt"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <app-add-receipt
+      *ngIf="selectedStaff"
+      [selectedStaff]="selectedStaff"
+      (close)="onCloseAddReceipt($event)"
+    ></app-add-receipt>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="change-password"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <app-change-password
+      *ngIf="selectedStaff"
+      [selectedStaff]="selectedStaff"
+      (close)="onCloseChangePasswordDialog($event)"
+    ></app-change-password>
+  </div>
+</div>

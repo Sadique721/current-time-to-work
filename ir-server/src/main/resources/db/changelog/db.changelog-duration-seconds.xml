@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="migrate-duration-minutes-to-seconds-voice" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="voice_rated_cdr" columnName="duration_minutes"/>
+            <not>
+                <columnExists tableName="voice_rated_cdr" columnName="duration_seconds"/>
+            </not>
+        </preConditions>
+
+        <!-- Add the new column -->
+        <addColumn tableName="voice_rated_cdr">
+            <column name="duration_seconds" type="BIGINT"/>
+        </addColumn>
+
+        <!-- Backfill the data (duration_minutes * 60) -->
+        <update tableName="voice_rated_cdr">
+            <column name="duration_seconds" valueComputed="duration_minutes * 60"/>
+        </update>
+
+        <!-- Drop the old column -->
+        <dropColumn tableName="voice_rated_cdr" columnName="duration_minutes"/>
+    </changeSet>
+
+    <changeSet id="migrate-duration-minutes-to-seconds-sms" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="sms_rated_cdr" columnName="duration_minutes"/>
+            <not>
+                <columnExists tableName="sms_rated_cdr" columnName="duration_seconds"/>
+            </not>
+        </preConditions>
+
+        <!-- Add the new column -->
+        <addColumn tableName="sms_rated_cdr">
+            <column name="duration_seconds" type="BIGINT"/>
+        </addColumn>
+
+        <!-- Backfill the data (duration_minutes * 60) -->
+        <update tableName="sms_rated_cdr">
+            <column name="duration_seconds" valueComputed="duration_minutes * 60"/>
+        </update>
+
+        <!-- Drop the old column -->
+        <dropColumn tableName="sms_rated_cdr" columnName="duration_minutes"/>
+    </changeSet>
+
+    <changeSet id="rename-total-calls-to-total-calls-or-total-sms" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="rated_summary" columnName="total_calls"/>
+            <not>
+                <columnExists tableName="rated_summary" columnName="total_calls_or_total_sms"/>
+            </not>
+        </preConditions>
+
+        <!-- Rename column total_calls to total_calls_or_total_sms -->
+        <renameColumn tableName="rated_summary"
+                      oldColumnName="total_calls"
+                      newColumnName="total_calls_or_total_sms"
+                      columnDataType="BIGINT"/>
+    </changeSet>
+
+    <changeSet id="rename-total-calls-to-total-calls-or-total-sms-roaming" author="system">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="roaming_rated_summary" columnName="total_calls"/>
+            <not>
+                <columnExists tableName="roaming_rated_summary" columnName="total_calls_or_total_sms"/>
+            </not>
+        </preConditions>
+
+        <!-- Rename column total_calls to total_calls_or_total_sms -->
+        <renameColumn tableName="roaming_rated_summary"
+                      oldColumnName="total_calls"
+                      newColumnName="total_calls_or_total_sms"
+                      columnDataType="INT"/>
+    </changeSet>
+
+</databaseChangeLog>

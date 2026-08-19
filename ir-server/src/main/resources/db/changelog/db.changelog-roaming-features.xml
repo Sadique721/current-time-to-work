@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <!-- 1. clearing_houses table -->
+    <changeSet id="roaming-001" author="system">
+        <preConditions onFail="MARK_RAN"><not><tableExists tableName="clearing_houses"/></not></preConditions>
+        <createTable tableName="clearing_houses">
+            <column autoIncrement="true" name="id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="name" type="VARCHAR(100)"><constraints nullable="false" unique="true"/></column>
+            <column name="type" type="ENUM('DCH','FCH','BOTH')"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('ACTIVE','INACTIVE')"><constraints nullable="false"/></column>
+            <column name="default_currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
+            <column name="timezone" type="VARCHAR(50)"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <!-- 2. clearing_house_protocols join table -->
+    <changeSet id="roaming-002" author="system">
+        <preConditions onFail="MARK_RAN"><not><tableExists tableName="clearing_house_protocols"/></not></preConditions>
+        <createTable tableName="clearing_house_protocols">
+            <column autoIncrement="true" name="id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
+            <column name="clearing_house_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="protocol" type="ENUM('SFTP','API','AS2')"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="clearing_house_protocols" columnNames="clearing_house_id,protocol"
+                             constraintName="uk_ch_protocol"/>
+        <addForeignKeyConstraint baseTableName="clearing_house_protocols" baseColumnNames="clearing_house_id"
+                                 referencedTableName="clearing_houses" referencedColumnNames="id"
+                                 constraintName="fk_ch_protocol_ch"/>
+    </changeSet>
+
+    <!-- 3. exchange_rates table -->
+    <changeSet id="roaming-003" author="system">
+        <preConditions onFail="MARK_RAN"><not><tableExists tableName="exchange_rates"/></not></preConditions>
+        <createTable tableName="exchange_rates">
+            <column autoIncrement="true" name="id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="base_currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
+            <column name="target_currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
+            <column name="rate" type="DECIMAL(18,6)"><constraints nullable="false"/></column>
+            <column name="valid_from" type="date"><constraints nullable="false"/></column>
+            <column name="source" type="VARCHAR(50)"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <!-- 4. partners: add clearing_house_id FK -->
+    <changeSet id="roaming-004" author="system">
+        <preConditions onFail="MARK_RAN"><not><columnExists tableName="partners" columnName="clearing_house_id"/></not></preConditions>
+        <addColumn tableName="partners">
+            <column name="clearing_house_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="partners" baseColumnNames="clearing_house_id"
+                                 referencedTableName="clearing_houses" referencedColumnNames="id"
+                                 constraintName="fk_partner_clearing_house"/>
+    </changeSet>
+
+    <!-- 5. agreements: add home_plmn, visitor_plmn, tap_direction -->
+    <changeSet id="roaming-005" author="system">
+        <preConditions onFail="MARK_RAN"><not><columnExists tableName="agreements" columnName="home_plmn"/></not></preConditions>
+        <addColumn tableName="agreements">
+            <column name="home_plmn" type="VARCHAR(6)"/>
+            <column name="visitor_plmn" type="VARCHAR(6)"/>
+            <column name="tap_direction" type="ENUM('TAP_IN','TAP_OUT')"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 6. rate_packages: add currency -->
+    <changeSet id="roaming-006" author="system">
+        <preConditions onFail="MARK_RAN"><not><columnExists tableName="rate_packages" columnName="currency"/></not></preConditions>
+        <addColumn tableName="rate_packages">
+            <column name="currency" type="VARCHAR(3)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 7. ServiceType enum: add VOICE_MO, VOICE_MT, SMS_MO to rate_packages and pulse_config -->
+    <changeSet id="roaming-007" author="system">
+        <sql>ALTER TABLE rate_packages MODIFY COLUMN service_type ENUM('VOICE','SMS','USAGE','DATA','VOICE_MO','VOICE_MT','SMS_MO');</sql>
+    </changeSet>
+    <changeSet id="roaming-008" author="system">
+        <sql>ALTER TABLE pulse_config MODIFY COLUMN service_type ENUM('VOICE','SMS','USAGE','DATA','VOICE_MO','VOICE_MT','SMS_MO');</sql>
+    </changeSet>
+
+    <!-- 8. zones: remove min_length, max_length; add priority -->
+    <changeSet id="roaming-009" author="system">
+        <preConditions onFail="MARK_RAN"><columnExists tableName="zones" columnName="min_length"/></preConditions>
+        <dropColumn tableName="zones" columnName="min_length"/>
+    </changeSet>
+    <changeSet id="roaming-010" author="system">
+        <preConditions onFail="MARK_RAN"><columnExists tableName="zones" columnName="max_length"/></preConditions>
+        <dropColumn tableName="zones" columnName="max_length"/>
+    </changeSet>
+    <changeSet id="roaming-011" author="system">
+        <preConditions onFail="MARK_RAN"><not><columnExists tableName="zones" columnName="priority"/></not></preConditions>
+        <addColumn tableName="zones">
+            <column name="priority" type="INT" defaultValueNumeric="100"><constraints nullable="false"/></column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 9. tap_out_config table -->
+    <changeSet id="roaming-012" author="system">
+        <preConditions onFail="MARK_RAN"><not><tableExists tableName="tap_out_config"/></not></preConditions>
+        <createTable tableName="tap_out_config">
+            <column autoIncrement="true" name="id" type="BIGINT"><constraints nullable="false" primaryKey="true"/></column>
+            <column name="created_date" type="datetime"/>
+            <column name="modified_date" type="datetime"/>
+            <column name="deleted_at" type="datetime"/>
+            <column name="is_deleted" type="BIT(1)" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('GLOBAL','PARTNER_SPECIFIC')"><constraints nullable="false"/></column>
+            <column name="our_tadig" type="VARCHAR(6)"><constraints nullable="false"/></column>
+            <column name="partner_id" type="BIGINT"/>
+            <column name="clearing_house_id" type="BIGINT"/>
+            <column name="file_transfer_config" type="TEXT"/>
+            <column name="is_active" type="BIT(1)" defaultValueNumeric="1"><constraints nullable="false"/></column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="tap_out_config" baseColumnNames="partner_id"
+                                 referencedTableName="partners" referencedColumnNames="partner_id"
+                                 constraintName="fk_tap_out_config_partner"/>
+        <addForeignKeyConstraint baseTableName="tap_out_config" baseColumnNames="clearing_house_id"
+                                 referencedTableName="clearing_houses" referencedColumnNames="id"
+                                 constraintName="fk_tap_out_config_ch"/>
+    </changeSet>
+
+</databaseChangeLog>

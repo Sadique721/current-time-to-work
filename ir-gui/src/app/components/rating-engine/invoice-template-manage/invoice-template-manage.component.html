@@ -1,0 +1,261 @@
+<div class="page-header">
+  <div class="add-item d-flex">
+    <div class="page-title">
+      <h4>Invoice Template Management</h4>
+      <h6>Manage your invoice templates</h6>
+    </div>
+  </div>
+  <ul class="table-top-head">
+    <li>
+      <a
+        (click)="toggleCollapse()"
+        [class.active]="isCollapsed"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        matTooltip="Collapse"
+        matTooltipPosition="above"
+        id="collapse-header"
+      >
+        @if (!isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+        @if (isCollapsed) {
+          <i class="ti ti-chevron-up"></i>
+        }
+      </a>
+    </li>
+  </ul>
+  <div class="page-btn">
+    <a class="btn btn-primary" (click)="openAddEdit()">
+      <i class="ti ti-circle-plus me-2"></i>Add Template
+    </a>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div
+  class="modal fade"
+  id="add-invoice-template"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="page-wrapper-new p-0">
+        <div class="content p-0">
+          <div class="modal-header">
+            <div class="page-title">
+              <h4>
+                {{ selectedTemplate?.templateId ? "Update " : "Create " }}
+                Template
+              </h4>
+            </div>
+            <button
+              type="button"
+              class="close"
+              (click)="onCloseAddEdit(false)"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="templateForm">
+              <div class="row">
+                <div class="col-lg-12 mb-3">
+                  <label class="form-label"
+                    >Template Name <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="templateName"
+                  />
+                  <div
+                    *ngIf="
+                      templateForm.get('templateName')?.touched &&
+                      templateForm.get('templateName')?.invalid
+                    "
+                    class="text-danger fs-12 mt-1"
+                  >
+                    Template name is required.
+                  </div>
+                </div>
+                <div class="col-lg-12 mb-3">
+                  <custom-select
+                    label="Line of Business"
+                    [options]="lobOptions"
+                    optionValue="value"
+                    optionLabel="label"
+                    [formControlRef]="templateForm | getControl: 'lineOfBusiness'"
+                    placeholder="Select Line of Business"
+                  ></custom-select>
+                  <div
+                    *ngIf="
+                      templateForm.get('lineOfBusiness')?.touched &&
+                      templateForm.get('lineOfBusiness')?.invalid
+                    "
+                    class="text-danger fs-12 mt-1"
+                  >
+                    Line of business is required.
+                  </div>
+                </div>
+                <div class="col-lg-12 mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    formControlName="templateDescription"
+                    rows="3"
+                  ></textarea>
+                </div>
+                <div class="col-lg-12 mb-3">
+                  <label class="form-label">
+                    Upload File
+                    <span class="text-danger" *ngIf="!selectedTemplate?.templateId"
+                      >*</span
+                    >
+                  </label>
+                  <input
+                    #fileInput
+                    type="file"
+                    class="form-control"
+                    (change)="onFileChange($event)"
+                    accept=".xsl,.xslt,text/xsl,application/xslt+xml"
+                  />
+                  <div class="form-text">
+                    <span *ngIf="selectedTemplate?.templateId"
+                      >Upload a new file only if you wish to replace the
+                      existing one.
+                    </span>
+                    Only XSL and XSLT files are allowed.
+                  </div>
+                </div>
+                <div class="col-lg-12 mb-3">
+                  <div class="form-check form-switch">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      formControlName="isActive"
+                    />
+                    <label class="form-check-label">Active Status</label>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3"
+              (click)="onCloseAddEdit(false)"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary fs-13 fw-medium p-2 px-3"
+              (click)="saveTemplate()"
+            >
+              {{ selectedTemplate?.id ? "Update" : "Save" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card table-list-card">
+  <div
+    class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3"
+  >
+    <div class="search-set d-flex align-items-center">
+      <div class="search-input">
+        <input
+          [formControl]="searchDataValue"
+          type="search"
+          class="form-control"
+          placeholder="Search by Template Name"
+          (keydown.enter)="searchData()"
+        />
+      </div>
+      <button class="btn btn-primary ms-2" (click)="searchData()">
+        Search
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="clearSearch()">
+        Clear
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive brand-table">
+      <table class="table datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>Sr.No</th>
+            <th>Template Name</th>
+            <th>Line of Business</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (data of tableData; track data.templateId; let index = $index) {
+            <tr>
+              <td>{{ paginationSkip + index + 1 }}</td>
+              <td>{{ data.templateName }}</td>
+              <td>{{ data.lineOfBusiness || "-" }}</td>
+              <td>{{ data.templateDescription || "-" }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="
+                    data.isActive !== false ? 'bg-success' : 'bg-danger'
+                  "
+                >
+                  {{ data.isActive !== false ? "Active" : "Inactive" }}
+                </span>
+              </td>
+              <td class="action-table-data">
+                <div class="edit-delete-action">
+                  <a
+                    href="javascript:void(0);"
+                    class="me-2 p-2"
+                    matTooltip="Edit"
+                    matTooltipPosition="above"
+                    (click)="openAddEdit(data)"
+                  >
+                    <i class="feather icon-edit feather-edit"></i>
+                  </a>
+                  <a
+                    href="javascript:void(0);"
+                    class="confirm-text p-2"
+                    matTooltip="Delete"
+                    matTooltipPosition="above"
+                    (click)="confirmDelete(data.templateId)"
+                  >
+                    <i
+                      data-feather="trash-2"
+                      class="feather icon-trash-2"
+                    ></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (tableData.length === 0) {
+            <tr>
+              <td colspan="7">
+                <h5 class="no-record">No matching records found</h5>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- pagination -->
+    <app-custom-pagination></app-custom-pagination>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+.is-invalid-textarea {
+  border: 1px solid #ff0000 !important;
+}
+
+.invalid-feedback-msg {
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+
+:host ::ng-deep textarea::placeholder {
+  color: #64748b;
+    opacity: 1;
+}
+
+:host ::ng-deep textarea.form-control {
+  border: 1px solid #cbd5e1;
+}
+
+:host ::ng-deep textarea.form-control:focus {
+  border-color: #94a3b8;
+}

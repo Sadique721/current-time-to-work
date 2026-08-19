@@ -1,0 +1,37 @@
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid #f1f1f1 !important;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  border-bottom: 1px solid #f1f1f1 !important;
+  h6 {
+    color: #334155;
+    font-size: 0.875rem;
+  }
+}
+
+.text-muted {
+  color: #64748b !important;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.6em;
+}
+
+.bg-light {
+  background-color: #f8fafc !important;
+}
+
+.table {
+  th {
+    font-weight: 600;
+    color: #475569;
+    background-color: #f8fafc;
+  }
+  td {
+    color: #1e293b;
+  }
+}

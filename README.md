@@ -1,3 +1,23 @@
+<!-- ========== ANIMATED HEADER BANNER ========== -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=IR%20Interconnect%20Roaming&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Telecom%20Roaming%20%7C%20Rating%20%26%20Settlement%20Engine&descAlignY=60&descAlign=50" width="100%">
+</p>
+
+<!-- ========== TYPING SVG INTRO ========== -->
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=600&lines=Telecom+Interconnect+Roaming;Spring+Boot+3.2.2+%2B+Angular+19;High-Performance+Rating+Engine;Liquibase+Auto-Migrations;Kafka+Event-Driven+Architecture" alt="Typing SVG">
+</p>
+
+<!-- ========== REPO VIEWS + BADGES ========== -->
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=Sadique721-ir&label=Repository%20Views&color=22d3ee&style=flat-square" alt="Repository views" />
+  <a href="https://github.com/Sadique721/current-time-to-work"><img src="https://img.shields.io/github/stars/Sadique721/current-time-to-work?style=for-the-badge&logo=github&color=22d3ee&labelColor=0a192f" alt="Repo Stars"></a>
+  <a href="https://github.com/Sadique721/current-time-to-work/fork"><img src="https://img.shields.io/github/forks/Sadique721/current-time-to-work?style=for-the-badge&logo=github&color=8b5cf6&labelColor=0a192f" alt="Repo Forks"></a>
+  <a href="https://github.com/Sadique721"><img src="https://img.shields.io/github/followers/Sadique721?label=Author%20Followers&style=for-the-badge&logo=github&color=10b981&labelColor=0a192f" alt="Author Followers"></a>
+</p>
+
+---
+
 # 👤 Author & Architect
 
 <table>
@@ -340,3 +360,10 @@ Spring Boot Backend (ir-server) ─── localhost:8060/rating-engine/v1
 *Setup by [Md Sadique Amin](https://github.com/Sadique721)*
 
 </div>
+
+---
+
+<!-- ========== ANIMATED FOOTER BANNER ========== -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=120&section=footer" width="100%">
+</p>

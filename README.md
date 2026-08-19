@@ -1,27 +1,31 @@
+# 👤 Author & Architect
+
+<table>
+  <tr>
+    <td width="130" align="center">
+      <img src="./md_sadique_amin.jpg" width="110" style="border-radius:10px;"/><br/>
+      <sub><b>Md Sadique Amin</b></sub>
+    </td>
+    <td>
+      <strong>Md Sadique Amin</strong> — Software Engineer, Telecom & Full-Stack Cloud Architect, AI Systems Developer.<br/><br/>
+      🔗 GitHub: <a href="https://github.com/Sadique721">@Sadique721</a><br/>
+      📧 Email: <a href="mailto:mdsadiqueamin721786@gmail.com">mdsadiqueamin721786@gmail.com</a><br/>
+      🏗️ Built: Enterprise BSS-OSS Telecom Suite · Diameter Protocol Engine · Angular & Flutter Apps · MSA AI Ecosystem
+    </td>
+  </tr>
+</table>
+
+<br/>
+
 <div align="center">
 
-![IR — Interconnect Roaming](./banner.jpg)
-
-<br/>
-
-![Java 21](https://img.shields.io/badge/Java-21_LTS-orange?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.2-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-19-DD0031?style=for-the-badge&logo=angular&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Gradle](https://img.shields.io/badge/Gradle-8.14.3-02303A?style=for-the-badge&logo=gradle&logoColor=white)
-![Liquibase](https://img.shields.io/badge/Liquibase-4.24-2962FF?style=for-the-badge&logo=liquibase&logoColor=white)
-![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-
-<br/>
-
-**`Liquibase Auto-Migration`** &nbsp;·&nbsp; **`HikariCP Connection Pool`** &nbsp;·&nbsp; **`JWT Auth`** &nbsp;·&nbsp; **`Swagger UI`**
-
-<br/>
+[![GitHub](https://img.shields.io/badge/GitHub-Sadique721-181717?style=flat-square&logo=github)](https://github.com/Sadique721)
+[![Email](https://img.shields.io/badge/Email-mdsadiqueamin721786%40gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:mdsadiqueamin721786@gmail.com)
 
 </div>
 
 ---
+
 
 ## 📁 Repository Structure
 
@@ -308,36 +312,31 @@ Spring Boot Backend (ir-server) ─── localhost:8060/rating-engine/v1
 
 ---
 
-## 👤 Author & Architect
-
-<table>
-  <tr>
-    <td width="130" align="center">
-      <img src="https://avatars.githubusercontent.com/u/Sadique721" width="90" style="border-radius:50%;"/><br/>
-      <sub><b>Md Sadique Amin</b></sub>
-    </td>
-    <td>
-      <strong>Md Sadique Amin</strong> — Software Engineer, Telecom & Full-Stack Cloud Architect, AI Systems Developer.<br/><br/>
-      🔗 GitHub: <a href="https://github.com/Sadique721">@Sadique721</a><br/>
-      📧 Email: <a href="mailto:mdsadiqueamin721786@gmail.com">mdsadiqueamin721786@gmail.com</a><br/>
-      🏗️ Built: Enterprise BSS-OSS Telecom Suite · Diameter Protocol Engine · Angular & Flutter Apps · MSA AI Ecosystem
-    </td>
-  </tr>
-</table>
-
----
-
 <div align="center">
+
+![IR — Interconnect Roaming](./banner.jpg)
+
+<br/>
+
+![Java 21](https://img.shields.io/badge/Java-21_LTS-orange?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.2-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-19-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-8.14.3-02303A?style=for-the-badge&logo=gradle&logoColor=white)
+![Liquibase](https://img.shields.io/badge/Liquibase-4.24-2962FF?style=for-the-badge&logo=liquibase&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+
+<br/>
+
+**`Liquibase Auto-Migration`** &nbsp;·&nbsp; **`HikariCP Connection Pool`** &nbsp;·&nbsp; **`JWT Auth`** &nbsp;·&nbsp; **`Swagger UI`**
+
+<br/>
 
 *IR — Interconnect Roaming Platform*
 &nbsp;|&nbsp;
 *Keynna Technology Pvt. Ltd.*
 &nbsp;|&nbsp;
 *Setup by [Md Sadique Amin](https://github.com/Sadique721)*
-
-<br/>
-
-[![GitHub](https://img.shields.io/badge/GitHub-Sadique721-181717?style=flat-square&logo=github)](https://github.com/Sadique721)
-[![Email](https://img.shields.io/badge/Email-mdsadiqueamin721786%40gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:mdsadiqueamin721786@gmail.com)
 
 </div>

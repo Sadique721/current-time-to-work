@@ -1,6 +1,6 @@
 <!-- ========== ANIMATED HEADER BANNER ========== -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=IR%20Interconnect%20Roaming&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Telecom%20Roaming%20%7C%20Rating%20%26%20Settlement%20Engine&descAlignY=60&descAlign=50" width="100%">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=IR%20Interconnect%20Roaming&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Telecom%20Roaming%20%7C%20Rating%20and%20Settlement%20Engine&descAlignY=60&descAlign=50" width="100%">
 </p>
 
 <!-- ========== TYPING SVG INTRO ========== -->

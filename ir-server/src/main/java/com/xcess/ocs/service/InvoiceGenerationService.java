@@ -11,6 +11,9 @@ import com.xcess.ocs.roaming.repository.TapOutRatedSummaryRepository;
 import com.xcess.ocs.service.TaxCalculationService.InvoiceTaxLineItem;
 import com.xcess.ocs.service.TaxCalculationService.MultiTaxCalculationResult;
 import com.xcess.ocs.service.TaxCalculationService.TaxCalculationResult;
+import com.xcess.ocs.constants.enums.SettlementType;
+import com.xcess.ocs.constants.enums.NetPayableBy;
+import com.xcess.ocs.constants.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,6 +68,7 @@ public class InvoiceGenerationService {
 
     @Transactional
     public Invoice generateInvoiceForSettlementType(Long agreementId, LocalDate billingStart, LocalDate billingEnd, String settlementType) {
+        SettlementType settlementTypeEnum = SettlementType.fromString(settlementType);
         Agreement agreement = agreementRepository.findById(agreementId)
                 .orElseThrow(() -> new RuntimeException("Agreement not found"));
 
@@ -113,9 +117,9 @@ public class InvoiceGenerationService {
 
                 // For OUTGOING settlement (TAP OUT): we are the sender, charges = vendor total
                 // For INCOMING settlement (TAP IN): visited network billed us, charges = customer total
-                if ("OUTGOING".equals(settlementType) || "NET".equals(settlementType)) {
+                if (SettlementType.OUTGOING == settlementTypeEnum || SettlementType.NET == settlementTypeEnum) {
                     outgoingTotal = convertToBillingCurrency(tapTotal, billingCurrency, billingEnd);
-                } else if ("INCOMING".equals(settlementType)) {
+                } else if (SettlementType.INCOMING == settlementTypeEnum) {
                     incomingTotal = convertToBillingCurrency(tapTotal, billingCurrency, billingEnd);
                 }
             } else {
@@ -125,12 +129,12 @@ public class InvoiceGenerationService {
                 allSummaries.addAll(summaries);
 
                 incomingTotal = summaries.stream()
-                        .filter(rs -> "INCOMING".equals(rs.getDirection()))
+                        .filter(rs -> SettlementType.INCOMING.label().equals(rs.getDirection()))
                         .map(rs -> convertToBillingCurrency(rs.getTotalCharge(), billingCurrency, billingEnd))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
                 outgoingTotal = summaries.stream()
-                        .filter(rs -> "OUTGOING".equals(rs.getDirection()))
+                        .filter(rs -> SettlementType.OUTGOING.label().equals(rs.getDirection()))
                         .map(rs -> convertToBillingCurrency(rs.getTotalCharge(), billingCurrency, billingEnd))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
             }
@@ -145,29 +149,29 @@ public class InvoiceGenerationService {
         BigDecimal netAmount;
         String netPayableBy;
 
-        switch (settlementType) {
-            case "INCOMING":
+        switch (settlementTypeEnum) {
+            case INCOMING:
                 customerTotal = incomingTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
                 vendorTotal = BigDecimal.ZERO;
                 netAmount = customerTotal;
-                netPayableBy = "CUSTOMER";
+                netPayableBy = NetPayableBy.CUSTOMER.label();
                 break;
 
-            case "OUTGOING":
+            case OUTGOING:
                 customerTotal = BigDecimal.ZERO;
                 vendorTotal = outgoingTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
                 netAmount = vendorTotal;
-                netPayableBy = "HOST";
+                netPayableBy = NetPayableBy.HOST.label();
                 break;
 
-            case "NET":
+            case NET:
             default:
                 BigDecimal totalIncoming = incomingTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
                 BigDecimal totalOutgoing = outgoingTotals.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
                 customerTotal = totalIncoming;
                 vendorTotal = totalOutgoing;
                 netAmount = customerTotal.subtract(vendorTotal);
-                netPayableBy = netAmount.compareTo(BigDecimal.ZERO) >= 0 ? "CUSTOMER" : "HOST";
+                netPayableBy = netAmount.compareTo(BigDecimal.ZERO) >= 0 ? NetPayableBy.CUSTOMER.label() : NetPayableBy.HOST.label();
                 netAmount = netAmount.abs();
                 break;
         }
@@ -177,11 +181,11 @@ public class InvoiceGenerationService {
         netAmount = netAmount.setScale(invoicePrecision, RoundingMode.HALF_UP);
 
         String templatePath = null;
-        if ("INCOMING".equals(settlementType) && agreement.getIncomingSettlementTemplate() != null) {
+        if (SettlementType.INCOMING == settlementTypeEnum && agreement.getIncomingSettlementTemplate() != null) {
             templatePath = agreement.getIncomingSettlementTemplate().getTemplatePath();
-        } else if ("OUTGOING".equals(settlementType) && agreement.getOutgoingSettlementTemplate() != null) {
+        } else if (SettlementType.OUTGOING == settlementTypeEnum && agreement.getOutgoingSettlementTemplate() != null) {
             templatePath = agreement.getOutgoingSettlementTemplate().getTemplatePath();
-        } else if ("NET".equals(settlementType) && agreement.getNetSettlementTemplate() != null) {
+        } else if (SettlementType.NET == settlementTypeEnum && agreement.getNetSettlementTemplate() != null) {
             templatePath = agreement.getNetSettlementTemplate().getTemplatePath();
         }
 
@@ -190,11 +194,11 @@ public class InvoiceGenerationService {
         invoice.setInvoiceNumber(invoiceNumber);
 
         boolean shouldCalculateTax = false;
-        String currency = "Rs.";
+        String currency = AppConstants.DEFAULT_CURRENCY;
 
-        if ("INCOMING".equals(settlementType)) {
+        if (SettlementType.INCOMING == settlementTypeEnum) {
             shouldCalculateTax = true;
-        } else if ("NET".equals(settlementType) && netAmount.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (SettlementType.NET == settlementTypeEnum && netAmount.compareTo(BigDecimal.ZERO) > 0) {
             shouldCalculateTax = true;
         }
 
@@ -223,7 +227,7 @@ public class InvoiceGenerationService {
         invoice.setBillingCycleEnd(billingEnd);
         invoice.setSettlementType(settlementType);
         invoice.setXmlContent(xmlContent);
-        invoice.setStatus("GENERATED");
+        invoice.setStatus(AppConstants.STATUS_GENERATED);
         invoice.setCustomerTotal(customerTotal);
         invoice.setVendorTotal(vendorTotal);
         invoice.setNetAmount(netAmount);
@@ -231,7 +235,7 @@ public class InvoiceGenerationService {
         invoice.setGeneratedDate(LocalDateTime.now());
 
         if (multiTaxResult != null) {
-            invoice.setTaxType("MULTI");
+            invoice.setTaxType(AppConstants.TAX_TYPE_MULTI);
             invoice.setTaxableAmount(multiTaxResult.getTaxableAmount());
             invoice.setTaxRate(null);
             invoice.setTaxAmount(multiTaxResult.getTotalTax());
@@ -342,6 +346,7 @@ public class InvoiceGenerationService {
                                BigDecimal customerTotal, BigDecimal vendorTotal,
                                BigDecimal netAmount, String netPayableBy, String settlementType, String invoiceNumber,
                                MultiTaxCalculationResult multiTaxResult, String currency, List<RatedSummary> allSummaries) {
+        SettlementType settlementTypeEnum = SettlementType.fromString(settlementType);
         InvoiceXmlDTO dto = new InvoiceXmlDTO();
 
         dto.setInvoiceId(invoiceNumber);
@@ -361,7 +366,9 @@ public class InvoiceGenerationService {
         agreementDto.setBillingCycleStart(String.valueOf(billingStart));
         agreementDto.setBillingCycleEnd(String.valueOf(billingEnd));
         agreementDto.setSettlementType(settlementType);
-        agreementDto.setDescription("Master Interconnect Settlement Agreement");
+        
+        boolean isRoaming = agreement.getLineOfBusiness() != null && "ROAMING".equals(agreement.getLineOfBusiness().name());
+        agreementDto.setDescription(isRoaming ? AppConstants.INVOICE_DESC_ROAMING_TAP_OUT : AppConstants.INVOICE_DESC_INTERCONNECT);
         dto.setAgreement(agreementDto);
 
         Account billToAccount = null;
@@ -377,22 +384,22 @@ public class InvoiceGenerationService {
         }
 
         Map<String, BigDecimal> accountTotals = new HashMap<>();
-        switch (settlementType) {
-            case "INCOMING":
+        switch (settlementTypeEnum) {
+            case INCOMING:
                 for (String accountCode : incomingTotals.keySet()) {
                     if ("CUSTOMER".equals(accountTypes.get(accountCode))) {
                         accountTotals.put(accountCode, incomingTotals.get(accountCode));
                     }
                 }
                 break;
-            case "OUTGOING":
+            case OUTGOING:
                 for (String accountCode : outgoingTotals.keySet()) {
                     if ("VENDOR".equals(accountTypes.get(accountCode))) {
                         accountTotals.put(accountCode, outgoingTotals.get(accountCode));
                     }
                 }
                 break;
-            case "NET":
+            case NET:
             default:
                 for (String accountCode : incomingTotals.keySet()) {
                     BigDecimal incoming = incomingTotals.getOrDefault(accountCode, BigDecimal.ZERO);
@@ -416,14 +423,14 @@ public class InvoiceGenerationService {
             String key = accountCode + "|" + serviceType;
             
             boolean include = false;
-            switch (settlementType) {
-                case "INCOMING":
+            switch (settlementTypeEnum) {
+                case INCOMING:
                     if ("CUSTOMER".equals(accountType) && "INCOMING".equals(direction)) include = true;
                     break;
-                case "OUTGOING":
+                case OUTGOING:
                     if ("VENDOR".equals(accountType) && "OUTGOING".equals(direction)) include = true;
                     break;
-                case "NET":
+                case NET:
                 default:
                     include = true;
                     break;
@@ -453,14 +460,14 @@ public class InvoiceGenerationService {
             String accountType = accountTypes.get(entry.getKey());
             String trafficDirection;
 
-            switch (settlementType) {
-                case "INCOMING":
+            switch (settlementTypeEnum) {
+                case INCOMING:
                     trafficDirection = "Inbound Traffic";
                     break;
-                case "OUTGOING":
+                case OUTGOING:
                     trafficDirection = "Outbound Traffic";
                     break;
-                case "NET":
+                case NET:
                 default:
                     trafficDirection = "CUSTOMER".equals(accountType) ? "Inbound Traffic" : "Outbound Traffic";
             }
@@ -506,14 +513,15 @@ public class InvoiceGenerationService {
 
     private String generateInvoiceNumber(String settlementType, LocalDate billingStart) {
         String typePrefix;
-        switch (settlementType) {
-            case "INCOMING":
+        SettlementType settlementTypeEnum = SettlementType.fromString(settlementType);
+        switch (settlementTypeEnum) {
+            case INCOMING:
                 typePrefix = "INC";
                 break;
-            case "OUTGOING":
+            case OUTGOING:
                 typePrefix = "OUT";
                 break;
-            case "NET":
+            case NET:
             default:
                 typePrefix = "NET";
                 break;

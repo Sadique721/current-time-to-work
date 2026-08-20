@@ -6,6 +6,7 @@ import com.xcess.ocs.dto.PageResponseDTO;
 import com.xcess.ocs.dto.search.InvoiceSearchDTO;
 import com.xcess.ocs.service.InvoiceGenerationService;
 import com.xcess.ocs.service.InvoiceService;
+import com.xcess.ocs.constants.enums.SettlementType;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,8 @@ public class InvoiceController {
         log.info("Manually generating {} invoice for agreement: {}, period: {} to {}", 
                 settlementType, agreementId, billingStart, billingEnd);
         
-        if ("ROAMING_TAP_OUT".equals(settlementType)) {
+        SettlementType settlementTypeEnum = SettlementType.fromString(settlementType);
+        if (SettlementType.ROAMING_TAP_OUT == settlementTypeEnum) {
             com.xcess.ocs.entity.Invoice invoiceEntity = roamingTapOutInvoiceService.generateInvoice(agreementId, billingStart, billingEnd);
             if (invoiceEntity == null) {
                 return ResponseEntity.badRequest().build();

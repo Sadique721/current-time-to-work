@@ -13,6 +13,7 @@ import com.xcess.ocs.service.BillingSchedulerAuditLogService;
 import com.xcess.ocs.service.BillingSchedulerStatusService;
 import com.xcess.ocs.service.FailedInvoiceService;
 import com.xcess.ocs.service.InvoiceGenerationService;
+import com.xcess.ocs.constants.enums.SettlementType;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -222,9 +223,9 @@ public class BillingCycleScheduler {
             // INCOMING settlement - for CUSTOMER partners
             if (Boolean.TRUE.equals(managedAgreement.getIsIncomingSettlement())) {
                 if (!invoiceRepository.existsByAgreement_AgreementIdAndBillingCycleStartAndBillingCycleEndAndSettlementType(
-                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, "INCOMING")) {
+                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.INCOMING.label())) {
                     Invoice invoice = invoiceGenerationService.generateInvoiceForSettlementType(
-                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, "INCOMING");
+                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.INCOMING.label());
                     if (invoice == null) {
                         failedInvoiceService.saveFailedInvoice(managedAgreement.getAgreementId(), cycleStart, cycleEnd,
                                 "INCOMING: Invoice returned is null");
@@ -236,9 +237,9 @@ public class BillingCycleScheduler {
             // OUTGOING settlement - for VENDOR partners
             if (Boolean.TRUE.equals(managedAgreement.getIsOutgoingSettlement())) {
                 if (!invoiceRepository.existsByAgreement_AgreementIdAndBillingCycleStartAndBillingCycleEndAndSettlementType(
-                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, "OUTGOING")) {
+                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.OUTGOING.label())) {
                     Invoice invoice = invoiceGenerationService.generateInvoiceForSettlementType(
-                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, "OUTGOING");
+                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.OUTGOING.label());
                     if (invoice == null) {
                         failedInvoiceService.saveFailedInvoice(managedAgreement.getAgreementId(), cycleStart, cycleEnd,
                                 "OUTGOING: Invoice returned is null");
@@ -250,9 +251,9 @@ public class BillingCycleScheduler {
             // NET settlement - for both
             if (Boolean.TRUE.equals(managedAgreement.getIsNetSettlement())) {
                 if (!invoiceRepository.existsByAgreement_AgreementIdAndBillingCycleStartAndBillingCycleEndAndSettlementType(
-                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, "NET")) {
+                        managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.NET.label())) {
                     Invoice invoice = invoiceGenerationService.generateInvoiceForSettlementType(
-                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, "NET");
+                            managedAgreement.getAgreementId(), cycleStart, cycleEnd, SettlementType.NET.label());
                     if (invoice == null) {
                         failedInvoiceService.saveFailedInvoice(managedAgreement.getAgreementId(), cycleStart, cycleEnd,
                                 "NET: Invoice returned is null");

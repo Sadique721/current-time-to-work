@@ -8,6 +8,7 @@ import com.xcess.ocs.entity.Invoice;
 import com.xcess.ocs.exception.ResourceNotFoundException;
 import com.xcess.ocs.repository.InvoiceRepository;
 import com.xcess.ocs.util.PaginationUtils;
+import com.xcess.ocs.constants.enums.SettlementType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -145,12 +146,13 @@ public class InvoiceService {
         
         String settlementType = invoice.getSettlementType();
         String templatePath = null;
+        SettlementType settlementTypeEnum = SettlementType.fromString(settlementType);
         
-        if ("INCOMING".equals(settlementType) && invoice.getAgreement().getIncomingSettlementTemplate() != null) {
+        if (SettlementType.INCOMING == settlementTypeEnum && invoice.getAgreement().getIncomingSettlementTemplate() != null) {
             templatePath = invoice.getAgreement().getIncomingSettlementTemplate().getTemplatePath();
-        } else if (("OUTGOING".equals(settlementType) || "ROAMING_TAP_OUT".equals(settlementType)) && invoice.getAgreement().getOutgoingSettlementTemplate() != null) {
+        } else if ((SettlementType.OUTGOING == settlementTypeEnum || SettlementType.ROAMING_TAP_OUT == settlementTypeEnum) && invoice.getAgreement().getOutgoingSettlementTemplate() != null) {
             templatePath = invoice.getAgreement().getOutgoingSettlementTemplate().getTemplatePath();
-        } else if ("NET".equals(settlementType) && invoice.getAgreement().getNetSettlementTemplate() != null) {
+        } else if (SettlementType.NET == settlementTypeEnum && invoice.getAgreement().getNetSettlementTemplate() != null) {
             templatePath = invoice.getAgreement().getNetSettlementTemplate().getTemplatePath();
         }
         

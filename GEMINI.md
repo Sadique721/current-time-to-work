@@ -33,4 +33,4 @@ The following files are configured for local environment testing/development. **
 
 * **JPA Entity Classes:** Database entity files (e.g. `Invoice.java`, `ReRateRequest.java`, `ErrorRateRequest.java`) must remain **100% untouched** (no annotations or field updates) to prevent Liquibase schema conflicts.
 * **Refactoring Strategy (Strategy A):** Use service-layer type safety (e.g., custom Enums like `SettlementType`, `NetPayableBy`, `RequestStatus`, and `ServiceType`) while preserving the REST payload string structures for Angular GUI compatibility.
-* **Auditing:** Maintain [**`Hardcode.md`**](file:///d:/KTPL/current/IR/ir-server/Hardcode.md) in the backend repository root to record all refactored codes and test cURL inputs/outputs.
+* **Auditing:** Maintain [**`Hardcode.md`**](file:///d:/KTPL/current/IR/ir-server/documentation/Hardcode.md) in the backend repository's documentation directory to record all refactored codes and test cURL inputs/outputs.

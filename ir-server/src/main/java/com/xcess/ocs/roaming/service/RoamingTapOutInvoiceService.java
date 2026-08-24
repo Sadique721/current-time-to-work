@@ -1,5 +1,8 @@
 package com.xcess.ocs.roaming.service;
 
+import com.xcess.ocs.constants.AppConstants;
+import com.xcess.ocs.constants.enums.NetPayableBy;
+import com.xcess.ocs.constants.enums.SettlementType;
 import com.xcess.ocs.dto.xml.*;
 import com.xcess.ocs.entity.*;
 import com.xcess.ocs.entity.Agreement;
@@ -34,7 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RoamingTapOutInvoiceService {
 
-    public static final String SETTLEMENT_TYPE = "ROAMING_TAP_OUT";
+    public static final String SETTLEMENT_TYPE = SettlementType.ROAMING_TAP_OUT.label();
 
     private final AgreementRepository agreementRepository;
     private final AgreementTaxConfigRepository agreementTaxConfigRepository;
@@ -134,15 +137,15 @@ public class RoamingTapOutInvoiceService {
         invoice.setBillingCycleEnd(cycleEnd);
         invoice.setSettlementType(SETTLEMENT_TYPE);
         invoice.setXmlContent(xmlContent);
-        invoice.setStatus("GENERATED");
+        invoice.setStatus(AppConstants.STATUS_GENERATED);
         invoice.setCustomerTotal(totalOurCharge);
         invoice.setNetAmount(totalOurCharge);
-        invoice.setNetPayableBy("HOST");
+        invoice.setNetPayableBy(NetPayableBy.CUSTOMER.label());
         invoice.setGeneratedDate(LocalDateTime.now());
         invoice.setCurrency(currency);
 
         if (taxResult != null) {
-            invoice.setTaxType("MULTI");
+            invoice.setTaxType(AppConstants.TAX_TYPE_MULTI);
             invoice.setTaxableAmount(taxResult.getTaxableAmount());
             invoice.setTaxAmount(taxResult.getTotalTax());
             invoice.setTotalInvoiceAmount(taxResult.getTotalInvoiceAmount());
@@ -255,7 +258,7 @@ public class RoamingTapOutInvoiceService {
             // Voice CDR lines
             for (VoiceRatedCdr cdr : voiceCdrs) {
                 RoamingTapOutInvoiceXmlDTO.CdrLine line = new RoamingTapOutInvoiceXmlDTO.CdrLine();
-                line.setServiceType("VOICE");
+                line.setServiceType(ServiceType.VOICE.name());
                 line.setCallingNumber(cdr.getCallingNumber());
                 line.setCalledNumber(cdr.getCalledNumber());
                 line.setStartTime(cdr.getStartTime() != null ? cdr.getStartTime().toString() : null);
@@ -269,7 +272,7 @@ public class RoamingTapOutInvoiceService {
             // SMS CDR lines
             for (SmsRatedCdr cdr : smsCdrs) {
                 RoamingTapOutInvoiceXmlDTO.CdrLine line = new RoamingTapOutInvoiceXmlDTO.CdrLine();
-                line.setServiceType("SMS");
+                line.setServiceType(ServiceType.SMS.name());
                 line.setCallingNumber(cdr.getCallingNumber());
                 line.setCalledNumber(cdr.getCalledNumber());
                 line.setStartTime(cdr.getStartTime() != null ? cdr.getStartTime().toString() : null);
@@ -283,7 +286,7 @@ public class RoamingTapOutInvoiceService {
             // Usage CDR lines
             for (UsageRatedCdr cdr : usageCdrs) {
                 RoamingTapOutInvoiceXmlDTO.CdrLine line = new RoamingTapOutInvoiceXmlDTO.CdrLine();
-                line.setServiceType("USAGE");
+                line.setServiceType(ServiceType.USAGE.name());
                 line.setCallingNumber(cdr.getSubscriberIdentity());
                 line.setCalledNumber(cdr.getAccessPointName());
                 line.setStartTime(cdr.getStartTime() != null ? cdr.getStartTime().toString() : null);
@@ -311,7 +314,7 @@ public class RoamingTapOutInvoiceService {
         NetSettlement net = new NetSettlement();
         net.setCustomerTotal(totalOurCharge.doubleValue());
         net.setNetAmount(totalOurCharge.doubleValue());
-        net.setNetPayableBy("HOST");
+        net.setNetPayableBy(NetPayableBy.CUSTOMER.label());
         dto.setNetSettlement(net);
 
         BigDecimal totalInvoice = taxResult != null ? taxResult.getTotalInvoiceAmount() : totalOurCharge;

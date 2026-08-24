@@ -1,5 +1,6 @@
 package com.xcess.ocs.service;
 
+import com.xcess.ocs.constants.enums.RequestStatus;
 import com.xcess.ocs.dto.CdrQueryConfigDTO;
 import com.xcess.ocs.dto.ReRateRequestDTO;
 import com.xcess.ocs.entity.CdrQueryConfig;
@@ -37,8 +38,8 @@ public class ReRateRequestService {
         reRateRequestRepository.findByRequestId(requestId).ifPresentOrElse(
                 request -> {
                     String currentStatus = request.getStatus();
-                    if ("FAILED".equals(currentStatus) || "COMPLETED".equals(currentStatus)
-                            || "IN_PROGRESS".equals(currentStatus)) {
+                    if (RequestStatus.FAILED.name().equals(currentStatus) || RequestStatus.COMPLETED.name().equals(currentStatus)
+                            || RequestStatus.IN_PROGRESS.name().equals(currentStatus)) {
                         request.setStatus(status);
                         reRateRequestRepository.save(request);
                         log.info("Updated ReRateRequest {} status from {} to {}", requestId, currentStatus, status);

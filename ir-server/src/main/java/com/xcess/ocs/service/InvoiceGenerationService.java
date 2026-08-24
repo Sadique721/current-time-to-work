@@ -63,7 +63,7 @@ public class InvoiceGenerationService {
 
     @Transactional
     public Invoice generateInvoiceForAgreement(Long agreementId, LocalDate billingStart, LocalDate billingEnd) {
-        return generateInvoiceForSettlementType(agreementId, billingStart, billingEnd, "NET");
+        return generateInvoiceForSettlementType(agreementId, billingStart, billingEnd, SettlementType.NET.label());
     }
 
     @Transactional
@@ -425,10 +425,10 @@ public class InvoiceGenerationService {
             boolean include = false;
             switch (settlementTypeEnum) {
                 case INCOMING:
-                    if ("CUSTOMER".equals(accountType) && "INCOMING".equals(direction)) include = true;
+                    if (NetPayableBy.CUSTOMER.label().equals(accountType) && SettlementType.INCOMING.label().equals(direction)) include = true;
                     break;
                 case OUTGOING:
-                    if ("VENDOR".equals(accountType) && "OUTGOING".equals(direction)) include = true;
+                    if ("VENDOR".equals(accountType) && SettlementType.OUTGOING.label().equals(direction)) include = true;
                     break;
                 case NET:
                 default:
@@ -469,7 +469,7 @@ public class InvoiceGenerationService {
                     break;
                 case NET:
                 default:
-                    trafficDirection = "CUSTOMER".equals(accountType) ? "Inbound Traffic" : "Outbound Traffic";
+                    trafficDirection = NetPayableBy.CUSTOMER.label().equals(accountType) ? "Inbound Traffic" : "Outbound Traffic";
             }
 
             SummaryAccount summaryAccount = new SummaryAccount();

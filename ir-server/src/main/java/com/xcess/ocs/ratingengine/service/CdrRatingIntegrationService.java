@@ -1,5 +1,6 @@
 package com.xcess.ocs.ratingengine.service;
 
+import com.xcess.ocs.constants.enums.SettlementType;
 import com.xcess.ocs.dto.SmsRatedCdrDTO;
 import com.xcess.ocs.dto.VoiceRatedCdrDTO;
 import com.xcess.ocs.dto.UsageRatedCdrDTO;
@@ -445,7 +446,7 @@ public class CdrRatingIntegrationService {
             }
 
             log.info("Successfully rated {} CDR: calling={}, called={}, zone={}, rate={}, package={}",
-                    isIncoming ? "INCOMING" : "OUTGOING",
+                    isIncoming ? SettlementType.INCOMING.label() : SettlementType.OUTGOING.label(),
                     voiceRatedCdr.getCallingNumber(),
                     voiceRatedCdr.getCalledNumber(),
                     resolvedZoneName != null ? resolvedZoneName : "prefix-based",

@@ -1,5 +1,6 @@
 package com.xcess.ocs.summaryengine.cron;
 
+import com.xcess.ocs.constants.enums.RequestStatus;
 import com.xcess.ocs.dto.RequestParameters;
 import com.xcess.ocs.entity.CdrQueryConfig;
 
@@ -328,11 +329,11 @@ public class ReRatePollingScheduler {
             long duration = System.currentTimeMillis() - startTime;
             log.info("Completed re-rate request {}: processed {} records in {} ms", reRateRequest.getRequestId(), totalProcessed, duration);
             maxRetryForReRateReqProcessing.set(0);
-            reRateRequestService.editReRateStatus(reRateRequest.getRequestId(), "COMPLETED");
+            reRateRequestService.editReRateStatus(reRateRequest.getRequestId(), RequestStatus.COMPLETED.name());
         } catch (Exception e) {
             log.error("Failed re-rate process for request {}: {}", reRateRequest.getRequestId(), e.getMessage(), e);
             maxRetryForReRateReqProcessing.incrementAndGet();
-            reRateRequestService.editReRateStatus(reRateRequest.getRequestId(), "FAILED");
+            reRateRequestService.editReRateStatus(reRateRequest.getRequestId(), RequestStatus.FAILED.name());
         }
     }
 

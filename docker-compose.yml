@@ -34,6 +34,23 @@ services:
     networks:
       - ir-network
 
+  mysql:
+    image: mysql:8.0
+    container_name: ir-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: xcessocs
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./xcessocs.sql:/docker-entrypoint-initdb.d/xcessocs.sql
+    networks:
+      - ir-network
+
+
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui-dashboard
@@ -48,6 +65,21 @@ services:
     networks:
       - ir-network
 
+  sftp-mock:
+    image: atmoz/sftp:alpine
+    container_name: sftp-mock
+    ports:
+      - "2222:22"
+    command: sftpuser:sftpuser:1001
+    volumes:
+      - sftp_data:/home/sftpuser/upload
+    networks:
+      - ir-network
+
 networks:
   ir-network:
     driver: bridge
+
+volumes:
+  mysql_data:
+  sftp_data:

@@ -1,5 +1,7 @@
 package com.xcess.ocs.summaryengine.cron;
 
+import com.xcess.ocs.constants.AppConstants;
+import com.xcess.ocs.constants.enums.RequestStatus;
 import com.xcess.ocs.dto.RequestParameters;
 import com.xcess.ocs.entity.CdrQueryConfig;
 import com.xcess.ocs.entity.ServiceType;
@@ -216,12 +218,12 @@ public class ErrorRecoveryPollingScheduler {
         for (ErrorRateRequest request : candidates) {
             try {
                 ErrorRateRequest fresh = errorRateRequestRepository
-                        .findByRequestIdAndStatus(request.getRequestId(), "PENDING")
-                        .or(() -> errorRateRequestRepository.findByRequestIdAndStatus(request.getRequestId(), "NEW"))
+                        .findByRequestIdAndStatus(request.getRequestId(), AppConstants.STATUS_PENDING)
+                        .or(() -> errorRateRequestRepository.findByRequestIdAndStatus(request.getRequestId(), RequestStatus.NEW.name()))
                         .orElse(null);
 
                 if (fresh != null) {
-                    fresh.setStatus("PROCESSING");
+                    fresh.setStatus(RequestStatus.PROCESSING.name());
                     fresh.setModifiedBy(instanceId);
                     fresh.setModifiedAt(LocalDateTime.now());
                     
@@ -328,11 +330,11 @@ public class ErrorRecoveryPollingScheduler {
             long duration = System.currentTimeMillis() - startTime;
             log.info("Error Recovery :: Completed request {}: processed {} records in {} ms", errorRateRequest.getRequestId(), totalProcessed, duration);
             maxRetryForErrorRateReqProcessing.set(0);
-            errorRateRequestService.editErrorRateStatus(errorRateRequest.getRequestId(), "COMPLETED");
+            errorRateRequestService.editErrorRateStatus(errorRateRequest.getRequestId(), RequestStatus.COMPLETED.name());
         } catch (Exception e) {
             log.error("Error Recovery :: Failed for request {}: {}", errorRateRequest.getRequestId(), e.getMessage(), e);
             maxRetryForErrorRateReqProcessing.incrementAndGet();
-            errorRateRequestService.editErrorRateStatus(errorRateRequest.getRequestId(), "FAILED");
+            errorRateRequestService.editErrorRateStatus(errorRateRequest.getRequestId(), RequestStatus.FAILED.name());
         }
     }
 

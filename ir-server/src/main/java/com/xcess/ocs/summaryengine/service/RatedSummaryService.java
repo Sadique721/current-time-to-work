@@ -1,7 +1,9 @@
 package com.xcess.ocs.summaryengine.service;
 
+import com.xcess.ocs.constants.enums.SettlementType;
 import com.xcess.ocs.dto.RatedSummaryDTO;
 import com.xcess.ocs.entity.RatedSummary;
+import com.xcess.ocs.entity.ServiceType;
 import com.xcess.ocs.repository.SmsRatedCdrRepository;
 import com.xcess.ocs.repository.VoiceRatedCdrRepository;
 import com.xcess.ocs.repository.RatedSummaryRepository;
@@ -109,13 +111,13 @@ public class RatedSummaryService {
         log.info("Generating OUTGOING summaries");
 
         List<Map<String, Object>> voiceResults = dynamicQueryService.executeQuery("rated-summary-outgoing-daily", params);
-        saveSummaries(voiceResults, "OUTGOING");
+        saveSummaries(voiceResults, SettlementType.OUTGOING.label());
 
         List<Map<String, Object>> smsResults = dynamicQueryService.executeQuery("rated-summary-sms-outgoing-daily", params);
-        saveSummaries(smsResults, "OUTGOING");
+        saveSummaries(smsResults, SettlementType.OUTGOING.label());
 
         List<Map<String, Object>> usageResults = dynamicQueryService.executeQuery("rated-summary-usage-outgoing-daily", params);
-        saveSummaries(usageResults, "OUTGOING");
+        saveSummaries(usageResults, SettlementType.OUTGOING.label());
 
         log.info("Saved OUTGOING summaries — voice: {}, sms: {}, usage: {}",
                 voiceResults.size(), smsResults.size(), usageResults.size());
@@ -126,13 +128,13 @@ public class RatedSummaryService {
         log.info("Generating INCOMING summaries");
 
         List<Map<String, Object>> voiceResults = dynamicQueryService.executeQuery("rated-summary-incoming-daily", params);
-        saveSummaries(voiceResults, "INCOMING");
+        saveSummaries(voiceResults, SettlementType.INCOMING.label());
 
         List<Map<String, Object>> smsResults = dynamicQueryService.executeQuery("rated-summary-sms-incoming-daily", params);
-        saveSummaries(smsResults, "INCOMING");
+        saveSummaries(smsResults, SettlementType.INCOMING.label());
 
         List<Map<String, Object>> usageResults = dynamicQueryService.executeQuery("rated-summary-usage-incoming-daily", params);
-        saveSummaries(usageResults, "INCOMING");
+        saveSummaries(usageResults, SettlementType.INCOMING.label());
 
         log.info("Saved INCOMING summaries — voice: {}, sms: {}, usage: {}",
                 voiceResults.size(), smsResults.size(), usageResults.size());
@@ -166,12 +168,12 @@ public class RatedSummaryService {
                 if (existing.isPresent()) {
                     summary = existing.get();
                     // Accumulate only the metric column relevant to this service type
-                    if ("VOICE".equals(serviceType)) {
+                    if (ServiceType.VOICE.name().equals(serviceType)) {
                         summary.setTotalCalls(nullSafeAdd(summary.getTotalCalls(), getLong(row, "total_calls")));
                         summary.setTotalDuration(nullSafeAdd(summary.getTotalDuration(), getBigDecimal(row, "total_duration")));
-                    } else if ("SMS".equals(serviceType)) {
+                    } else if (ServiceType.SMS.name().equals(serviceType)) {
                         summary.setTotalSms(nullSafeAdd(summary.getTotalSms(), getLong(row, "total_sms")));
-                    } else if ("USAGE".equals(serviceType)) {
+                    } else if (ServiceType.USAGE.name().equals(serviceType)) {
                         summary.setTotalSessions(nullSafeAdd(summary.getTotalSessions(), getLong(row, "total_sessions")));
                         summary.setTotalDataVolume(nullSafeAdd(summary.getTotalDataVolume(), getBigDecimal(row, "total_data_volume")));
                     }
@@ -198,12 +200,12 @@ public class RatedSummaryService {
                     summary.setAppliedRate(appliedRate);
                     summary.setTotalCharge(getBigDecimal(row, "total_charge"));
 
-                    if ("VOICE".equals(serviceType)) {
+                    if (ServiceType.VOICE.name().equals(serviceType)) {
                         summary.setTotalCalls(getLong(row, "total_calls"));
                         summary.setTotalDuration(getBigDecimal(row, "total_duration"));
-                    } else if ("SMS".equals(serviceType)) {
+                    } else if (ServiceType.SMS.name().equals(serviceType)) {
                         summary.setTotalSms(getLong(row, "total_sms"));
-                    } else if ("USAGE".equals(serviceType)) {
+                    } else if (ServiceType.USAGE.name().equals(serviceType)) {
                         summary.setTotalSessions(getLong(row, "total_sessions"));
                         summary.setTotalDataVolume(getBigDecimal(row, "total_data_volume"));
                     }

@@ -1,5 +1,6 @@
 package com.xcess.ocs.service;
 
+import com.xcess.ocs.constants.enums.NetPayableBy;
 import com.xcess.ocs.dto.TemplateConfigurationDTO;
 import com.xcess.ocs.dto.search.TemplateConfigurationSearchDTO;
 import com.xcess.ocs.dto.xml.*;
@@ -497,7 +498,7 @@ public class TemplateConfigurationService {
         netSettlement.setCustomerTotal(10000.0);
         netSettlement.setVendorTotal(5000.0);
         netSettlement.setNetAmount(5000.0);
-        netSettlement.setNetPayableBy("CUSTOMER");
+        netSettlement.setNetPayableBy(NetPayableBy.CUSTOMER.label());
         dto.setNetSettlement(netSettlement);
 
         return XmlConverter.convertToXml(dto);

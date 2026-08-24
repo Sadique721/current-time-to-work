@@ -37,7 +37,6 @@ public class OcsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(OcsApplication.class, args);
-
 	}
 
 }

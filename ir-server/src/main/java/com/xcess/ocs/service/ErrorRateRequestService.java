@@ -1,5 +1,6 @@
 package com.xcess.ocs.service;
 
+import com.xcess.ocs.constants.enums.RequestStatus;
 import com.xcess.ocs.dto.CdrQueryConfigDTO;
 import com.xcess.ocs.dto.ErrorRateRequestDTO;
 import com.xcess.ocs.entity.CdrQueryConfig;
@@ -28,7 +29,7 @@ public class ErrorRateRequestService {
 
     @Transactional
     public void editErrorRateStatus(String requestId, String status) {
-        errorRateRequestRepository.findByRequestIdAndStatus(requestId, "PROCESSING").ifPresentOrElse(
+        errorRateRequestRepository.findByRequestIdAndStatus(requestId, RequestStatus.PROCESSING.name()).ifPresentOrElse(
                 request -> {
                     request.setStatus(status);
                     errorRateRequestRepository.save(request);
@@ -48,7 +49,7 @@ public class ErrorRateRequestService {
         entity.setVoiceQueryConfig(resolveQueryConfig(dto.getVoiceQueryConfig(), errorRateRequest));
         entity.setSmsQueryConfig(resolveQueryConfig(dto.getSmsQueryConfig(), errorRateRequest));
         entity.setUsageQueryConfig(resolveQueryConfig(dto.getUsageQueryConfig(), errorRateRequest));
-        entity.setStatus("NEW");
+        entity.setStatus(RequestStatus.NEW.name());
         entity.setEnable(dto.getEnable() != null ? dto.getEnable() : true);
         entity.setStartDate(dto.getStartDate());
         entity.setEndDate(dto.getEndDate());

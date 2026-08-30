@@ -32,6 +32,22 @@
 </tr>
 </table>
 
+<!-- ========== NEW: SYSTEM DIAGRAM SECTION ========== -->
+## 📊 System Architecture & Workflow
+
+```mermaid
+sequenceDiagram
+    participant User as Employee
+    participant App as Time Tracker UI
+    participant DB as Logs Database
+    User->>App: Punch In / Start Session
+    App->>DB: Record Start Time (Timestamp)
+    User->>App: Update Active Tasks
+    App->>DB: Log Task Progress
+    User->>App: Punch Out / End Session
+    App->>DB: Record End Time & Calculate Duration
+```
+
 ---
 
 <!-- ========== ANIMATED HEADER BANNER ========== -->

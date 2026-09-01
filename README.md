@@ -1,3 +1,55 @@
+<!-- ========== NEW: ANIMATED WAVE HEADER ========== -->
+<!-- ========== NEW: TYPING ANIMATION INTRO ========== -->
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&amp;weight=600&amp;size=24&amp;duration=3000&amp;pause=500&amp;color=22D3EE&amp;center=true&amp;vCenter=true&amp;width=700&amp;lines=Employee%20Time%20Tracking;Work%20Log%20Management;Productivity%20Analytics" alt="Typing SVG">
+</p>
+
+<!-- ========== NEW: HIGH QUALITY PROJECT BANNER ========== -->
+![Project Banner](project_banner.svg)
+
+
+<!-- ========== NEW: AUTHOR & ARCHITECT SECTION ========== -->
+## 👨‍💻 Author & Architect
+
+<table>
+<tr>
+<td align="center" width="160">
+  <a href="https://github.com/Sadique721">
+    <img src="https://avatars.githubusercontent.com/Sadique721" width="110" style="border-radius:50%"><br>
+    <b>Md Sadique Amin</b><br>
+    <sub>Backend Java Developer</sub>
+  </a>
+</td>
+<td>
+
+**Md Sadique Amin** — Backend Java Developer.
+
+- 🔗 GitHub: [@Sadique721](https://github.com/Sadique721)
+- 📧 Email: mdsadiqueamin721786@gmail.com
+- 🏗️ Built: Enterprise BSS-OSS Telecom Suite, Backend Java Developer, IR Interconnect & Roaming
+
+</td>
+</tr>
+</table>
+
+<!-- ========== NEW: SYSTEM DIAGRAM SECTION ========== -->
+## 📊 System Architecture & Workflow
+
+```mermaid
+sequenceDiagram
+    participant User as Employee
+    participant App as Time Tracker UI
+    participant DB as Logs Database
+    User->>App: Punch In / Start Session
+    App->>DB: Record Start Time (Timestamp)
+    User->>App: Update Active Tasks
+    App->>DB: Log Task Progress
+    User->>App: Punch Out / End Session
+    App->>DB: Record End Time & Calculate Duration
+```
+
+---
+
 <!-- ========== ANIMATED HEADER BANNER ========== -->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=IR%20Interconnect%20Roaming&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Telecom%20Roaming%20%7C%20Rating%20and%20Settlement%20Engine&descAlignY=60&descAlign=50" width="100%">
@@ -366,4 +418,10 @@ Spring Boot Backend (ir-server) ─── localhost:8060/rating-engine/v1
 <!-- ========== ANIMATED FOOTER BANNER ========== -->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=120&section=footer" width="100%">
+</p>
+
+
+<!-- ========== NEW: FOOTER WAVE ANIMATION ========== -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=120&section=footer&width=100%">
 </p>

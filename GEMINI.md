@@ -6,7 +6,8 @@ This document preserves the workspace memory, path rules, and developer constrai
 
 ## 📍 1. Workspace Locations & Environments
 
-* **Root Directory:** `d:\KTPL\current\IR` (Git remote points to GitHub repository `current-time-to-work`)
+* **Root Directory:** `d:\KTPL\current\IR` (Git remote points to GitHub repository `current-time-to-work`, branch `main`)
+  * **GitHub Branch Rule:** The GitHub repository strictly uses **only `main` branch**. Never push or create other branches (e.g. `amin`) on GitHub. All GitHub syncs and pushes must always target `main`.
 * **Backend Repository:** `d:\KTPL\current\IR\ir-server` (Git remote points to Bitbucket repository `ir-server`, branch `amin`)
   * **Default Port:** `8080`
   * **Local Context Path:** `/rating-engine/v1`

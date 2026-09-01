@@ -7,27 +7,36 @@ This document preserves the workspace memory, path rules, and developer constrai
 ## 📍 1. Workspace Locations & Environments
 
 * **Root Directory:** `d:\KTPL\current\IR` (Git remote points to GitHub repository `current-time-to-work`, branch `main`)
-  * **GitHub Branch Rule:** The GitHub repository strictly uses **only `main` branch**. Never push or create other branches (e.g. `amin`) on GitHub. All GitHub syncs and pushes must always target `main`.
+  * **GitHub Push Policy:**
+    * Strictly uses **only `main` branch**.
+    * Can commit and push the **overall project** (all code files, frontend `ir-gui`, backend `ir-server`, documentation, build configurations, and scripts with full details).
+    * Never create or push secondary branches (e.g. `amin`) on GitHub.
 * **Backend Repository:** `d:\KTPL\current\IR\ir-server` (Git remote points to Bitbucket repository `ir-server`, branch `amin`)
-  * **Bitbucket Branch Rule:** The Bitbucket backend repository strictly uses **only `amin` branch**. All Bitbucket syncs and pushes must always target `amin`.
+  * **Bitbucket Push Policy:**
+    * Strictly uses **only `amin` branch**.
+    * **Pre-Push Reminder Requirement:** ALWAYS remind/notify the user before committing or pushing anything to Bitbucket.
+    * **Selective Scoped Commits:** Only stage and commit the specific backend files/features that were worked on (e.g. refactored services, DTOs, controllers, changelogs, `documentation/Hardcode.md`).
+    * **Strictly Exclude Local Files on Bitbucket:** Never stage or push local configurations (`application.properties`, `application-local.properties`, `build.gradle`, `settings.gradle`, `gradle.properties`, wrapper configs).
   * **Default Port:** `8080`
   * **Local Context Path:** `/rating-engine/v1`
   * **Local Database:** MySQL Port `3306` (username: `root`, password: `0721`, database: `xcessocs`)
 
 ---
 
-## 🔒 2. Committing & Pushing Constraints (Strictly Local Files)
+## 🔒 2. Committing & Pushing Constraints (Bitbucket vs GitHub)
 
-The following files are configured for local environment testing/development. **Do not commit, stage, or push them to remote repositories:**
-
-1. **📁 Properties Configurations:**
-   * `src/main/resources/application.properties`
-   * `src/main/resources/application-local.properties`
-2. **📁 Gradle Toolchain & Compiler Setups:**
-   * `build.gradle`
-   * `settings.gradle`
-   * `gradle.properties`
-   * `gradle/wrapper/gradle-wrapper.properties`
+1. **GitHub (`current-time-to-work` -> `main`):**
+   * Full project scope permitted.
+   * Can include toolchain configurations, local testing scripts, and full workspace features.
+2. **Bitbucket (`ir-server` -> `amin`):**
+   * Strictly limited to production-safe codebase files.
+   * **Do NOT commit or push local configs to Bitbucket:**
+     * `src/main/resources/application.properties`
+     * `src/main/resources/application-local.properties`
+     * `build.gradle`
+     * `settings.gradle`
+     * `gradle.properties`
+     * `gradle/wrapper/gradle-wrapper.properties`
 
 ---
 

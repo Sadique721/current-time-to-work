@@ -111,7 +111,7 @@ tasks.named('jar') {
 }
 
 tasks.named('test') {
-    enabled = false
+    useJUnitPlatform()
 }
 
 jacoco {

@@ -244,16 +244,11 @@ public class PartnerService {
 
     public List<Map<String, Object>> getPartnersByPartnerType(String partnerType) {
         log.debug("Fetching partners for partner type: {}", partnerType);
-        List<Partner> partners;
-        if ("CUSTOMER".equalsIgnoreCase(partnerType)) {
-            partners = partnerRepository.findByPartnerTypeAndIsDeletedFalse(PartnerType.CUSTOMER);
-        } else if ("VENDOR".equalsIgnoreCase(partnerType)) {
-            partners = partnerRepository.findByPartnerTypeAndIsDeletedFalse(PartnerType.VENDOR);
-        } else if ("BOTH".equalsIgnoreCase(partnerType)) {
-            partners = partnerRepository.findByPartnerTypeAndIsDeletedFalse(PartnerType.BOTH);
-        } else {
+        PartnerType resolvedType = PartnerType.fromString(partnerType);
+        if (resolvedType == null) {
             throw new IllegalArgumentException("Invalid Partner Type");
         }
+        List<Partner> partners = partnerRepository.findByPartnerTypeAndIsDeletedFalse(resolvedType);
         return partners.stream()
                 .map(p -> {
                     Map<String, Object> map = new HashMap<>();

@@ -469,27 +469,27 @@ public class TemplateConfigurationService {
         Account account1 = new Account();
         account1.setServiceType("Voice");
         account1.setAccountCode("ACC001");
-        account1.setAccountType("CUSTOMER");
+        account1.setAccountType(com.xcess.ocs.entity.PartnerType.CUSTOMER.name());
         account1.setTotalAmount(10000.0);
         dto.getAccounts().add(account1);
 
         Account account2 = new Account();
         account2.setServiceType("Voice");
         account2.setAccountCode("ACC002");
-        account2.setAccountType("VENDOR");
+        account2.setAccountType(com.xcess.ocs.entity.PartnerType.VENDOR.name());
         account2.setTotalAmount(5000.0);
         dto.getAccounts().add(account2);
 
         SummaryAccount summary1 = new SummaryAccount();
         summary1.setAccountCode("ACC001");
-        summary1.setAccountType("CUSTOMER");
+        summary1.setAccountType(com.xcess.ocs.entity.PartnerType.CUSTOMER.name());
         summary1.setTrafficDirection("Inbound Traffic");
         summary1.setTotal(10000.0);
         dto.getSummary().add(summary1);
 
         SummaryAccount summary2 = new SummaryAccount();
         summary2.setAccountCode("ACC002");
-        summary2.setAccountType("VENDOR");
+        summary2.setAccountType(com.xcess.ocs.entity.PartnerType.VENDOR.name());
         summary2.setTrafficDirection("Outbound Traffic");
         summary2.setTotal(5000.0);
         dto.getSummary().add(summary2);

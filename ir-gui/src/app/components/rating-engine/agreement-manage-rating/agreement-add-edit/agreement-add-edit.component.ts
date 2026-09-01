@@ -253,25 +253,7 @@ export class AgreementAddEditComponent implements OnInit, OnDestroy {
 
     // Dynamic validation for Billing Type
     this.basicForm.get('billingType')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(billingType => {
-      const periodCtrl = this.basicForm.get('billingCyclePeriod');
-      const dayCtrl = this.basicForm.get('weeklyDay');
-
-      if (billingType === 'DAYS') {
-        periodCtrl?.setValidators([Validators.required, Validators.min(1)]);
-        dayCtrl?.clearValidators();
-        this.updateDisabledDays(null); // Reset disabled days
-      } else if (billingType === 'WEEKLY') {
-        dayCtrl?.setValidators([Validators.required]);
-        periodCtrl?.clearValidators();
-        this.updateDisabledDays(dayCtrl?.value);
-      } else {
-        // FORTNIGHTLY, MONTHLY
-        periodCtrl?.clearValidators();
-        dayCtrl?.clearValidators();
-        this.updateDisabledDays(null); // Reset disabled days
-      }
-      periodCtrl?.updateValueAndValidity();
-      dayCtrl?.updateValueAndValidity();
+      this.updateBillingTypeValidation(billingType);
     });
 
     // Dynamic handling of Weekly Day changes to disable days in the calendar
@@ -562,7 +544,11 @@ export class AgreementAddEditComponent implements OnInit, OnDestroy {
         : null,
     }, { emitEvent: false }); // Disable events to prevent clearing taxRows via subscriptions
 
+    // Sync billing validation manually because emitEvent is false
+    this.updateBillingTypeValidation(this.basicForm.get('billingType')?.value);
+
     this.basicForm.get('agreementCode')?.disable();
+    this.basicForm.get('lineOfBusiness')?.disable();
 
     if (!this.selectedAgreement.partnerId) {
       this.basicForm.get('partnerId')?.clearValidators();
@@ -917,6 +903,29 @@ export class AgreementAddEditComponent implements OnInit, OnDestroy {
       }
     }
     return true;
+  }
+
+  private updateBillingTypeValidation(billingType: string): void {
+    const periodCtrl = this.basicForm.get('billingCyclePeriod');
+    const dayCtrl = this.basicForm.get('weeklyDay');
+
+    if (billingType === 'DAYS') {
+      periodCtrl?.setValidators([Validators.required, Validators.min(1)]);
+      dayCtrl?.clearValidators();
+      this.updateDisabledDays(null); // Reset disabled days
+    } else if (billingType === 'WEEKLY') {
+      dayCtrl?.setValidators([Validators.required]);
+      periodCtrl?.clearValidators();
+      this.updateDisabledDays(dayCtrl?.value);
+    } else {
+      // FORTNIGHTLY, MONTHLY
+      periodCtrl?.clearValidators();
+      dayCtrl?.clearValidators();
+      this.updateDisabledDays(null); // Reset disabled days
+    }
+    
+    periodCtrl?.updateValueAndValidity();
+    dayCtrl?.updateValueAndValidity();
   }
 
   private updateDisabledDays(day: string | null | undefined): void {

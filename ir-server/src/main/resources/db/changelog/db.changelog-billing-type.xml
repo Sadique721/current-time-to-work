@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.10.xsd">
+
+    <changeSet id="add-billing-type" author="developer">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="agreements" columnName="billing_type"/></not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="billing_type" type="VARCHAR(20)" defaultValue="DAYS">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="agreements" columnName="billing_type"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="add-weekly-day" author="developer">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="agreements" columnName="weekly_day"/></not>
+        </preConditions>
+        <addColumn tableName="agreements">
+            <column name="weekly_day" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="agreements" columnName="weekly_day"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="make-billing-cycle-period-nullable" author="developer">
+        <comment>Allow NULL for non-DAYS billing types (WEEKLY, FORTNIGHTLY, MONTHLY)</comment>
+        <dropNotNullConstraint tableName="agreements" columnName="billing_cycle_period" columnDataType="INT"/>
+    </changeSet>
+
+    <changeSet id="ensure-billing-type-varchar" author="developer">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="agreements" columnName="billing_type"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE agreements MODIFY COLUMN billing_type VARCHAR(20) NOT NULL DEFAULT 'DAYS';
+        </sql>
+    </changeSet>
+
+    <changeSet id="alter-billing-type-to-enum" author="Govind Sirsath">
+        <preConditions onFail="HALT">
+            <columnExists tableName="agreements" columnName="billing_type"/>
+        </preConditions>
+
+        <modifyDataType
+                tableName="agreements"
+                columnName="billing_type"
+                newDataType="ENUM('DAYS','WEEKLY','FORTNIGHTLY','MONTHLY')"
+        />
+
+        <addDefaultValue
+                tableName="agreements"
+                columnName="billing_type"
+                defaultValue="DAYS"
+        />
+
+        <rollback>
+            <modifyDataType
+                    tableName="agreements"
+                    columnName="billing_type"
+                    newDataType="VARCHAR(20)"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="alter-weekly-day-to-enum" author="Govind Sirsath">
+        <preConditions onFail="HALT">
+            <columnExists tableName="agreements" columnName="weekly_day"/>
+        </preConditions>
+
+        <modifyDataType
+                tableName="agreements"
+                columnName="weekly_day"
+                newDataType="ENUM('SUN','MON','TUE','WED','THU','FRI','SAT')"/>
+
+        <rollback>
+            <modifyDataType
+                    tableName="agreements"
+                    columnName="weekly_day"
+                    newDataType="VARCHAR(10)"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

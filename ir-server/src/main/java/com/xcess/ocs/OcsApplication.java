@@ -37,6 +37,7 @@ public class OcsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(OcsApplication.class, args);
+		System.out.println("************************************************* Application INTERCONNECT ROAMING SERVER Started Successfully *************************************************");
 	}
 
 }

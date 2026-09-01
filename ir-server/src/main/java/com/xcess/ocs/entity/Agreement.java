@@ -45,9 +45,19 @@ public class Agreement extends BaseEntity {
     @Schema(description = "Next billing cycle start date (auto-calculated)", example = "2026-05-01", nullable = true)
     private LocalDate nextBillingCycleStartDate;
 
-    @Column(name = "billing_cycle_period", nullable = false)
-    @Schema(description = "Billing cycle period in days", example = "30")
+    @Column(name = "billing_cycle_period")
+    @Schema(description = "Billing cycle period in days (required for DAYS billing type)", example = "30", nullable = true)
     private Integer billingCyclePeriod;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "billing_type", nullable = false)
+    @Schema(description = "Billing type: DAYS, WEEKLY, FORTNIGHTLY, or MONTHLY", example = "DAYS")
+    private BillingType billingType = BillingType.DAYS;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "weekly_day")
+    @Schema(description = "Day of week for WEEKLY billing type", example = "MON", nullable = true)
+    private WeeklyDay weeklyDay;
 
     @Column(name = "is_incoming_settlement", nullable = false)
     @Schema(description = "Whether incoming settlement is enabled", example = "true")

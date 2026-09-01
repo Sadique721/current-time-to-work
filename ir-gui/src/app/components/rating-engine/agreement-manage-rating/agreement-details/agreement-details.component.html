@@ -60,9 +60,16 @@
             </span>
           </div>
         </div>
+        <!-- Preview Message -->
+        <div class="row" *ngIf="previewMessage">
+          <div class="col-xl-12">
+            <div class="alert alert-info py-2 my-2 mb-3 fs-13">
+              <i class="feather icon-info me-1"></i> {{ previewMessage }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
     <!-- Jurisdiction & Tax Section (if not exempt) -->
     <div class="card rounded-0 border-0 mb-3" *ngIf="!selectedAgreement.isTaxExempt">
       <div class="card-header border-0 rounded-0 bg-light d-flex align-items-center">

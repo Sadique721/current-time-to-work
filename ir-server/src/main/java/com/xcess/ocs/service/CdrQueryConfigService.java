@@ -1,5 +1,6 @@
 package com.xcess.ocs.service;
 
+import com.xcess.ocs.constants.enums.CdrQueryRequestType;
 import com.xcess.ocs.dto.CdrQueryConfigDTO;
 import com.xcess.ocs.entity.CdrQueryConfig;
 import com.xcess.ocs.entity.ServiceType;
@@ -23,11 +24,11 @@ public class CdrQueryConfigService {
     @Transactional
     public CdrQueryConfigDTO create(CdrQueryConfigDTO dto, String requestType) {
         String fetchQuery = null;
-        if(requestType.equals("ErrorRequest")){
-            fetchQuery  = createErrorQuery(dto.getServiceType());
-        }
-        if(requestType.equals("ReRateRequest")){
-            fetchQuery  = createRerateQuery(dto.getServiceType());
+        CdrQueryRequestType type = CdrQueryRequestType.fromString(requestType);
+        if (type == CdrQueryRequestType.ERROR_REQUEST) {
+            fetchQuery = createErrorQuery(dto.getServiceType());
+        } else if (type == CdrQueryRequestType.RERATE_REQUEST) {
+            fetchQuery = createRerateQuery(dto.getServiceType());
         }
 
         CdrQueryConfig entity = CdrQueryConfig.builder()

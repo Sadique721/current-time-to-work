@@ -90,7 +90,7 @@ public class ReRateRequest implements Comparable<ReRateRequest> {
         createdAt = LocalDateTime.now();
         modifiedAt = LocalDateTime.now();
         if (requestedAt == null) requestedAt = LocalDateTime.now();
-        if (status == null) status = "NEW";
+        if (status == null) status = com.xcess.ocs.constants.enums.RequestStatus.NEW.name();
         if (enable == null) enable = true;
         if (isActive == null) isActive = true;
         if (isDelete == null) isDelete = false;

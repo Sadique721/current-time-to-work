@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ErrorRateRequestRepository extends JpaRepository<ErrorRateRequest, Long> {
 
-    @Query("SELECT e FROM ErrorRateRequest e WHERE e.status = 'PENDING' OR e.status = 'NEW' AND e.isDelete = false AND e.isActive = true ORDER BY e.requestedAt ASC")
+    @Query("SELECT e FROM ErrorRateRequest e WHERE (e.status = 'PENDING' OR e.status = 'NEW') AND e.isDelete = false AND e.isActive = true ORDER BY e.requestedAt ASC")
     List<ErrorRateRequest> findPendingRequests();
 
     Optional<ErrorRateRequest> findByRequestIdAndStatus(String requestId, String status);

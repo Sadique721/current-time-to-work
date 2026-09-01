@@ -75,26 +75,8 @@ public class RoamingRatedSummaryService {
             // ── Data volume — normalise to bytes ─────────────────────────────
             // TAP 3.12 encodes data in octets (bytes), so no conversion is required
             // for standard TAP files. The explicit conversion block below is kept
-            // for resilience in case a custom TAP profile decodes in KB/MB/GB.
             summary.setTotalUsageBytes(group.stream()
-                    .map(c -> {
-                        if (c.getTotalUsage() == null) return BigDecimal.ZERO;
-                        // RoamingCdr.getMeasurementUnitForRating() always returns "BYTES"
-                        // (TAP standard), so the switch below is a safety guard only.
-                        BigDecimal val = c.getTotalUsage();
-                        String unit = c.getMeasurementUnitForRating() != null
-                                ? c.getMeasurementUnitForRating().toUpperCase() : "BYTES";
-                        switch (unit) {
-                            case "KB": case "KILOBYTE": case "KILOBYTES":
-                                return val.multiply(BigDecimal.valueOf(1024));
-                            case "MB": case "MEGABYTE": case "MEGABYTES":
-                                return val.multiply(BigDecimal.valueOf(1_048_576));
-                            case "GB": case "GIGABYTE": case "GIGABYTES":
-                                return val.multiply(BigDecimal.valueOf(1_073_741_824));
-                            default:
-                                return val; // already in bytes
-                        }
-                    })
+                    .map(c -> com.xcess.ocs.constants.enums.DataUnit.toBytes(c.getTotalUsage(), c.getMeasurementUnitForRating()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add));
 
             // ── Charges ──────────────────────────────────────────────────────

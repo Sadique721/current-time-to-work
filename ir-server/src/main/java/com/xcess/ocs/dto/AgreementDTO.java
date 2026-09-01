@@ -1,6 +1,8 @@
 package com.xcess.ocs.dto;
 
+import com.xcess.ocs.entity.BillingType;
 import com.xcess.ocs.entity.LineOfBusiness;
+import com.xcess.ocs.entity.WeeklyDay;
 import com.xcess.ocs.roaming.entity.TapDirection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -36,10 +38,14 @@ public class AgreementDTO {
     @Schema(description = "Start date of the billing cycle", example = "2026-04-01", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate billingCycleStartDate;
 
-    @NotNull(message = "Billing cycle period is required")
-    @Min(value = 1, message = "Billing cycle period must be at least 1")
-    @Schema(description = "Billing cycle period in days", example = "30", requiredMode = Schema.RequiredMode.REQUIRED, minimum = "1")
+    @Schema(description = "Billing cycle period in days (required for DAYS billing type)", example = "30", nullable = true)
     private Integer billingCyclePeriod;
+
+    @Schema(description = "Billing type: DAYS, WEEKLY, FORTNIGHTLY, or MONTHLY", example = "DAYS", defaultValue = "DAYS")
+    private BillingType billingType;
+
+    @Schema(description = "Day of week for WEEKLY billing type", example = "MON", nullable = true)
+    private WeeklyDay weeklyDay;
 
     @NotNull(message = "isIncomingSettlement is required")
     @Schema(description = "Whether incoming settlement is enabled", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -99,6 +105,34 @@ public class AgreementDTO {
     public void validate() {
         List<String> errors = new ArrayList<>();
 
+        BillingType effectiveType = billingType != null ? billingType : BillingType.DAYS;
+        switch (effectiveType) {
+            case DAYS -> {
+                if (billingCyclePeriod == null || billingCyclePeriod < 1) {
+                    errors.add("billingCyclePeriod is required and must be >= 1 for DAYS billing type");
+                }
+                if (weeklyDay != null) {
+                    errors.add("weeklyDay is not applicable for DAYS billing type");
+                }
+            }
+            case WEEKLY -> {
+                if (weeklyDay == null) {
+                    errors.add("weeklyDay is required for WEEKLY billing type");
+                }
+                if (billingCyclePeriod != null) {
+                    errors.add("billingCyclePeriod is not applicable for WEEKLY billing type");
+                }
+            }
+            case FORTNIGHTLY, MONTHLY -> {
+                if (billingCyclePeriod != null) {
+                    errors.add("billingCyclePeriod is not applicable for " + effectiveType + " billing type");
+                }
+                if (weeklyDay != null) {
+                    errors.add("weeklyDay is not applicable for " + effectiveType + " billing type");
+                }
+            }
+        }
+
         boolean incomingEnabled = isIncomingSettlement != null && isIncomingSettlement;
         boolean outgoingEnabled = isOutgoingSettlement != null && isOutgoingSettlement;
         boolean netEnabled = isNetSettlement != null && isNetSettlement;
@@ -121,7 +155,6 @@ public class AgreementDTO {
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join("; ", errors));
-
         }
     }
 }

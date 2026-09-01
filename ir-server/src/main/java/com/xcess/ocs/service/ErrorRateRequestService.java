@@ -25,7 +25,7 @@ public class ErrorRateRequestService {
 
     private final ErrorRateRequestRepository errorRateRequestRepository;
     private final CdrQueryConfigService cdrQueryConfigService;
-    String errorRateRequest = "ErrorRequest";
+    private final String errorRateRequest = com.xcess.ocs.constants.enums.CdrQueryRequestType.ERROR_REQUEST.label();
 
     @Transactional
     public void editErrorRateStatus(String requestId, String status) {

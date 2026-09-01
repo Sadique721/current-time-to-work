@@ -34,10 +34,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -47,21 +50,25 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * REST controller for TAP file operations: upload, listing, download, and invoice generation.
+ * REST controller for TAP file operations: upload, listing, download, and
+ * invoice generation.
  *
- * <p>TAP files are GSMA-standard ASN.1 BER-encoded roaming data exchange files.
- * This controller handles both TAP IN (inbound from partner) and TAP OUT (outbound to partner)
+ * <p>
+ * TAP files are GSMA-standard ASN.1 BER-encoded roaming data exchange files.
+ * This controller handles both TAP IN (inbound from partner) and TAP OUT
+ * (outbound to partner)
  * file lifecycle management.
  *
- * <p>Base path: {@code /api/roaming/tap}
+ * <p>
+ * Base path: {@code /api/roaming/tap}
  */
 @Slf4j
 @RestController
 @RequestMapping("api/roaming/tap")
 @RequiredArgsConstructor
-@Tag(name = "TAP File Management",
-     description = "Upload, list, download, and trigger invoice generation for GSMA TAP roaming files. " +
-                   "Supports both TAP IN (inbound from partner) and TAP OUT (outbound to partner) file types.")
+@Tag(name = "TAP File Management", description = "Upload, list, download, and trigger invoice generation for GSMA TAP roaming files. "
+        +
+        "Supports both TAP IN (inbound from partner) and TAP OUT (outbound to partner) file types.")
 public class TapFileController {
 
     private final TapFileRecordRepository tapFileRecordRepository;
@@ -75,7 +82,8 @@ public class TapFileController {
     private final com.xcess.ocs.roaming.scheduler.TapOutScheduler tapOutScheduler;
 
     /**
-     * Accepts a TAP file upload, stores it to disk, creates a {@code TapFileRecord},
+     * Accepts a TAP file upload, stores it to disk, creates a
+     * {@code TapFileRecord},
      * and immediately triggers asynchronous processing.
      *
      * @param file      the multipart TAP file
@@ -83,26 +91,20 @@ public class TapFileController {
      * @param fileType  TAP_IN or TAP_OUT
      * @return HTTP 202 Accepted with the accepted filename
      */
-    @Operation(
-        summary = "Upload a TAP file",
-        description = "Accepts a GSMA TAP ASN.1 file upload for a specific partner. " +
-                      "The file is stored to disk, a TapFileRecord is created with RECEIVED status, " +
-                      "and processing is triggered immediately."
-    )
+    @Operation(summary = "Upload a TAP file", description = "Accepts a GSMA TAP ASN.1 file upload for a specific partner. "
+            +
+            "The file is stored to disk, a TapFileRecord is created with RECEIVED status, " +
+            "and processing is triggered immediately.")
     @ApiResponses({
-        @ApiResponse(responseCode = "202", description = "File accepted and processing triggered"),
-        @ApiResponse(responseCode = "400", description = "Partner not found or invalid file type",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "202", description = "File accepted and processing triggered"),
+            @ApiResponse(responseCode = "400", description = "Partner not found or invalid file type", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/upload")
     public ResponseEntity<String> upload(
-            @Parameter(description = "The TAP ASN.1 binary file", required = true)
-            @RequestParam("file") MultipartFile file,
-            @Parameter(description = "ID of the partner this file belongs to", example = "99", required = true)
-            @RequestParam("partnerId") Long partnerId,
-            @Parameter(description = "File type: TAP_IN for inbound files, TAP_OUT for outbound files",
-                       example = "TAP_IN", required = true)
-            @RequestParam("fileType") TapFileType fileType) throws IOException {
+            @Parameter(description = "The TAP ASN.1 binary file", required = true) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "ID of the partner this file belongs to", example = "99", required = true) @RequestParam("partnerId") Long partnerId,
+            @Parameter(description = "File type: TAP_IN for inbound files, TAP_OUT for outbound files", example = "TAP_IN", required = true) @RequestParam("fileType") TapFileType fileType)
+            throws IOException {
         Partner partner = partnerRepository.findById(partnerId)
                 .orElseThrow(() -> new IllegalArgumentException("Partner not found: " + partnerId));
 
@@ -136,36 +138,23 @@ public class TapFileController {
      * @param pageRequestDTO pagination parameters and optional search filters
      * @return paginated list of {@link TapFileRecordDTO}
      */
-    @Operation(
-        summary = "List TAP file records (paginated)",
-        description = "Returns a paginated list of TAP file records with optional filtering by " +
-                      "status, file type, sender/recipient TADIG code, or partner ID."
-    )
+    @Operation(summary = "List TAP file records (paginated)", description = "Returns a paginated list of TAP file records with optional filtering by "
+            +
+            "status, file type, sender/recipient TADIG code, or partner ID.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Page of TAP file records returned successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid pagination parameters",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "Page of TAP file records returned successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        required = true,
-        description = "Pagination and search criteria",
-        content = @Content(
-            mediaType = "application/json",
-            examples = @ExampleObject(
-                name = "Filter by partner and status",
-                value = """
-                    {
-                      "page": 1,
-                      "pageSize": 10,
-                      "searchCriteria": {
-                        "partnerId": 99,
-                        "status": "RECEIVED",
-                        "fileType": "TAP_IN"
-                      }
-                    }"""
-            )
-        )
-    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, description = "Pagination and search criteria", content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Filter by partner and status", value = """
+            {
+              "page": 1,
+              "pageSize": 10,
+              "searchCriteria": {
+                "partnerId": 99,
+                "status": "RECEIVED",
+                "fileType": "TAP_IN"
+              }
+            }""")))
     @PostMapping("/files/paginated")
     public ResponseEntity<PageResponseDTO<TapFileRecordDTO>> getFilesInPage(
             @Valid @RequestBody PageRequestDTO<TapFileSearchDTO> pageRequestDTO) {
@@ -185,19 +174,14 @@ public class TapFileController {
      * @param id the TAP file record ID
      * @return the matching {@link TapFileRecordDTO}, or 404 if not found
      */
-    @Operation(
-        summary = "Get a TAP file record by ID",
-        description = "Returns the full TAP file record including status, TADIG codes, charge totals, and error reason."
-    )
+    @Operation(summary = "Get a TAP file record by ID", description = "Returns the full TAP file record including status, TADIG codes, charge totals, and error reason.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "TAP file record returned successfully"),
-        @ApiResponse(responseCode = "404", description = "TAP file record not found",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "TAP file record returned successfully"),
+            @ApiResponse(responseCode = "404", description = "TAP file record not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/files/{id}")
     public ResponseEntity<TapFileRecordDTO> getById(
-            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true) @PathVariable Long id) {
         return tapFileRecordRepository.findById(id)
                 .map(r -> ResponseEntity.ok(toDTO(r)))
                 .orElse(ResponseEntity.notFound().build());
@@ -206,26 +190,20 @@ public class TapFileController {
     /**
      * Returns a specific TAP file's CDRs filtered by service type.
      *
-     * @param id the TAP file record ID
+     * @param id          the TAP file record ID
      * @param serviceType the service type filter (e.g. VOICE, SMS, USAGE)
      * @return the TAP file details and its corresponding CDRs
      */
-    @Operation(
-        summary = "Get TAP file CDRs by service type",
-        description = "Returns TAP file details and its associated CDRs filtered by service type."
-    )
+    @Operation(summary = "Get TAP file CDRs by service type", description = "Returns TAP file details and its associated CDRs filtered by service type.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "TAP file CDRs returned successfully"),
-        @ApiResponse(responseCode = "404", description = "TAP file record not found",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "TAP file CDRs returned successfully"),
+            @ApiResponse(responseCode = "404", description = "TAP file record not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/files/{id}/cdrs")
     public ResponseEntity<TapFileCdrDetailsResponseDTO> getTapFileCdrs(
-            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true)
-            @PathVariable Long id,
-            @Parameter(description = "Service type to filter CDRs", example = "VOICE", required = false)
-            @RequestParam(required = false) ServiceType serviceType) {
-        
+            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true) @PathVariable Long id,
+            @Parameter(description = "Service type to filter CDRs", example = "VOICE", required = false) @RequestParam(required = false) ServiceType serviceType) {
+
         TapFileRecord record = tapFileRecordRepository.findById(id).orElse(null);
         if (record == null) {
             return ResponseEntity.notFound().build();
@@ -274,7 +252,8 @@ public class TapFileController {
                     dto.setCalledNumber(cdr.getCalledNumber());
                     // getStartTime() now returns LocalDateTime directly
                     dto.setCallStartTime(cdr.getStartTime());
-                    dto.setCallDurationSec(cdr.getDurationSeconds() != null ? cdr.getDurationSeconds().intValue() : null);
+                    dto.setCallDurationSec(
+                            cdr.getDurationSeconds() != null ? cdr.getDurationSeconds().intValue() : null);
                     dto.setHomePlmn(cdr.getHomePlmn());
                     dto.setVisitedPlmn(cdr.getVisitedPlmn());
                     dto.setCurrency(record.getPartner() != null ? record.getPartner().getBillingCurrency() : null);
@@ -337,28 +316,25 @@ public class TapFileController {
      * Streams the raw TAP ASN.1 binary file as an octet-stream download.
      *
      * @param id the TAP file record ID
-     * @return the binary file as an attachment, or 404 if the record or file is missing
+     * @return the binary file as an attachment, or 404 if the record or file is
+     *         missing
      */
-    @Operation(
-        summary = "Download a TAP file",
-        description = "Streams the raw GSMA TAP ASN.1 binary file as an octet-stream attachment."
-    )
+    @Operation(summary = "Download a TAP file", description = "Streams the raw GSMA TAP ASN.1 binary file as an octet-stream attachment.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "File streamed successfully",
-                     content = @Content(mediaType = "application/octet-stream")),
-        @ApiResponse(responseCode = "404", description = "File record not found or file missing from disk",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "File streamed successfully", content = @Content(mediaType = "application/octet-stream")),
+            @ApiResponse(responseCode = "404", description = "File record not found or file missing from disk", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/files/{id}/download")
     public ResponseEntity<Resource> downloadFile(
-            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true) @PathVariable Long id) {
         log.info("Downloading TAP file for record: {}", id);
         TapFileRecord record = tapFileRecordRepository.findById(id).orElse(null);
-        if (record == null || record.getFilePath() == null) return ResponseEntity.notFound().build();
+        if (record == null || record.getFilePath() == null)
+            return ResponseEntity.notFound().build();
 
         Resource resource = new FileSystemResource(record.getFilePath());
-        if (!resource.exists()) return ResponseEntity.notFound().build();
+        if (!resource.exists())
+            return ResponseEntity.notFound().build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -372,20 +348,16 @@ public class TapFileController {
      * @param id the TAP file record ID
      * @return HTTP 200 with confirmation message, or 404 if not found
      */
-    @Operation(
-        summary = "Generate invoice for a TAP file",
-        description = "Triggers roaming invoice generation for a TAP file that has been decoded and rated. " +
-                      "The file must be in RATED or DECODED status for invoice generation to succeed."
-    )
+    @Operation(summary = "Generate invoice for a TAP file", description = "Triggers roaming invoice generation for a TAP file that has been decoded and rated. "
+            +
+            "The file must be in RATED or DECODED status for invoice generation to succeed.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Invoice generation triggered successfully"),
-        @ApiResponse(responseCode = "404", description = "TAP file record not found",
-                     content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+            @ApiResponse(responseCode = "200", description = "Invoice generation triggered successfully"),
+            @ApiResponse(responseCode = "404", description = "TAP file record not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/files/{id}/invoice")
     public ResponseEntity<String> generateInvoice(
-            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "Unique ID of the TAP file record", example = "1", required = true) @PathVariable Long id) {
         return tapFileRecordRepository.findById(id).map(record -> {
             invoiceService.generateInvoice(record);
             return ResponseEntity.ok("Invoice generation triggered for TAP file: " + record.getFileName());
@@ -397,32 +369,39 @@ public class TapFileController {
      *
      * @return HTTP 200 with confirmation message
      */
-    @Operation(
-        summary = "Trigger TAP OUT Scheduler",
-        description = "Manually triggers the daily TAP OUT scheduler which generates TAP OUT files for all eligible roaming partners."
-    )
+    @Operation(summary = "Trigger TAP OUT Scheduler", description = "Manually triggers the TAP OUT scheduler. Accepts an optional target date (YYYY-MM-DD). If omitted, defaults to yesterday.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "TAP OUT scheduler triggered successfully")
+            @ApiResponse(responseCode = "200", description = "TAP OUT scheduler triggered successfully")
     })
     @PostMapping("/trigger-tap-out-scheduler")
-    public ResponseEntity<String> triggerTapOutScheduler() {
-        log.info("Manual trigger for TAP OUT scheduler received.");
-        tapOutScheduler.generateDailyTapOutFiles();
-        return ResponseEntity.ok("TAP OUT scheduler triggered successfully.");
+    public ResponseEntity<String> triggerTapOutScheduler(
+            @Parameter(description = "Target processing date in YYYY-MM-DD format (optional, defaults to yesterday)", example = "2026-07-20") @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        log.info("Manual trigger for TAP OUT scheduler received for date: {}",
+                date != null ? date : "yesterday (default)");
+        if (date != null) {
+            tapOutScheduler.generateTapOutFilesForDate(date);
+            return ResponseEntity.ok("TAP OUT scheduler triggered successfully for date: " + date);
+        } else {
+            tapOutScheduler.generateDailyTapOutFiles();
+            return ResponseEntity.ok("TAP OUT scheduler triggered successfully.");
+        }
     }
 
     private Specification<TapFileRecord> buildSpec(TapFileSearchDTO search) {
         return (root, query, cb) -> {
-            if (search == null) return cb.conjunction();
+            if (search == null)
+                return cb.conjunction();
             var predicates = new java.util.ArrayList<>();
             if (search.getStatus() != null)
                 predicates.add(cb.equal(root.get("status"), search.getStatus()));
             if (search.getFileType() != null)
                 predicates.add(cb.equal(root.get("fileType"), search.getFileType()));
             if (search.getSenderTadig() != null)
-                predicates.add(cb.like(cb.lower(root.get("senderTadig")), "%" + search.getSenderTadig().toLowerCase() + "%"));
+                predicates.add(
+                        cb.like(cb.lower(root.get("senderTadig")), "%" + search.getSenderTadig().toLowerCase() + "%"));
             if (search.getRecipientTadig() != null)
-                predicates.add(cb.like(cb.lower(root.get("recipientTadig")), "%" + search.getRecipientTadig().toLowerCase() + "%"));
+                predicates.add(cb.like(cb.lower(root.get("recipientTadig")),
+                        "%" + search.getRecipientTadig().toLowerCase() + "%"));
             if (search.getPartnerId() != null)
                 predicates.add(cb.equal(root.get("partner").get("partnerId"), search.getPartnerId()));
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
@@ -453,7 +432,10 @@ public class TapFileController {
     }
 
     private Integer parseSequenceNo(String fileName) {
-        try { return Integer.parseInt(fileName.replaceAll("\\D", "").substring(0, 5)); }
-        catch (Exception e) { return null; }
+        try {
+            return Integer.parseInt(fileName.replaceAll("\\D", "").substring(0, 5));
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

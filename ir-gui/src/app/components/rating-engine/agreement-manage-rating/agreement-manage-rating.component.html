@@ -75,7 +75,12 @@
             </td>
             <td>
               <div class="fs-12 fw-medium">{{ data.billingCycleStartDate | date: "yyyy-MM-dd" }}</div>
-              <div class="text-muted fs-11">{{ data.billingCyclePeriod }} Days Period</div>
+              <div class="text-muted fs-11">
+                <span *ngIf="!data.billingType || data.billingType === 'DAYS'">{{ data.billingCyclePeriod }} Days Cycle</span>
+                <span *ngIf="data.billingType === 'WEEKLY'">Every {{ data.weeklyDay | titlecase }}</span>
+                <span *ngIf="data.billingType === 'FORTNIGHTLY'">Fortnightly</span>
+                <span *ngIf="data.billingType === 'MONTHLY'">Monthly</span>
+              </div>
             </td>
             <td>
               <div class="fs-12 fw-medium text-dark">{{ data.isTaxExempt ? 'Tax Exempt' : (data.taxConfigs.length || 0)

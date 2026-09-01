@@ -164,9 +164,11 @@ public class AccountRateService {
 
         switch (ratePackage.getType()) {
             case SELLING:
-                return "CUSTOMER".equals(accountType) || "BOTH".equals(accountType);
+                return com.xcess.ocs.entity.PartnerType.CUSTOMER.name().equals(accountType)
+                        || com.xcess.ocs.entity.PartnerType.BOTH.name().equals(accountType);
             case BUYING:
-                return "VENDOR".equals(accountType) || "BOTH".equals(accountType);
+                return com.xcess.ocs.entity.PartnerType.VENDOR.name().equals(accountType)
+                        || com.xcess.ocs.entity.PartnerType.BOTH.name().equals(accountType);
             default:
                 return false;
         }

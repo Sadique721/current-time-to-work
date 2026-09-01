@@ -60,10 +60,10 @@ public class RatedSummaryService {
             Map<String, Object> params = new HashMap<>();
             params.put("startTime", startTime);
             params.put("endTime", endTime);
-            params.put("ratingStatus", "RATED");
+            params.put("ratingStatus", com.xcess.ocs.entity.RatingStatus.RATED.name());
             params.put("isDeleted", false);
             params.put("isSummarized", false);
-            params.put("lineOfBusiness", "INTERCONNECT");
+            params.put("lineOfBusiness", com.xcess.ocs.entity.LineOfBusiness.INTERCONNECT.name());
 
             // Generate OUTGOING summaries then mark outgoing CDRs as summarized
             generateOutgoingSummaries(params);

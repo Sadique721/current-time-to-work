@@ -88,4 +88,42 @@ public class TapOutScheduler {
         log.info("TAP OUT scheduler completed — success: {}, failed: {}, total: {}",
                 success, failed, roamingPartners.size());
     }
+
+    /**
+     * On-demand / manual TAP OUT generation for a specific target date (e.g. historical testing).
+     *
+     * @param targetDate the specific date to generate TAP OUT files for
+     * @return count of successfully processed partners
+     */
+    public int generateTapOutFilesForDate(LocalDate targetDate) {
+        LocalDate processDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
+        LocalDateTime startTime = processDate.atStartOfDay();
+        LocalDateTime endTime = processDate.atTime(23, 59, 59);
+
+        log.info("Manual TAP OUT generation started for date: {} (window: {} to {})", processDate, startTime, endTime);
+
+        List<Partner> roamingPartners = partnerRepository.findRoamingPartnersWithFullProfile().stream()
+                .filter(p -> !p.getTadigCode().isBlank()
+                        && p.getTapProfileGroup() != null)
+                .collect(Collectors.toList());
+
+        if (roamingPartners.isEmpty()) {
+            log.info("TAP OUT: no eligible ROAMING partners found");
+            return 0;
+        }
+
+        int success = 0;
+        for (Partner partner : roamingPartners) {
+            try {
+                tapOutFileGenerationService.generateForPartner(partner, startTime, endTime);
+                success++;
+            } catch (Exception e) {
+                log.error("TAP OUT generation failed for partner={}: {}",
+                        partner.getPartnerCode(), e.getMessage(), e);
+            }
+        }
+
+        log.info("Manual TAP OUT completed for date: {} — success: {}/{}", processDate, success, roamingPartners.size());
+        return success;
+    }
 }

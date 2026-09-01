@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ReRateRequestRepository extends JpaRepository<ReRateRequest, Long> {
 
-    @Query("SELECT r FROM ReRateRequest r WHERE r.status = 'PENDING' OR r.status = 'NEW' AND r.isDelete = false AND r.isActive = true ORDER BY r.requestedAt ASC")
+    @Query("SELECT r FROM ReRateRequest r WHERE (r.status = 'PENDING' OR r.status = 'NEW') AND r.isDelete = false AND r.isActive = true ORDER BY r.requestedAt ASC")
     List<ReRateRequest> findPendingRequests();
 
     Optional<ReRateRequest> findByRequestIdAndStatus(String requestId, String status);

@@ -78,7 +78,7 @@ public class RoamingTapOutInvoiceService {
         // Load TAP OUT file records for this partner in the billing cycle
         LocalDateTime from = cycleStart.atStartOfDay();
         LocalDateTime to = cycleEnd.atTime(23, 59, 59);
-        LocalDateTime tapFileTo=cycleEnd.plusDays(1).atTime(2, 0);
+        LocalDateTime tapFileTo = cycleEnd.plusDays(1).atTime(23, 59, 59);
         List<TapFileRecord> tapFiles = tapFileRecordRepository
                 .findTapOutByPartnerAndDateRange(partner.getPartnerId(), from, tapFileTo);
 

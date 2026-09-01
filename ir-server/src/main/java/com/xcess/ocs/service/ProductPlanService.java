@@ -322,10 +322,10 @@ public class ProductPlanService {
         log.debug("Fetching product plans for partner type: {}", partnerType);
 
         List<ProductPlan> productPlans;
-        if ("CUSTOMER".equalsIgnoreCase(partnerType)) {
+        if (com.xcess.ocs.entity.PartnerType.CUSTOMER.name().equalsIgnoreCase(partnerType)) {
             productPlans = productPlanRepository.findByPackageTypeAndIsDeletedFalse(ProductPlan.PackageType.SELLING);
             log.debug("Fetched {} SELLING product plans for CUSTOMER", productPlans.size());
-        } else if ("VENDOR".equalsIgnoreCase(partnerType)) {
+        } else if (com.xcess.ocs.entity.PartnerType.VENDOR.name().equalsIgnoreCase(partnerType)) {
             productPlans = productPlanRepository.findByPackageTypeAndIsDeletedFalse(ProductPlan.PackageType.BUYING);
             log.debug("Fetched {} BUYING product plans for VENDOR", productPlans.size());
         } else {

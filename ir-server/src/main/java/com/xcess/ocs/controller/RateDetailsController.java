@@ -1,5 +1,6 @@
 package com.xcess.ocs.controller;
 
+import com.xcess.ocs.constants.CsvConstants;
 import com.xcess.ocs.constants.ResponseConstants;
 import com.xcess.ocs.dto.*;
 import com.xcess.ocs.service.RateDetailsService;
@@ -50,8 +51,8 @@ public class RateDetailsController {
             @RequestBody List<RateDetailDTO> rateDetailDTOs) {
         log.info("Received create request with type '{}'", type);
 
-        if (!type.equalsIgnoreCase("replace")) {
-            return ResponseEntity.badRequest().body("Invalid operation type. Only 'replace' is supported for now.");
+        if (!CsvConstants.OP_REPLACE.equalsIgnoreCase(type)) {
+            return ResponseEntity.badRequest().body("Invalid operation type. Only '" + CsvConstants.OP_REPLACE + "' is supported for now.");
         }
         log.info("Creating new rate details for rate package ID: {}", ratePackageId);
 
@@ -184,14 +185,17 @@ public class RateDetailsController {
 @GetMapping("/template/csv/{ratePackageType}")
 public ResponseEntity<?> downloadCsvTemplate(@PathVariable("ratePackageType") String ratePackageType) throws IOException {
     String filename;
-    if (ratePackageType.equalsIgnoreCase("DESTINATION_BASED")) {
-        filename = "destination_based_template.csv";
-    } else if (ratePackageType.equalsIgnoreCase("SOURCE_DESTINATION_BASED")) {
-        filename = "source_destination_based_template.csv";
-    } else if (ratePackageType.equalsIgnoreCase("ZONE_DESTINATION_BASED")) {
-        filename = "zone_destination_based_template.csv";
+    if (CsvConstants.TYPE_DESTINATION_BASED.equalsIgnoreCase(ratePackageType)) {
+        filename = CsvConstants.FILE_DESTINATION_BASED_TEMPLATE;
+    } else if (CsvConstants.TYPE_SOURCE_DESTINATION_BASED.equalsIgnoreCase(ratePackageType)) {
+        filename = CsvConstants.FILE_SOURCE_DESTINATION_BASED_TEMPLATE;
+    } else if (CsvConstants.TYPE_ZONE_DESTINATION_BASED.equalsIgnoreCase(ratePackageType)) {
+        filename = CsvConstants.FILE_ZONE_DESTINATION_BASED_TEMPLATE;
     } else {
-        return ResponseEntity.badRequest().body("Invalid ratePackageType. Allowed: DESTINATION_BASED, SOURCE_DESTINATION_BASED, or ZONE_DESTINATION_BASED.");
+        return ResponseEntity.badRequest().body("Invalid ratePackageType. Allowed: "
+                + CsvConstants.TYPE_DESTINATION_BASED + ", "
+                + CsvConstants.TYPE_SOURCE_DESTINATION_BASED + ", or "
+                + CsvConstants.TYPE_ZONE_DESTINATION_BASED + ".");
     }
     ClassPathResource resource = new ClassPathResource("templates/" + filename);
     byte[] fileBytes = StreamUtils.copyToByteArray(resource.getInputStream());
@@ -202,9 +206,9 @@ public ResponseEntity<?> downloadCsvTemplate(@PathVariable("ratePackageType") St
 }
 
     private static final java.util.Map<String, String[]> EXCEL_HEADERS = java.util.Map.of(
-            "DESTINATION_BASED", new String[]{"destinationPrefix", "destinationPrefixName", "rate", "startTime", "endTime"},
-            "SOURCE_DESTINATION_BASED", new String[]{"destinationPrefix", "destinationPrefixName", "rate", "startTime", "endTime", "sourcePrefix", "sourcePrefixName"},
-            "ZONE_DESTINATION_BASED", new String[]{"zoneName", "rate", "startTime", "endTime"}
+            CsvConstants.TYPE_DESTINATION_BASED, new String[]{CsvConstants.HEADER_DESTINATION_PREFIX, CsvConstants.HEADER_DESTINATION_PREFIX_NAME, CsvConstants.HEADER_RATE, CsvConstants.HEADER_START_TIME, CsvConstants.HEADER_END_TIME},
+            CsvConstants.TYPE_SOURCE_DESTINATION_BASED, new String[]{CsvConstants.HEADER_DESTINATION_PREFIX, CsvConstants.HEADER_DESTINATION_PREFIX_NAME, CsvConstants.HEADER_RATE, CsvConstants.HEADER_START_TIME, CsvConstants.HEADER_END_TIME, CsvConstants.HEADER_SOURCE_PREFIX, CsvConstants.HEADER_SOURCE_PREFIX_NAME},
+            CsvConstants.TYPE_ZONE_DESTINATION_BASED, new String[]{CsvConstants.HEADER_ZONE_NAME, CsvConstants.HEADER_RATE, CsvConstants.HEADER_START_TIME, CsvConstants.HEADER_END_TIME}
     );
 
     private static final java.util.Map<String, Object[][]> EXCEL_SAMPLE_DATA = java.util.Map.of(

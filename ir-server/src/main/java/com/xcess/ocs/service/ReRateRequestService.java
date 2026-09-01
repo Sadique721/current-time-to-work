@@ -31,7 +31,7 @@ public class ReRateRequestService {
     private final VoiceRatedCdrRepository voiceRatedCdrRepository;
     private final SmsRatedCdrRepository smsRatedCdrRepository;
     private final UsageRatedCdrRepository usageRatedCdrRepository;
-    String reRateRequest = "ReRateRequest";
+    private final String reRateRequest = com.xcess.ocs.constants.enums.CdrQueryRequestType.RERATE_REQUEST.label();
 
     @Transactional
     public void editReRateStatus(String requestId, String status) {
@@ -61,7 +61,7 @@ public class ReRateRequestService {
         entity.setVoiceQueryConfig(resolveQueryConfig(dto.getVoiceQueryConfig(), reRateRequest));
         entity.setSmsQueryConfig(resolveQueryConfig(dto.getSmsQueryConfig(), reRateRequest));
         entity.setUsageQueryConfig(resolveQueryConfig(dto.getUsageQueryConfig(), reRateRequest));
-        entity.setStatus("NEW");
+        entity.setStatus(RequestStatus.NEW.name());
         entity.setEnable(dto.getEnable() != null ? dto.getEnable() : true);
         entity.setRemark(dto.getRemark());
         entity.setStartDate(dto.getStartDate());

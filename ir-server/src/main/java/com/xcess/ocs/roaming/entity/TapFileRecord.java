@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -16,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "tap_file_records")
-@EntityListeners(AuditingEntityListener.class)
 public class TapFileRecord {
 
     @Id
@@ -69,7 +66,6 @@ public class TapFileRecord {
     @Column(name = "error_reason", columnDefinition = "TEXT")
     private String errorReason;
 
-    @CreatedDate
-    @Column(name = "processed_at", updatable = false)
+    @Column(name = "processed_at")
     private LocalDateTime processedAt;
 }

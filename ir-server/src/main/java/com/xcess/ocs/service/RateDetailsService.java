@@ -1257,32 +1257,47 @@ public class RateDetailsService {
             if (header.length < 4) {
                 throw new IllegalArgumentException("Invalid CSV header format for ZONE_DESTINATION_BASED rates.");
             }
-            if (!header[0].equalsIgnoreCase("zoneName") ||
-                    !header[1].equalsIgnoreCase("rate") ||
-                    !header[2].equalsIgnoreCase("startTime") ||
-                    !header[3].equalsIgnoreCase("endTime")) {
+            if (!header[0].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_ZONE_NAME) ||
+                    !header[1].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_RATE) ||
+                    !header[2].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_START_TIME) ||
+                    !header[3].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_END_TIME)) {
                 throw new IllegalArgumentException(
-                        "Invalid CSV header format for ZONE_DESTINATION_BASED rates. Expected: zoneName,rate,startTime,endTime");
+                        "Invalid CSV header format for ZONE_DESTINATION_BASED rates. Expected: "
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_ZONE_NAME + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_RATE + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_START_TIME + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_END_TIME);
             }
         } else {
             if (header.length < 5) {
                 throw new IllegalArgumentException("Invalid CSV header format");
             }
-            if (!header[0].equalsIgnoreCase("destinationPrefix") ||
-                    !header[1].equalsIgnoreCase("destinationPrefixName") ||
-                    !header[2].equalsIgnoreCase("rate") ||
-                    !header[3].equalsIgnoreCase("startTime") ||
-                    !header[4].equalsIgnoreCase("endTime")) {
+            if (!header[0].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX) ||
+                    !header[1].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX_NAME) ||
+                    !header[2].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_RATE) ||
+                    !header[3].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_START_TIME) ||
+                    !header[4].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_END_TIME)) {
                 throw new IllegalArgumentException(
-                        "Invalid CSV header format. Expected: destinationPrefix,destinationPrefixName,rate,startTime,endTime");
+                        "Invalid CSV header format. Expected: "
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX_NAME + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_RATE + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_START_TIME + ","
+                                + com.xcess.ocs.constants.CsvConstants.HEADER_END_TIME);
             }
 
             if (header.length > 5) {
-                if (!header[5].equalsIgnoreCase("sourcePrefix") ||
-                        !header[6].equalsIgnoreCase("sourcePrefixName")) {
+                if (!header[5].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_SOURCE_PREFIX) ||
+                        !header[6].equalsIgnoreCase(com.xcess.ocs.constants.CsvConstants.HEADER_SOURCE_PREFIX_NAME)) {
                     throw new IllegalArgumentException(
-                            "Invalid CSV header format for source-destination based rates. " +
-                                    "Expected: destinationPrefix,destinationPrefixName,rate,startTime,endTime,sourcePrefix,sourcePrefixName");
+                            "Invalid CSV header format for source-destination based rates. Expected: "
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_DESTINATION_PREFIX_NAME + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_RATE + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_START_TIME + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_END_TIME + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_SOURCE_PREFIX + ","
+                                    + com.xcess.ocs.constants.CsvConstants.HEADER_SOURCE_PREFIX_NAME);
                 }
             }
         }

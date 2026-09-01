@@ -484,25 +484,7 @@ public class CdrRatingIntegrationService {
     }
 
     private BigDecimal normalizeDataVolume(BigDecimal volume, String fromUnit, String toUnit) {
-        if (fromUnit == null || toUnit == null || fromUnit.equalsIgnoreCase(toUnit)) {
-            return volume;
-        }
-
-        // Convert to BYTES first
-        BigDecimal inBytes = volume;
-        switch (fromUnit.toUpperCase()) {
-            case "KB" -> inBytes = volume.multiply(BigDecimal.valueOf(1024));
-            case "MB" -> inBytes = volume.multiply(BigDecimal.valueOf(1024 * 1024));
-            case "GB" -> inBytes = volume.multiply(BigDecimal.valueOf(1024 * 1024 * 1024));
-        }
-
-        // Convert from BYTES to target unit
-        switch (toUnit.toUpperCase()) {
-            case "KB" -> { return inBytes.divide(BigDecimal.valueOf(1024), 4, RoundingMode.CEILING); }
-            case "MB" -> { return inBytes.divide(BigDecimal.valueOf(1024 * 1024), 4, RoundingMode.CEILING); }
-            case "GB" -> { return inBytes.divide(BigDecimal.valueOf(1024 * 1024 * 1024), 4, RoundingMode.CEILING); }
-            default -> { return inBytes; } // BYTE or unknown
-        }
+        return com.xcess.ocs.constants.enums.DataUnit.normalize(volume, fromUnit, toUnit);
     }
 
     private BigDecimal calculateTotalCost(BigDecimal durationSeconds, RateDetails rateDetails, RatePackage ratePackage) {

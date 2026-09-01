@@ -210,12 +210,13 @@ public class AccountService {
 
     private void validateAccountType(String accountType, String partnerType) {
         log.debug("Validating account type: {} against partner type: {}", accountType, partnerType);
-        if (!accountType.equals("CUSTOMER") && !accountType.equals("VENDOR")) {
+        if (!com.xcess.ocs.entity.PartnerType.CUSTOMER.name().equals(accountType)
+                && !com.xcess.ocs.entity.PartnerType.VENDOR.name().equals(accountType)) {
             log.warn("Invalid account type: {}", accountType);
             throw new IllegalArgumentException("Account type must be either CUSTOMER or VENDOR");
         }
 
-        if (!partnerType.equals("BOTH") && !partnerType.equals(accountType)) {
+        if (!com.xcess.ocs.entity.PartnerType.BOTH.name().equals(partnerType) && !partnerType.equals(accountType)) {
             log.warn("Incompatible account type: {} with partner type: {}", accountType, partnerType);
             throw new IllegalArgumentException(
                     "Account type '" + accountType + "' is not compatible with partner type '" + partnerType + "'");

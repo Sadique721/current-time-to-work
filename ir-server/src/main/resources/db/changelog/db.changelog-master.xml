@@ -80,4 +80,5 @@
     <include file="db/changelog/db.changelog-zone-prefix-input.xml" />
     <include file="db/changelog/db.changelog-error-and-rerate.xml" />
     <include file="db/changelog/db.changelog-cdr-query-config.xml" />
+    <include file="db/changelog/db.changelog-billing-type.xml" />
 </databaseChangeLog>

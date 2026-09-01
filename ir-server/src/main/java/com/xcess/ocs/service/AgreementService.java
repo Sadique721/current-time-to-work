@@ -59,6 +59,11 @@ public class AgreementService {
         agreement.setNextBillingCycleStartDate(dto.getBillingCycleStartDate());
         agreement.setBillingCyclePeriod(dto.getBillingCyclePeriod());
 
+        BillingType effectiveType = dto.getBillingType() != null ? dto.getBillingType() : BillingType.DAYS;
+        agreement.setBillingType(effectiveType);
+        agreement.setWeeklyDay(dto.getWeeklyDay());
+        validateWeeklyDay(effectiveType, dto.getWeeklyDay(), dto.getBillingCycleStartDate());
+
         agreement.setIsIncomingSettlement(dto.getIsIncomingSettlement());
         agreement.setIsOutgoingSettlement(dto.getIsOutgoingSettlement());
         agreement.setIsNetSettlement(dto.getIsNetSettlement());
@@ -137,6 +142,11 @@ public class AgreementService {
         agreement.setBillingCycleStartDate(dto.getBillingCycleStartDate());
         agreement.setNextBillingCycleStartDate(dto.getBillingCycleStartDate());
         agreement.setBillingCyclePeriod(dto.getBillingCyclePeriod());
+
+        BillingType effectiveType = dto.getBillingType() != null ? dto.getBillingType() : BillingType.DAYS;
+        agreement.setBillingType(effectiveType);
+        agreement.setWeeklyDay(dto.getWeeklyDay());
+        validateWeeklyDay(effectiveType, dto.getWeeklyDay(), dto.getBillingCycleStartDate());
 
         agreement.setIsIncomingSettlement(dto.getIsIncomingSettlement());
         agreement.setIsOutgoingSettlement(dto.getIsOutgoingSettlement());
@@ -315,6 +325,8 @@ public class AgreementService {
         dto.setAgreementCode(agreement.getAgreementCode());
         dto.setBillingCycleStartDate(agreement.getBillingCycleStartDate());
         dto.setBillingCyclePeriod(agreement.getBillingCyclePeriod());
+        dto.setBillingType(agreement.getBillingType());
+        dto.setWeeklyDay(agreement.getWeeklyDay());
 
         dto.setIsIncomingSettlement(agreement.getIsIncomingSettlement());
         dto.setIsOutgoingSettlement(agreement.getIsOutgoingSettlement());
@@ -406,5 +418,15 @@ public class AgreementService {
                 .map(this::toDTO)
                 .toList();
         return new PageResponseDTO<>(pageDetails, content);
+    }
+
+    private void validateWeeklyDay(BillingType type, WeeklyDay weeklyDay, java.time.LocalDate startDate) {
+        if (type == BillingType.WEEKLY && weeklyDay != null && startDate != null) {
+            if (!startDate.getDayOfWeek().equals(weeklyDay.toDayOfWeek())) {
+                throw new IllegalArgumentException(
+                        "billingCycleStartDate (" + startDate + ") falls on " + startDate.getDayOfWeek()
+                                + " but weeklyDay is configured as " + weeklyDay);
+            }
+        }
     }
 }

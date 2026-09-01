@@ -73,6 +73,36 @@ public class RoamingSummaryScheduler {
         }
     }
 
+    /**
+     * On-demand execution of Roaming Summary generation for a specific target date.
+     *
+     * @param targetDate the specific date to generate summaries for
+     * @return number of summaries created
+     */
+    public int runSummaryForDate(LocalDate targetDate) {
+        LocalDate processDate = (targetDate != null) ? targetDate : LocalDate.now().minusDays(1);
+        LocalDateTime start = processDate.atStartOfDay();
+        LocalDateTime end   = processDate.atTime(23, 59, 59);
+
+        log.info("Manual RoamingSummary execution started for date: {} (window: {} to {})", processDate, start, end);
+        long startMs = System.currentTimeMillis();
+
+        try {
+            statusService.updateToRunning();
+            int summariesCreated = generationService.generateSummaries(start, end);
+            long elapsed = System.currentTimeMillis() - startMs;
+            statusService.updateToSuccess(summariesCreated);
+            log.info("Manual RoamingSummary completed for date: {} — summaries={}, time={}ms",
+                    processDate, summariesCreated, elapsed);
+            return summariesCreated;
+        } catch (Exception e) {
+            long elapsed = System.currentTimeMillis() - startMs;
+            log.error("Manual RoamingSummary failed for date: {} after {}ms — {}", processDate, elapsed, e.getMessage(), e);
+            statusService.updateToFailed(e.getMessage());
+            throw e;
+        }
+    }
+
     private boolean waitForSchedulerLock() {
         int maxAttempts = (int) (WAIT_TIMEOUT_MINUTES * 60 / WAIT_INTERVAL_SECONDS);
         int attempt     = 0;

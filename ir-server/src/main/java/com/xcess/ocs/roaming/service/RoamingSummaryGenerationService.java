@@ -211,7 +211,20 @@ public class RoamingSummaryGenerationService {
                                             List<SmsRatedCdr>    sms,
                                             List<UsageRatedCdr>  usage) {
         TapOutRatedSummary s = new TapOutRatedSummary();
-        s.setSummaryDate(LocalDate.now());
+        LocalDate summaryDate = null;
+        if (voice != null && !voice.isEmpty() && voice.get(0).getStartTime() != null) {
+            summaryDate = voice.get(0).getStartTime().toLocalDate();
+        } else if (sms != null && !sms.isEmpty() && sms.get(0).getStartTime() != null) {
+            summaryDate = sms.get(0).getStartTime().toLocalDate();
+        } else if (usage != null && !usage.isEmpty() && usage.get(0).getStartTime() != null) {
+            summaryDate = usage.get(0).getStartTime().toLocalDate();
+        }
+        if (summaryDate == null) {
+            summaryDate = (tapFile != null && tapFile.getProcessedAt() != null)
+                    ? tapFile.getProcessedAt().toLocalDate()
+                    : LocalDate.now();
+        }
+        s.setSummaryDate(summaryDate);
         s.setTapFileRecord(tapFile);
         s.setPartner(tapFile.getPartner());
 
@@ -227,18 +240,7 @@ public class RoamingSummaryGenerationService {
                 .sum() : 0L);
 
         s.setTotalUsageBytes(usage != null ? usage.stream()
-                .map(c -> {
-                    BigDecimal val = c.getTotalUsage() != null ? c.getTotalUsage() : BigDecimal.ZERO;
-                    String unit = c.getMeasurementUnit() != null ? c.getMeasurementUnit().toUpperCase() : "BYTE";
-                    if (unit.equals("KB") || unit.equals("KILOBYTE") || unit.equals("KILOBYTES")) {
-                        return val.multiply(BigDecimal.valueOf(1024));
-                    } else if (unit.equals("MB") || unit.equals("MEGABYTE") || unit.equals("MEGABYTES")) {
-                        return val.multiply(BigDecimal.valueOf(1048576));
-                    } else if (unit.equals("GB") || unit.equals("GIGABYTE") || unit.equals("GIGABYTES")) {
-                        return val.multiply(BigDecimal.valueOf(1073741824));
-                    }
-                    return val;
-                })
+                .map(c -> com.xcess.ocs.constants.enums.DataUnit.toBytes(c.getTotalUsage(), c.getMeasurementUnit()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add) : BigDecimal.ZERO);
 
         BigDecimal voiceCharge = voice != null ? voice.stream()

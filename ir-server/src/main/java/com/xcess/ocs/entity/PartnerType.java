@@ -15,5 +15,17 @@ public enum PartnerType {
     CARRIER,
 
     /** Partner who acts as both vendor and carrier */
-    BOTH
+    BOTH;
+
+    public static PartnerType fromString(String type) {
+        if (type == null || type.isBlank()) {
+            return null;
+        }
+        for (PartnerType pt : values()) {
+            if (pt.name().equalsIgnoreCase(type.trim())) {
+                return pt;
+            }
+        }
+        return null;
+    }
 }

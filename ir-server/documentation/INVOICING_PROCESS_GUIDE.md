@@ -67,7 +67,9 @@ Before an invoice can be generated, an `Agreement` must exist.
 | `lineOfBusiness` | `INTERCONNECT` or `ROAMING`. Dictates which generation service is used. |
 | `billingCycleStartDate` | The anchor date for the billing cycle. |
 | `nextBillingCycleStartDate` | The date the *current* active cycle starts. |
-| `billingCyclePeriod` | The length of the cycle in days (e.g., 30). |
+| `billingType` | `DAYS`, `WEEKLY`, `FORTNIGHTLY`, or `MONTHLY` (defaults to `DAYS`). |
+| `billingCyclePeriod` | The length of the cycle in days (required and only applicable for `DAYS` billing type). |
+| `weeklyDay` | The day of week for `WEEKLY` billing type (e.g., `MON`, `TUE`). `billingCycleStartDate` must fall on this day. |
 | `isIncomingSettlement` | Generates an INCOMING invoice (Customer pays Host). |
 | `isOutgoingSettlement` | Generates an OUTGOING invoice (Host pays Vendor). |
 | `isNetSettlement` | Generates a NET invoice (Calculates the difference). |
@@ -84,12 +86,16 @@ The `BillingCycleScheduler` runs daily at midnight (`@Scheduled(cron = "${billin
 ### Execution Flow
 1. **Concurrency Lock:** It checks `BillingSchedulerStatusService`. If the previous day's run is still stuck in `RUNNING`, it waits up to 60 minutes. If it still doesn't finish, the current run is skipped to prevent duplicate concurrent generation.
 2. **Fetch Agreements:** Iterates through all active agreements.
-3. **Date Validation:** 
+3. **Date Calculation & Validation:** 
    - `cycleStart` = `nextBillingCycleStartDate` (or falls back to `billingCycleStartDate`).
-   - `cycleEnd` = `cycleStart + billingCyclePeriod - 1`.
+   - `cycleEnd` is calculated dynamically via `BillingCycleCalculatorService` based on the agreement's `billingType`:
+     - **DAYS:** `cycleStart.plusDays(billingCyclePeriod - 1)`
+     - **WEEKLY:** `cycleStart.plusDays(6)`
+     - **FORTNIGHTLY:** Calculated using the anchor day from `billingCycleStartDate.getDayOfMonth()`. Leg 1 is exactly 15 days, and Leg 2 spans until the next occurrence of the anchor day.
+     - **MONTHLY:** `cycleStart.plusMonths(1).minusDays(1)` (exactly one month cycle from the start date, with leap/calendar-end clamping).
    - **Condition:** If `cycleEnd` is **before** `today`, the cycle is complete, and generation proceeds.
 4. **Trigger Generation:** Depending on the `LineOfBusiness` and enabled settlement types, it triggers the respective service.
-5. **Cycle Advancement:** **ONLY IF** generation succeeds for all configured types, `nextBillingCycleStartDate` is advanced. If any fail, it throws an exception, saves a record via `FailedInvoiceService`, and leaves the date alone for a retry tomorrow.
+5. **Cycle Advancement:** **ONLY IF** generation succeeds for all configured types, `nextBillingCycleStartDate` is advanced to `cycleEnd.plusDays(1)` (via `BillingCycleResult.nextCycleStart()`). If any fail, it throws an exception, saves a record via `FailedInvoiceService`, and leaves the date alone for a retry tomorrow.
 
 ---
 
@@ -154,16 +160,17 @@ The system relies heavily on the `InvoiceXmlDTO` → XML format.
 
 ## 9. Scenario Playbook — Positive & Negative Cases
 
-### ✅ Scenario 1: Standard NET Settlement Success (Positive)
-**Context:** A 30-day Interconnect Agreement ends on Jan 31.
+### ✅ Scenario 1: Standard MONTHLY Settlement Success (Positive)
+**Context:** A MONTHLY Interconnect Agreement starts on Jan 15. The next billing cycle starts on Jan 15.
 **Flow:**
-1. Scheduler runs at midnight on Feb 1.
-2. Detects cycle is complete.
-3. Retrieves summaries. Incoming = $500, Outgoing = $300.
-4. Net = $200 (Payable by CUSTOMER).
-5. Taxes applied ($20). Total = $220.
-6. XML built -> PDF generated -> Saved to `/var/ocs/invoices/NET-202601-001.pdf`.
-7. Agreement's `nextBillingCycleStartDate` is advanced to Mar 2.
+1. Scheduler runs at midnight on Feb 15.
+2. The `BillingCycleCalculatorService` calculates `cycleEnd = Feb 14` (Jan 15 + 1 month - 1 day) and `nextCycleStart = Feb 15`.
+3. Detects the cycle is complete (since `cycleEnd` Feb 14 is before Feb 15).
+4. Retrieves summaries. Incoming = $500, Outgoing = $300.
+5. Net = $200 (Payable by CUSTOMER).
+6. Taxes applied ($20). Total = $220.
+7. XML built -> PDF generated -> Saved to `/var/ocs/invoices/NET-20260115-001.pdf`.
+8. Agreement's `nextBillingCycleStartDate` is advanced to Feb 15.
 **Result:** Clean generation, cycle advanced.
 
 ### ❌ Scenario 2: Previous Scheduler Run Stuck (Negative)
@@ -205,7 +212,7 @@ The system relies heavily on the `InvoiceXmlDTO` → XML format.
 
 If you are modifying or debugging the Invoicing module, verify the following:
 
-- [ ] **Check the Cycle Dates:** If an agreement isn't generating, check `nextBillingCycleStartDate`. `cycleStart + billingCyclePeriod - 1` must be strictly *before* `LocalDate.now()`.
+- [ ] **Check the Cycle Dates:** If an agreement isn't generating, check `nextBillingCycleStartDate` (or `billingCycleStartDate`). The `cycleEnd` date computed by `BillingCycleCalculatorService` (e.g. `cycleStart.plusDays(billingCyclePeriod - 1)` for `DAYS`, `cycleStart.plusDays(6)` for `WEEKLY`, `cycleStart.plusMonths(1).minusDays(1)` for `MONTHLY`, or fortnightly leg calculations) must be strictly *before* `LocalDate.now()`.
 - [ ] **Transaction Boundaries:** `processAgreement()` uses `@Transactional(REQUIRES_NEW)`. If one agreement fails, it rolls back its own data, but other agreements in the loop will continue to process successfully.
 - [ ] **XML Over Code Changes:** If the invoice layout/numbers look wrong on the PDF, check the `xml_content` in the database first. If the XML is right but the PDF is wrong, the issue is in the XSLT template, not the Java code.
 - [ ] **Check Failed Invoices Table:** Always query the `failed_invoice` table if business reports missing invoices. The exact error reason is logged there.

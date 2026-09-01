@@ -141,7 +141,7 @@ public class TapOutFileGenerationService {
         }
 
         TapFileRecord tapFileRecord = saveTapFileRecord(enrichedPartner, fileName, outPath, nextSequence,
-                successfulCdrs.size(), calculateTotalRawCharge(successfulCdrs));
+                successfulCdrs.size(), calculateTotalRawCharge(successfulCdrs), startTime != null ? startTime.plusHours(1) : LocalDateTime.now());
 
        tapSftpPushService.push(enrichedPartner, outPath, tapFileRecord);
 
@@ -417,7 +417,8 @@ public class TapOutFileGenerationService {
     // ─────────────────────────────────────────────────────────────────────────
 
     private TapFileRecord saveTapFileRecord(Partner partner, String fileName, Path filePath,
-                                            int sequenceNo, int recordCount, BigInteger totalCharge) {
+                                            int sequenceNo, int recordCount, BigInteger totalCharge,
+                                            LocalDateTime processedAt) {
         TapFileRecord record = new TapFileRecord();
         record.setFileName(fileName);
         record.setFileType(TapFileType.TAP_OUT);
@@ -432,6 +433,9 @@ public class TapOutFileGenerationService {
         record.setTapDecimalPlaces(BigInteger.valueOf(TAP_DECIMAL_PLACES));
         record.setLocalCurrency(partner.getBillingCurrency());
         record.setTapVersion(partner.getTapVersion());
+        if (processedAt != null) {
+            record.setProcessedAt(processedAt);
+        }
         return tapFileRecordRepository.save(record);
     }
 

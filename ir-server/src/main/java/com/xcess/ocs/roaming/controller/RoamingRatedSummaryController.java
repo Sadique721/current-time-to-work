@@ -54,13 +54,21 @@ public class RoamingRatedSummaryController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Trigger Roaming Summary Scheduler", description = "Manually triggers the daily roaming summary scheduler")
+    @Operation(summary = "Trigger Roaming Summary Scheduler", description = "Manually triggers the roaming summary scheduler. Accepts an optional target date (YYYY-MM-DD). If omitted, defaults to yesterday.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "HTTP Status OK - Scheduler triggered successfully")
     })
     @PostMapping("/trigger-summary-scheduler")
-    public ResponseEntity<String> triggerSummaryScheduler() {
-        roamingSummaryScheduler.runDailySummary();
-        return ResponseEntity.ok("Roaming summary scheduler triggered successfully");
+    public ResponseEntity<String> triggerSummaryScheduler(
+            @io.swagger.v3.oas.annotations.Parameter(description = "Target processing date in YYYY-MM-DD format (optional, defaults to yesterday)", example = "2026-07-20")
+            @RequestParam(name = "date", required = false)
+            @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+        if (date != null) {
+            int count = roamingSummaryScheduler.runSummaryForDate(date);
+            return ResponseEntity.ok("Roaming summary scheduler triggered successfully for date: " + date + " (created " + count + " summaries)");
+        } else {
+            roamingSummaryScheduler.runDailySummary();
+            return ResponseEntity.ok("Roaming summary scheduler triggered successfully");
+        }
     }
 }

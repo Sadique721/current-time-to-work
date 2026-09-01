@@ -9,6 +9,8 @@ import com.xcess.ocs.repository.AgreementRepository;
 import com.xcess.ocs.repository.InvoiceRepository;
 import com.xcess.ocs.roaming.entity.TapDirection;
 import com.xcess.ocs.roaming.service.RoamingTapOutInvoiceService;
+import com.xcess.ocs.service.BillingCycleCalculatorService;
+import com.xcess.ocs.service.BillingCycleResult;
 import com.xcess.ocs.service.BillingSchedulerAuditLogService;
 import com.xcess.ocs.service.BillingSchedulerStatusService;
 import com.xcess.ocs.service.FailedInvoiceService;
@@ -57,6 +59,9 @@ public class BillingCycleScheduler {
     @Autowired
     private RoamingTapOutInvoiceService roamingTapOutInvoiceService;
 
+    @Autowired
+    private BillingCycleCalculatorService billingCycleCalculatorService;
+
     private volatile boolean interrupted = false;
 
     @Scheduled(cron = "${billingCycleCronScheduler}")
@@ -102,10 +107,7 @@ public class BillingCycleScheduler {
                             agreement.getNextBillingCycleStartDate() != null
                                     ? agreement.getNextBillingCycleStartDate()
                                     : agreement.getBillingCycleStartDate(),
-                            agreement.getNextBillingCycleStartDate() != null
-                                    ? agreement.getNextBillingCycleStartDate().plusDays(
-                                            agreement.getBillingCyclePeriod() != null ? agreement.getBillingCyclePeriod() : 1).minusDays(1)
-                                    : LocalDate.now(),
+                            estimateCycleEnd(agreement),
                             "Error: " + e.getMessage());
                 }
             }
@@ -138,6 +140,18 @@ public class BillingCycleScheduler {
                         (long) totalProcessed, (long) totalFailed, executionTime,
                         "Scheduler execution failed: " + e.getMessage());
             }
+        }
+    }
+
+    private LocalDate estimateCycleEnd(Agreement agreement) {
+        try {
+            LocalDate start = agreement.getNextBillingCycleStartDate() != null
+                    ? agreement.getNextBillingCycleStartDate()
+                    : agreement.getBillingCycleStartDate();
+            if (start == null) return LocalDate.now();
+            return billingCycleCalculatorService.calculate(start, agreement).cycleEnd();
+        } catch (Exception e) {
+            return LocalDate.now();
         }
     }
 
@@ -181,8 +195,9 @@ public class BillingCycleScheduler {
         String agreementCode = managedAgreement.getAgreementCode();
         log.debug("Processing agreement: {}", agreementCode);
 
-        if (managedAgreement.getBillingCyclePeriod() == null) {
-            log.warn("SKIP: Agreement {} has null billingCyclePeriod", agreementCode);
+        if (managedAgreement.getBillingType() == com.xcess.ocs.entity.BillingType.DAYS
+                && managedAgreement.getBillingCyclePeriod() == null) {
+            log.warn("SKIP: Agreement {} is DAYS billing type but has null billingCyclePeriod", agreementCode);
             return false;
         }
 
@@ -208,7 +223,8 @@ public class BillingCycleScheduler {
             return false;
         }
 
-        LocalDate cycleEnd = cycleStart.plusDays(managedAgreement.getBillingCyclePeriod() - 1);
+        com.xcess.ocs.service.BillingCycleResult cycleResult = billingCycleCalculatorService.calculate(cycleStart, managedAgreement);
+        LocalDate cycleEnd = cycleResult.cycleEnd();
 
         if (!cycleEnd.isBefore(today)) {
             log.debug("SKIP: Agreement {} cycle not yet complete (ends: {})", agreementCode, cycleEnd);
@@ -277,9 +293,8 @@ public class BillingCycleScheduler {
             }
         }
 
-        if(success)
-        {
-            managedAgreement.setNextBillingCycleStartDate(cycleStart.plusDays(managedAgreement.getBillingCyclePeriod()));
+        if (success) {
+            managedAgreement.setNextBillingCycleStartDate(cycleResult.nextCycleStart());
             agreementRepository.save(managedAgreement);
         }
 

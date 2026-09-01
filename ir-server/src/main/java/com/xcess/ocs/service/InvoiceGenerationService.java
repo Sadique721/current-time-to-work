@@ -90,7 +90,7 @@ public class InvoiceGenerationService {
         List<RatedSummary> allSummaries = new ArrayList<>();
 
         boolean isRoaming = agreement.getLineOfBusiness() != null
-                && "ROAMING".equals(agreement.getLineOfBusiness().name());
+                && com.xcess.ocs.entity.LineOfBusiness.ROAMING == agreement.getLineOfBusiness();
 
         for (AccountAgreement aa : accountAgreements) {
             String accountCode = aa.getAccount().getAccountCode();
@@ -367,7 +367,7 @@ public class InvoiceGenerationService {
         agreementDto.setBillingCycleEnd(String.valueOf(billingEnd));
         agreementDto.setSettlementType(settlementType);
         
-        boolean isRoaming = agreement.getLineOfBusiness() != null && "ROAMING".equals(agreement.getLineOfBusiness().name());
+        boolean isRoaming = agreement.getLineOfBusiness() != null && com.xcess.ocs.entity.LineOfBusiness.ROAMING == agreement.getLineOfBusiness();
         agreementDto.setDescription(isRoaming ? AppConstants.INVOICE_DESC_ROAMING_TAP_OUT : AppConstants.INVOICE_DESC_INTERCONNECT);
         dto.setAgreement(agreementDto);
 
@@ -387,14 +387,14 @@ public class InvoiceGenerationService {
         switch (settlementTypeEnum) {
             case INCOMING:
                 for (String accountCode : incomingTotals.keySet()) {
-                    if ("CUSTOMER".equals(accountTypes.get(accountCode))) {
+                    if (com.xcess.ocs.entity.PartnerType.CUSTOMER.name().equals(accountTypes.get(accountCode))) {
                         accountTotals.put(accountCode, incomingTotals.get(accountCode));
                     }
                 }
                 break;
             case OUTGOING:
                 for (String accountCode : outgoingTotals.keySet()) {
-                    if ("VENDOR".equals(accountTypes.get(accountCode))) {
+                    if (com.xcess.ocs.entity.PartnerType.VENDOR.name().equals(accountTypes.get(accountCode))) {
                         accountTotals.put(accountCode, outgoingTotals.get(accountCode));
                     }
                 }
@@ -428,7 +428,7 @@ public class InvoiceGenerationService {
                     if (NetPayableBy.CUSTOMER.label().equals(accountType) && SettlementType.INCOMING.label().equals(direction)) include = true;
                     break;
                 case OUTGOING:
-                    if ("VENDOR".equals(accountType) && SettlementType.OUTGOING.label().equals(direction)) include = true;
+                    if (com.xcess.ocs.entity.PartnerType.VENDOR.name().equals(accountType) && SettlementType.OUTGOING.label().equals(direction)) include = true;
                     break;
                 case NET:
                 default:

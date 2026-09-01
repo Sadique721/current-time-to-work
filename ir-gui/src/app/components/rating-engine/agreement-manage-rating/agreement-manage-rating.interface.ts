@@ -16,7 +16,9 @@ export interface IAgreement {
   agreementId: number;
   agreementCode: string;
   billingCycleStartDate: string;
-  billingCyclePeriod: number;
+  billingCyclePeriod: number | null;
+  billingType: string;
+  weeklyDay: string | null;
   isIncomingSettlement: boolean;
   isOutgoingSettlement: boolean;
   isNetSettlement: boolean;

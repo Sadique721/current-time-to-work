@@ -9,6 +9,7 @@ This document preserves the workspace memory, path rules, and developer constrai
 * **Root Directory:** `d:\KTPL\current\IR` (Git remote points to GitHub repository `current-time-to-work`, branch `main`)
   * **GitHub Branch Rule:** The GitHub repository strictly uses **only `main` branch**. Never push or create other branches (e.g. `amin`) on GitHub. All GitHub syncs and pushes must always target `main`.
 * **Backend Repository:** `d:\KTPL\current\IR\ir-server` (Git remote points to Bitbucket repository `ir-server`, branch `amin`)
+  * **Bitbucket Branch Rule:** The Bitbucket backend repository strictly uses **only `amin` branch**. All Bitbucket syncs and pushes must always target `amin`.
   * **Default Port:** `8080`
   * **Local Context Path:** `/rating-engine/v1`
   * **Local Database:** MySQL Port `3306` (username: `root`, password: `0721`, database: `xcessocs`)

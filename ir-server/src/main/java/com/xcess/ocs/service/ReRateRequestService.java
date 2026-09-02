@@ -2,14 +2,22 @@ package com.xcess.ocs.service;
 
 import com.xcess.ocs.constants.enums.RequestStatus;
 import com.xcess.ocs.dto.CdrQueryConfigDTO;
+import com.xcess.ocs.dto.ErrorConfigCheckStatusDTO;
 import com.xcess.ocs.dto.ReRateRequestDTO;
 import com.xcess.ocs.entity.CdrQueryConfig;
-import com.xcess.ocs.entity.ReRateRequest;
+import com.xcess.ocs.entity.LineOfBusiness;
+import com.xcess.ocs.entity.RateableCdr;
 import com.xcess.ocs.entity.RatingStatus;
+import com.xcess.ocs.entity.ReRateRequest;
+import com.xcess.ocs.entity.ServiceType;
+import com.xcess.ocs.entity.SmsRatedCdr;
+import com.xcess.ocs.entity.UsageRatedCdr;
+import com.xcess.ocs.entity.VoiceRatedCdr;
 import com.xcess.ocs.repository.ReRateRequestRepository;
 import com.xcess.ocs.repository.SmsRatedCdrRepository;
 import com.xcess.ocs.repository.UsageRatedCdrRepository;
 import com.xcess.ocs.repository.VoiceRatedCdrRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +39,7 @@ public class ReRateRequestService {
     private final VoiceRatedCdrRepository voiceRatedCdrRepository;
     private final SmsRatedCdrRepository smsRatedCdrRepository;
     private final UsageRatedCdrRepository usageRatedCdrRepository;
+    private final EntityManager entityManager;
     private final String reRateRequest = com.xcess.ocs.constants.enums.CdrQueryRequestType.RERATE_REQUEST.label();
 
     @Transactional
@@ -136,39 +145,110 @@ public class ReRateRequestService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> fetchErrorConfigCheckResult(int page, int size) {
-        log.info("Fetching error config check result page...");
-        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size);
+        log.info("Fetching error config check result page: {} with size: {}", page, size);
 
-        Page<com.xcess.ocs.entity.VoiceRatedCdr> failedVoiceCdrs = voiceRatedCdrRepository
-                .findByIncomingOrOutgoingRatingStatus(RatingStatus.FAILED, pageable);
-        Page<com.xcess.ocs.entity.SmsRatedCdr> failedSmsCdrs = smsRatedCdrRepository
-                .findByIncomingOrOutgoingRatingStatus(RatingStatus.FAILED, pageable);
-        Page<com.xcess.ocs.entity.UsageRatedCdr> failedUsageCdrs = usageRatedCdrRepository
-                .findByIncomingOrOutgoingRatingStatus(RatingStatus.FAILED, pageable);
+        // 1. Total counts from each table for failed rating
+        long voiceCount = entityManager.createQuery(
+                "SELECT COUNT(v) FROM VoiceRatedCdr v WHERE v.incomingRatingStatus = :status OR v.outgoingRatingStatus = :status", Long.class)
+                .setParameter("status", RatingStatus.FAILED)
+                .getSingleResult();
 
-        List<com.xcess.ocs.entity.RateableCdr> combinedCdrs = new ArrayList<>();
-        combinedCdrs.addAll(failedVoiceCdrs.getContent());
-        combinedCdrs.addAll(failedSmsCdrs.getContent());
-        combinedCdrs.addAll(failedUsageCdrs.getContent());
+        long smsCount = entityManager.createQuery(
+                "SELECT COUNT(s) FROM SmsRatedCdr s WHERE s.incomingRatingStatus = :status OR s.outgoingRatingStatus = :status", Long.class)
+                .setParameter("status", RatingStatus.FAILED)
+                .getSingleResult();
 
-        long totalElements = failedVoiceCdrs.getTotalElements() + failedSmsCdrs.getTotalElements()
-                + failedUsageCdrs.getTotalElements();
+        long usageCount = entityManager.createQuery(
+                "SELECT COUNT(u) FROM UsageRatedCdr u WHERE u.incomingRatingStatus = :status OR u.outgoingRatingStatus = :status", Long.class)
+                .setParameter("status", RatingStatus.FAILED)
+                .getSingleResult();
 
-        List<com.xcess.ocs.dto.ErrorConfigCheckStatusDTO> dtoList = combinedCdrs.stream().limit(size).map(cdr -> {
-            com.xcess.ocs.dto.ErrorConfigCheckStatusDTO dto = new com.xcess.ocs.dto.ErrorConfigCheckStatusDTO();
-            Long id = cdr instanceof com.xcess.ocs.entity.VoiceRatedCdr
-                    ? ((com.xcess.ocs.entity.VoiceRatedCdr) cdr).getRatedCdrId()
-                    : cdr instanceof com.xcess.ocs.entity.SmsRatedCdr
-                            ? ((com.xcess.ocs.entity.SmsRatedCdr) cdr).getSmsRatedCdrId()
-                            : ((com.xcess.ocs.entity.UsageRatedCdr) cdr).getRatedCdrId();
+        long totalElements = voiceCount + smsCount + usageCount;
+
+        // 2. Global Offset Calculation
+        long globalOffset = (long) page * size;
+        long remainingOffset = globalOffset;
+        int remainingToFetch = size;
+        List<RateableCdr> combinedCdrs = new ArrayList<>();
+
+        // 3. Fetch slice from VoiceRatedCdr
+        if (remainingOffset < voiceCount && remainingToFetch > 0) {
+            int voiceOffset = (int) remainingOffset;
+            int voiceLimit = (int) Math.min(voiceCount - remainingOffset, remainingToFetch);
+            List<VoiceRatedCdr> voiceList = entityManager.createQuery(
+                    "SELECT v FROM VoiceRatedCdr v WHERE v.incomingRatingStatus = :status OR v.outgoingRatingStatus = :status ORDER BY v.ratedCdrId ASC", VoiceRatedCdr.class)
+                    .setParameter("status", RatingStatus.FAILED)
+                    .setFirstResult(voiceOffset)
+                    .setMaxResults(voiceLimit)
+                    .getResultList();
+            combinedCdrs.addAll(voiceList);
+            remainingToFetch -= voiceList.size();
+            remainingOffset = 0;
+        } else {
+            remainingOffset = Math.max(0, remainingOffset - voiceCount);
+        }
+
+        // 4. Fetch slice from SmsRatedCdr
+        if (remainingOffset < smsCount && remainingToFetch > 0) {
+            int smsOffset = (int) remainingOffset;
+            int smsLimit = (int) Math.min(smsCount - remainingOffset, remainingToFetch);
+            List<SmsRatedCdr> smsList = entityManager.createQuery(
+                    "SELECT s FROM SmsRatedCdr s WHERE s.incomingRatingStatus = :status OR s.outgoingRatingStatus = :status ORDER BY s.smsRatedCdrId ASC", SmsRatedCdr.class)
+                    .setParameter("status", RatingStatus.FAILED)
+                    .setFirstResult(smsOffset)
+                    .setMaxResults(smsLimit)
+                    .getResultList();
+            combinedCdrs.addAll(smsList);
+            remainingToFetch -= smsList.size();
+            remainingOffset = 0;
+        } else {
+            remainingOffset = Math.max(0, remainingOffset - smsCount);
+        }
+
+        // 5. Fetch slice from UsageRatedCdr
+        if (remainingOffset < usageCount && remainingToFetch > 0) {
+            int usageOffset = (int) remainingOffset;
+            int usageLimit = (int) Math.min(usageCount - remainingOffset, remainingToFetch);
+            List<UsageRatedCdr> usageList = entityManager.createQuery(
+                    "SELECT u FROM UsageRatedCdr u WHERE u.incomingRatingStatus = :status OR u.outgoingRatingStatus = :status ORDER BY u.ratedCdrId ASC", UsageRatedCdr.class)
+                    .setParameter("status", RatingStatus.FAILED)
+                    .setFirstResult(usageOffset)
+                    .setMaxResults(usageLimit)
+                    .getResultList();
+            combinedCdrs.addAll(usageList);
+        }
+
+        // 6. DTO Mapping with Safe ServiceType Resolution
+        List<ErrorConfigCheckStatusDTO> dtoList = combinedCdrs.stream().map(cdr -> {
+            ErrorConfigCheckStatusDTO dto = new ErrorConfigCheckStatusDTO();
+            Long id = cdr instanceof VoiceRatedCdr
+                    ? ((VoiceRatedCdr) cdr).getRatedCdrId()
+                    : cdr instanceof SmsRatedCdr
+                            ? ((SmsRatedCdr) cdr).getSmsRatedCdrId()
+                            : ((UsageRatedCdr) cdr).getRatedCdrId();
+
+            ServiceType resolvedType = cdr.getServiceType();
+            if (resolvedType == null) {
+                if (cdr instanceof VoiceRatedCdr) {
+                    resolvedType = ServiceType.VOICE;
+                } else if (cdr instanceof SmsRatedCdr) {
+                    resolvedType = ServiceType.SMS;
+                } else if (cdr instanceof UsageRatedCdr) {
+                    resolvedType = ServiceType.USAGE;
+                } else {
+                    resolvedType = ServiceType.VOICE;
+                }
+            }
+
             dto.setId(id);
-            dto.setErrorRatedRecordId(cdr.getServiceType() + "-" + id);
-            dto.setServiceType(cdr.getServiceType() != null ? cdr.getServiceType().name() : "UNKNOWN");
-            dto.setLineOfBusiness(cdr.getLineOfBusiness() != null ? cdr.getLineOfBusiness().name() : "UNKNOWN");
+            dto.setErrorRatedRecordId(resolvedType.name() + "-" + id);
+            dto.setServiceType(resolvedType.name());
+            dto.setLineOfBusiness(cdr.getLineOfBusiness() != null ? cdr.getLineOfBusiness().name() : LineOfBusiness.INTERCONNECT.name());
             dto.setCallingNumber(cdr.getCallingNumber());
             dto.setCalledNumber(cdr.getCalledNumber());
             dto.setIncomingAccountId(cdr.getIncomingAccountId());
             dto.setOutgoingAccountId(cdr.getOutgoingAccountId());
+
             try {
                 dto.setIsConfigReady(false);
                 String incomingReason = cdr.getIncomingRatingFailureReason();
@@ -182,8 +262,8 @@ public class ReRateRequestService {
                     dto.setIsConfigReady(true);
                     dto.setErrorMessage("Ready for re-rating");
                 }
-                populateValidationChecks(dto, cdr, incomingReason, true);
-                populateValidationChecks(dto, cdr, outgoingReason, false);
+                populateValidationChecks(dto, cdr, resolvedType, incomingReason, true);
+                populateValidationChecks(dto, cdr, resolvedType, outgoingReason, false);
             } catch (Exception e) {
                 dto.setIsConfigReady(false);
                 dto.setErrorMessage(e.getMessage());
@@ -202,7 +282,7 @@ public class ReRateRequestService {
     }
 
     private void populateValidationChecks(com.xcess.ocs.dto.ErrorConfigCheckStatusDTO dto,
-            com.xcess.ocs.entity.RateableCdr cdr, String failureReason, boolean isIncoming) {
+            com.xcess.ocs.entity.RateableCdr cdr, ServiceType serviceType, String failureReason, boolean isIncoming) {
         List<String> success = new ArrayList<>();
         List<String> failure = new ArrayList<>();
         boolean hasFailed = false;
@@ -244,7 +324,7 @@ public class ReRateRequestService {
             return;
         }
 
-        if (com.xcess.ocs.entity.ServiceType.VOICE.equals(cdr.getServiceType())) {
+        if (com.xcess.ocs.entity.ServiceType.VOICE.equals(serviceType)) {
             if ("MISSING_CALLING_NUMBER".equals(failureReason)) {
                 failure.add("Calling Number Present");
                 hasFailed = true;
@@ -269,7 +349,7 @@ public class ReRateRequestService {
                     }
                 }
             }
-        } else if (com.xcess.ocs.entity.ServiceType.SMS.equals(cdr.getServiceType())) {
+        } else if (com.xcess.ocs.entity.ServiceType.SMS.equals(serviceType)) {
             if ("MISSING_CALLING_NUMBER".equals(failureReason)) {
                 failure.add("Calling Number Present");
                 hasFailed = true;
@@ -288,7 +368,7 @@ public class ReRateRequestService {
                     }
                 }
             }
-        } else if (com.xcess.ocs.entity.ServiceType.USAGE.equals(cdr.getServiceType())) {
+        } else if (com.xcess.ocs.entity.ServiceType.USAGE.equals(serviceType)) {
             if ("MISSING_SUBSCRIBER_IDENTITY".equals(failureReason)) {
                 failure.add("Subscriber Identity Present");
                 hasFailed = true;

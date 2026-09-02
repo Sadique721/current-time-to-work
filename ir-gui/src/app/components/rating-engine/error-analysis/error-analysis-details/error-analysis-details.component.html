@@ -82,7 +82,7 @@
         <h5 class="card-title mb-0"><i class="ti ti-arrow-down-right me-2 text-primary"></i>Incoming Context</h5>
       </div>
       <div class="card-body p-4">
-        @if (recordData.incomingSuccessData?.length || 0 > 0) {
+        @if (recordData.incomingSuccessData && recordData.incomingSuccessData.length > 0) {
           <div class="mb-4">
             <h6 class="text-success mb-3"><i class="ti ti-check me-2"></i>Successful Checks</h6>
             @for (success of recordData.incomingSuccessData; track success) {
@@ -93,7 +93,7 @@
             }
           </div>
         }
-        @if (recordData.incomingFailureData?.length || 0 > 0) {
+        @if (recordData.incomingFailureData && recordData.incomingFailureData.length > 0) {
           <div class="mb-0">
             <h6 class="text-danger mb-3"><i class="ti ti-x me-2"></i>Failed Checks</h6>
             @for (failure of recordData.incomingFailureData; track failure) {
@@ -104,7 +104,7 @@
             }
           </div>
         }
-        @if (!recordData.incomingSuccessData?.length && !recordData.incomingFailureData?.length) {
+        @if ((!recordData.incomingSuccessData || recordData.incomingSuccessData.length === 0) && (!recordData.incomingFailureData || recordData.incomingFailureData.length === 0)) {
           <div class="text-muted fs-14 text-center py-4 bg-light rounded">No incoming data checks available</div>
         }
       </div>
@@ -117,7 +117,7 @@
         <h5 class="card-title mb-0"><i class="ti ti-arrow-up-right me-2 text-warning"></i>Outgoing Context</h5>
       </div>
       <div class="card-body p-4">
-        @if (recordData.outgoingSuccessData?.length || 0 > 0) {
+        @if (recordData.outgoingSuccessData && recordData.outgoingSuccessData.length > 0) {
           <div class="mb-4">
             <h6 class="text-success mb-3"><i class="ti ti-check me-2"></i>Successful Checks</h6>
             @for (success of recordData.outgoingSuccessData; track success) {
@@ -128,7 +128,7 @@
             }
           </div>
         }
-        @if (recordData.outgoingFailureData?.length || 0 > 0) {
+        @if (recordData.outgoingFailureData && recordData.outgoingFailureData.length > 0) {
           <div class="mb-0">
             <h6 class="text-danger mb-3"><i class="ti ti-x me-2"></i>Failed Checks</h6>
             @for (failure of recordData.outgoingFailureData; track failure) {
@@ -139,7 +139,7 @@
             }
           </div>
         }
-        @if (!recordData.outgoingSuccessData?.length && !recordData.outgoingFailureData?.length) {
+        @if ((!recordData.outgoingSuccessData || recordData.outgoingSuccessData.length === 0) && (!recordData.outgoingFailureData || recordData.outgoingFailureData.length === 0)) {
           <div class="text-muted fs-14 text-center py-4 bg-light rounded">No outgoing data checks available</div>
         }
       </div>

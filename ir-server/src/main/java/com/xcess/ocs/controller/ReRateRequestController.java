@@ -86,9 +86,18 @@ public class ReRateRequestController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/fetchErrorConfigCheckResult/{page}/{size}")
+    @GetMapping("/fetchErrorConfigCheckResult")
     @Transactional(readOnly = true)
     public ResponseEntity<?> fetchErrorConfigCheckResult(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Map<String, Object> response = service.fetchErrorConfigCheckResult(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/fetchErrorConfigCheckResult/{page}/{size}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> fetchErrorConfigCheckResultLegacy(
             @PathVariable("page") Integer page,
             @PathVariable("size") Integer size) {
         Map<String, Object> response = service.fetchErrorConfigCheckResult(page, size);

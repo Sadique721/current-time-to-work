@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { OCS_RATING } from 'src/app/core/RadiusUtils/RadiusConstants';
 
@@ -29,6 +29,10 @@ export class ErrorAnalysisService {
   constructor(private http: HttpClient) {}
 
   fetchErrorConfigCheckResults(page: number = 0, size: number = 10): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/fetchErrorConfigCheckResult/${page}/${size}`);
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('_t', new Date().getTime().toString());
+    return this.http.get<any>(`${this.baseUrl}/fetchErrorConfigCheckResult`, { params });
   }
 }
